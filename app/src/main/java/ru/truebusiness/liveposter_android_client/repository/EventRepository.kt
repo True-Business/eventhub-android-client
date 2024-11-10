@@ -5,6 +5,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import ru.truebusiness.liveposter_android_client.data.Event
 import ru.truebusiness.liveposter_android_client.repository.api.RetrofitInstance
+import ru.truebusiness.liveposter_android_client.repository.mocks.mockList
 import java.util.UUID
 
 /**
@@ -37,17 +38,10 @@ class EventRepository {
         })
     }
 
+    /**
+     * Мок-метод, который возвращает заготовленные данные для тестирования
+     */
     fun fetchEventsMock(onResult: (List<Event>?) -> Unit) {
         onResult(mockList)
     }
-
-    private val mockList = listOf<Event>(
-        Event(
-            id = UUID.randomUUID(),
-            title = "Новое событие1",
-            content = "Содержание1",
-            startDate = "2024-12-01",
-            endDate = "2024-12-02",
-            location = "Академгородок, ул. Николаева 11")
-    )
 }
