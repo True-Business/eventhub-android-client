@@ -34,9 +34,9 @@ import androidx.navigation.NavController
 import ru.truebusiness.liveposter_android_client.data.EventCategory
 import ru.truebusiness.liveposter_android_client.ui.theme.MainPageBodyColor
 import ru.truebusiness.liveposter_android_client.ui.theme.MainPageEventButtonColor
-import ru.truebusiness.liveposter_android_client.ui.theme.TopFooterButtonColor
-import ru.truebusiness.liveposter_android_client.ui.theme.TopFooterButtonPressedColor
-import ru.truebusiness.liveposter_android_client.ui.theme.TopFooterColor
+import ru.truebusiness.liveposter_android_client.ui.theme.MainPageTopFooterButtonColor
+import ru.truebusiness.liveposter_android_client.ui.theme.MainPageTopFooterButtonPressedColor
+import ru.truebusiness.liveposter_android_client.ui.theme.MainPageTopFooterColor
 import ru.truebusiness.liveposter_android_client.view.viewmodel.EventsViewModel
 
 // TODO(e.vartazaryan): надо будет переделать через получение категорий с бекенда
@@ -82,7 +82,7 @@ fun MainPage(navController: NavController, eventsViewModel: EventsViewModel = vi
                 LazyRow(
                     contentPadding = PaddingValues(horizontal = 8.dp),
                     modifier = Modifier
-                        .background(TopFooterColor)
+                        .background(MainPageTopFooterColor)
                 ) {
                     items(EventCategory.values()) { category ->
 
@@ -92,10 +92,10 @@ fun MainPage(navController: NavController, eventsViewModel: EventsViewModel = vi
                             .padding(4.dp),
                             shape = RoundedCornerShape(8.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = if (selectedCategoryState.value == category)
-                                    TopFooterButtonPressedColor
+                                containerColor = if (selectedCategory == category)
+                                    MainPageTopFooterButtonPressedColor
                                 else
-                                    TopFooterButtonColor
+                                    MainPageTopFooterButtonColor
                             )
                         ) {
                             Text(category.displayName)
