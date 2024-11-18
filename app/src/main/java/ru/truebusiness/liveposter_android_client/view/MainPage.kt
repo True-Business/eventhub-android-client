@@ -1,6 +1,7 @@
 package ru.truebusiness.liveposter_android_client.view
 
 import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,6 +26,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
@@ -37,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -45,6 +48,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import ru.truebusiness.liveposter_android_client.R
 import ru.truebusiness.liveposter_android_client.data.EventCategory
 import ru.truebusiness.liveposter_android_client.ui.theme.MainPageBodyColor
 import ru.truebusiness.liveposter_android_client.ui.theme.MainPageEventButtonColor
@@ -121,6 +125,7 @@ fun MainPage(navController: NavController = rememberNavController(), eventsViewM
                     Text(
                         text = "Вартазарян Эдуард",
                         fontSize = 18.sp,
+                        color = Color.Black,
                         modifier = Modifier.padding(start = 30.dp)
                     )
 
@@ -131,16 +136,18 @@ fun MainPage(navController: NavController = rememberNavController(), eventsViewM
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.End
                     ) {
-                        Button(
+                        IconButton(
                             onClick = {},
-                            shape = CircleShape,
                             modifier = Modifier
                                 .height(40.dp)
                                 .width(40.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color.LightGray
-                            ),
-                            content = {}
+                            content = {
+                                Image(
+                                    painter = painterResource(id = R.drawable.bell),
+                                    contentDescription = "Bell",
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
                         )
                     }
                 }
