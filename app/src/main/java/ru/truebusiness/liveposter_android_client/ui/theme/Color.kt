@@ -19,3 +19,6 @@ val MainPageEventButtonColor = Color(0xFFF5B841)
 
 val EventPageBodyColor = Color(0xFFFFFFFF)
 val EventPageTopFooterColor = Color(0xFFF3EFE0)
+
+val RegistrationPageBodyColor = Color(0xFFF5B841)
+val RegistrationPageButtonColor = Color(0xFF2A2B2A)

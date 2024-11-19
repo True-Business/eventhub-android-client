@@ -1,6 +1,5 @@
 package ru.truebusiness.liveposter_android_client.view
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -8,8 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,7 +16,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -29,19 +25,14 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -57,6 +48,7 @@ import ru.truebusiness.liveposter_android_client.ui.theme.MainPageTopFooterButto
 import ru.truebusiness.liveposter_android_client.ui.theme.MainPageTopFooterColor
 import ru.truebusiness.liveposter_android_client.ui.theme.MainPageUserUnfoFooterColor
 import ru.truebusiness.liveposter_android_client.view.viewmodel.EventsViewModel
+import java.util.Collections.emptyList
 
 // TODO(e.vartazaryan): надо будет переделать через получение категорий с бекенда
 // TODO(e.vartazaryan): если мероприятий нет, то отображать "Тут пока пусто..."
@@ -64,10 +56,10 @@ import ru.truebusiness.liveposter_android_client.view.viewmodel.EventsViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Preview
-fun MainPage(navController: NavController = rememberNavController(), eventsViewModel: EventsViewModel = viewModel()) {
-
-    val tag = "MainPage"
-
+fun MainPage(
+    navController: NavController = rememberNavController(),
+    eventsViewModel: EventsViewModel = viewModel()
+) {
     val eventsState = eventsViewModel.events.observeAsState(emptyList())
     val events = eventsState.value
 
@@ -75,18 +67,6 @@ fun MainPage(navController: NavController = rememberNavController(), eventsViewM
 
     val selectedCategoryState = eventsViewModel.selectedCategory.observeAsState(EventCategory.ALL)
     val selectedCategory = selectedCategoryState.value
-
-    // эта штука будет отвечать за состояние списка событий
-    val listState = rememberLazyListState()
-    LaunchedEffect(listState) {
-        snapshotFlow { listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index == events.size - 1 }
-            .collect { isEndOfList ->
-                if (isEndOfList && !isLoading.value) {
-                    Log.v(tag, ": loading new events...")
-                    eventsViewModel.loadEvents()
-                }
-            }
-    }
 
     Column(
         modifier = Modifier
@@ -137,7 +117,9 @@ fun MainPage(navController: NavController = rememberNavController(), eventsViewM
                         horizontalArrangement = Arrangement.End
                     ) {
                         IconButton(
-                            onClick = {},
+                            onClick = {
+                                navController.navigate("registration")
+                            },
                             modifier = Modifier
                                 .height(40.dp)
                                 .width(40.dp),
