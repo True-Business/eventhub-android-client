@@ -22,3 +22,8 @@ val EventPageTopFooterColor = Color(0xFFF3EFE0)
 
 val RegistrationPageBodyColor = Color(0xFFF5B841)
 val RegistrationPageButtonColor = Color(0xFF2A2B2A)
+
+val WelcomeScreenRegistrationButtonColor = Color(0xFFF1C780)
+val WelcomeScreenEnterButtonColor = Color(0xFFF5B841)
+
+val WelcomeScreenRegisterMenuItemColor = Color(0xFFF6D6BA)

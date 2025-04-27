@@ -26,12 +26,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import ru.truebusiness.liveposter_android_client.ui.theme.RegistrationPageBodyColor
 import ru.truebusiness.liveposter_android_client.ui.theme.RegistrationPageButtonColor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegistrationPage(onBack: () -> Unit) {
+fun RegistrationPage(navController: NavController) {
 
     val name = remember { mutableStateOf("") }
     val surname = remember { mutableStateOf("") }
@@ -60,7 +61,9 @@ fun RegistrationPage(onBack: () -> Unit) {
                     containerColor = RegistrationPageBodyColor
                 ),
                 navigationIcon = {
-                    IconButton(onClick = { onBack }) {
+                    IconButton(onClick = {
+                        navController.popBackStack()
+                    }) {
                         Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад")
                     }
                 }
@@ -99,7 +102,15 @@ fun RegistrationPage(onBack: () -> Unit) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = {  },
+                onClick = {
+                    navController.navigate("main") {
+                        // Очищаем стек навигации после регистрации
+                        popUpTo(navController.graph.startDestinationId) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
+                },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = RegistrationPageButtonColor

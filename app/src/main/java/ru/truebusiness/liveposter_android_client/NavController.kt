@@ -10,6 +10,7 @@ import ru.truebusiness.liveposter_android_client.repository.EventRepository
 import ru.truebusiness.liveposter_android_client.view.EventDetailsPage
 import ru.truebusiness.liveposter_android_client.view.MainPage
 import ru.truebusiness.liveposter_android_client.view.RegistrationPage
+import ru.truebusiness.liveposter_android_client.view.WelcomeScreen
 
 @Composable
 fun MainPageNavigation() {
@@ -17,10 +18,15 @@ fun MainPageNavigation() {
     val navController = rememberNavController()
     val repository = EventRepository()
 
-    NavHost(navController = navController, startDestination = "main") {
+    NavHost(navController = navController, startDestination = "welcome") {
+        composable("welcome") {
+            WelcomeScreen(navController)
+        }
+
         composable("main") {
             MainPage(navController)
         }
+
         composable(
             route = "event/{eventId}",
             arguments = listOf(navArgument("eventId") { type = NavType.StringType })
@@ -34,12 +40,11 @@ fun MainPageNavigation() {
                 }
             }
         }
+
         composable(
             route = "registration"
         ) {
-            RegistrationPage {
-                navController.popBackStack()
-            }
+            RegistrationPage(navController)
         }
     }
 }
