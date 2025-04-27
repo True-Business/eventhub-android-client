@@ -9,6 +9,7 @@ import androidx.navigation.navArgument
 import ru.truebusiness.liveposter_android_client.repository.EventRepository
 import ru.truebusiness.liveposter_android_client.view.EventDetailsPage
 import ru.truebusiness.liveposter_android_client.view.MainPage
+import ru.truebusiness.liveposter_android_client.view.RegistrationPage
 
 @Composable
 fun MainPageNavigation() {
@@ -31,6 +32,13 @@ fun MainPageNavigation() {
                 EventDetailsPage(event) {
                     navController.popBackStack()
                 }
+            }
+        }
+        composable(
+            route = "registration"
+        ) {
+            RegistrationPage {
+                navController.popBackStack()
             }
         }
     }
