@@ -2,28 +2,17 @@ package ru.truebusiness.liveposter_android_client.view
 
 import android.util.Patterns
 import android.widget.Toast
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -41,11 +30,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import ru.truebusiness.liveposter_android_client.ui.theme.WelcomeScreenEnterButtonColor
-import ru.truebusiness.liveposter_android_client.ui.theme.WelcomeScreenRegisterMenuItemColor
 import ru.truebusiness.liveposter_android_client.ui.theme.WelcomeScreenRegistrationButtonColor
 
 @Composable
-fun WelcomeScreen(navController: NavController) {
+fun WelcomePage(navController: NavController) {
     var email by remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }
 
@@ -63,7 +51,7 @@ fun WelcomeScreen(navController: NavController) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Добро пожаловать",
+                text = "Event Hub",
                 style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
@@ -80,6 +68,9 @@ fun WelcomeScreen(navController: NavController) {
             Button(
                 onClick = {
                     if (email.isNotBlank() && Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                        /**
+                         * Добавить логику входа по email
+                         */
                         navController.navigate("main") {
                             popUpTo(navController.graph.startDestinationId) {
                                 inclusive = true
@@ -117,70 +108,14 @@ fun WelcomeScreen(navController: NavController) {
                 )
             }
 
-//            Button(
-//                onClick = { navController.navigate("registration") },
-//                modifier = Modifier.fillMaxWidth(),
-//                colors = ButtonDefaults.buttonColors(
-//                    containerColor = WelcomeScreenRegistrationButtonColor
-//                )
-//            ) {
-//                Text(text = "Зарегистрироваться", color = Color.Black)
-//            }
-            Box(
+            Button(
+                onClick = { navController.navigate("registration") },
                 modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = WelcomeScreenRegistrationButtonColor
+                )
             ) {
-                Button(
-                    onClick = { expanded = true },
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = WelcomeScreenRegistrationButtonColor
-                    )
-                ) {
-                    Text(text = "Зарегистрироваться", color = Color.Black)
-                    Icon(
-                        imageVector = Icons.Default.ArrowDropDown,
-                        contentDescription = "Меню регистрации",
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-
-                DropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false },
-                    modifier = Modifier
-                        .fillMaxWidth(0.95f)
-                    ,
-                ) {
-                    DropdownMenuItem(
-                        text = { Text("Я - бизнес-организатор") },
-                        onClick = {
-                            expanded = false
-                            navController.navigate("")
-                        },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Home,
-                                contentDescription = null
-                            )
-                        }
-                    )
-                    HorizontalDivider()
-                    DropdownMenuItem(
-                        text = { Text("Я - посетитель") },
-                        onClick = {
-                            expanded = false
-                            navController.navigate("registration")
-                        },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Person,
-                                contentDescription = null
-                            )
-                        }
-                    )
-                }
+                Text(text = "Зарегистрироваться", color = Color.Black)
             }
 
             TextButton(

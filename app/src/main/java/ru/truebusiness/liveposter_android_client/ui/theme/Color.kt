@@ -26,4 +26,8 @@ val RegistrationPageButtonColor = Color(0xFF2A2B2A)
 val WelcomeScreenRegistrationButtonColor = Color(0xFFF1C780)
 val WelcomeScreenEnterButtonColor = Color(0xFFF5B841)
 
-val WelcomeScreenRegisterMenuItemColor = Color(0xFFF6D6BA)
+
+val EmailVerificationPageConfirmButtonColor = Color(0xFFF5B841)
+
+val UserPersonalInfoContinueEnabledButtonColor = Color(0xFFF5B841)
+val UserPersonalInfoContinueDisabledButtonColor = Color(0xFF868686)

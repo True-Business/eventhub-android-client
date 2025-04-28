@@ -10,17 +10,19 @@ import ru.truebusiness.liveposter_android_client.repository.EventRepository
 import ru.truebusiness.liveposter_android_client.view.EventDetailsPage
 import ru.truebusiness.liveposter_android_client.view.MainPage
 import ru.truebusiness.liveposter_android_client.view.RegistrationPage
-import ru.truebusiness.liveposter_android_client.view.WelcomeScreen
+import ru.truebusiness.liveposter_android_client.view.RegistrationPageEmailVerification
+import ru.truebusiness.liveposter_android_client.view.RegistrationPagePersonalInfo
+import ru.truebusiness.liveposter_android_client.view.WelcomePage
 
 @Composable
-fun MainPageNavigation() {
+fun AppNavigation() {
 
     val navController = rememberNavController()
     val repository = EventRepository()
 
     NavHost(navController = navController, startDestination = "welcome") {
         composable("welcome") {
-            WelcomeScreen(navController)
+            WelcomePage(navController)
         }
 
         composable("main") {
@@ -45,6 +47,21 @@ fun MainPageNavigation() {
             route = "registration"
         ) {
             RegistrationPage(navController)
+        }
+
+        composable(
+            route = "email_verification/{email}",
+            arguments = listOf(navArgument("email") { type = NavType.StringType })
+        ) {
+            val email = it.arguments?.getString("email") ?: ""
+            RegistrationPageEmailVerification(
+                navController = navController,
+                email = email
+            )
+        }
+
+        composable(route = "user_personal_data") {
+            RegistrationPagePersonalInfo(navController)
         }
     }
 }
