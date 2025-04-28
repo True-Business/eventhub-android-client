@@ -17,7 +17,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -108,14 +107,8 @@ fun RegistrationPagePersonalInfo(navController: NavController) {
                     Toast.makeText(context, "Некорректное имя пользователя", Toast.LENGTH_SHORT).show()
                     return@Button
                 }
-                /**
-                 * Добавить логику сохранения данных
-                 */
-                navController.navigate("main") {
-                    popUpTo(navController.graph.startDestinationId) {
-                        inclusive = true
-                    }
-                }
+                //TODO: Добавить логику сохранения данных
+                navController.navigate("user_personal_info")
             },
             modifier = Modifier
                 .fillMaxWidth()

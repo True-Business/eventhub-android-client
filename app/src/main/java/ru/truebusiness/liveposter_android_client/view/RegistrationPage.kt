@@ -27,7 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import ru.truebusiness.liveposter_android_client.ui.theme.RegistrationPageBodyColor
+import ru.truebusiness.liveposter_android_client.ui.theme.RegistrationPageButtonBodyColor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -97,16 +97,14 @@ fun RegistrationPage(navController: NavController) {
 
         Button(
             onClick = {
-                /**
-                 * Добавить логику регистрации
-                 */
+                //TODO: Добавить логику регистрации
                 if (email.isNotBlank() && Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
                     navController.navigate("email_verification/${email}")
                 }
             },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
-                containerColor = RegistrationPageBodyColor
+                containerColor = RegistrationPageButtonBodyColor
             )
         ) {
             Text(

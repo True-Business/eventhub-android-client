@@ -20,8 +20,7 @@ val MainPageEventButtonColor = Color(0xFFF5B841)
 val EventPageBodyColor = Color(0xFFFFFFFF)
 val EventPageTopFooterColor = Color(0xFFF3EFE0)
 
-val RegistrationPageBodyColor = Color(0xFFF5B841)
-val RegistrationPageButtonColor = Color(0xFF2A2B2A)
+val RegistrationPageButtonBodyColor = Color(0xFFF5B841)
 
 val WelcomeScreenRegistrationButtonColor = Color(0xFFF1C780)
 val WelcomeScreenEnterButtonColor = Color(0xFFF5B841)
@@ -30,4 +29,8 @@ val WelcomeScreenEnterButtonColor = Color(0xFFF5B841)
 val EmailVerificationPageConfirmButtonColor = Color(0xFFF5B841)
 
 val UserPersonalInfoContinueEnabledButtonColor = Color(0xFFF5B841)
-val UserPersonalInfoContinueDisabledButtonColor = Color(0xFF868686)
+
+val UserInterestRegistrationPageContinueButtonColor = Color(0xFFF5B841)
+val UserInterestRegistrationPageCategoryChipColor = Color(0xFFF5B841)
+val UserInterestRegistrationPageRadioButtonSelectedColor = Color(0xFFF5B841)
+val UserInterestRegistrationPageCitySelectionMenuColor = Color(0xFFFFD998)

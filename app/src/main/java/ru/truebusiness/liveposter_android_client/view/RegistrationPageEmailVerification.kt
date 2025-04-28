@@ -103,9 +103,7 @@ fun RegistrationPageEmailVerification(navController: NavController, email: Strin
         Button(
             onClick = {
                 if (verificationCode.length == 4) {
-                    /**
-                     * Добавить логику проверки корректности отправленного кода
-                     */
+                    //TODO: Добавить логику проверки корректности отправленного кода
                     navController.navigate("user_personal_data")
                 } else {
                     showError = true
@@ -125,9 +123,7 @@ fun RegistrationPageEmailVerification(navController: NavController, email: Strin
         TextButton(
             onClick = {
                 if (isResendEnabled) {
-                    /**
-                     * Добавить логику переотпраки кода на почту
-                     */
+                    //TODO: Добавить логику переотпраки кода на почту
                     Toast.makeText(context, "Код отправлен повторно", Toast.LENGTH_SHORT).show()
                     isResendEnabled = false
                 }

@@ -12,6 +12,7 @@ import ru.truebusiness.liveposter_android_client.view.MainPage
 import ru.truebusiness.liveposter_android_client.view.RegistrationPage
 import ru.truebusiness.liveposter_android_client.view.RegistrationPageEmailVerification
 import ru.truebusiness.liveposter_android_client.view.RegistrationPagePersonalInfo
+import ru.truebusiness.liveposter_android_client.view.RegistrationPageUserInterest
 import ru.truebusiness.liveposter_android_client.view.WelcomePage
 
 @Composable
@@ -62,6 +63,10 @@ fun AppNavigation() {
 
         composable(route = "user_personal_data") {
             RegistrationPagePersonalInfo(navController)
+        }
+
+        composable(route = "user_personal_info") {
+            RegistrationPageUserInterest(navController)
         }
     }
 }
