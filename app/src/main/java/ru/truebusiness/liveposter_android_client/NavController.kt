@@ -9,10 +9,10 @@ import androidx.navigation.navArgument
 import ru.truebusiness.liveposter_android_client.repository.EventRepository
 import ru.truebusiness.liveposter_android_client.view.EventDetailsPage
 import ru.truebusiness.liveposter_android_client.view.MainPage
-import ru.truebusiness.liveposter_android_client.view.RegistrationPage
-import ru.truebusiness.liveposter_android_client.view.RegistrationPageEmailVerification
-import ru.truebusiness.liveposter_android_client.view.RegistrationPagePersonalInfo
-import ru.truebusiness.liveposter_android_client.view.RegistrationPageUserInterest
+import ru.truebusiness.liveposter_android_client.view.registration.RegistrationPage
+import ru.truebusiness.liveposter_android_client.view.registration.RegistrationPageEmailVerification
+import ru.truebusiness.liveposter_android_client.view.registration.RegistrationPagePersonalInfo
+import ru.truebusiness.liveposter_android_client.view.registration.RegistrationPageUserInterest
 import ru.truebusiness.liveposter_android_client.view.WelcomePage
 
 @Composable
@@ -44,6 +44,7 @@ fun AppNavigation() {
             }
         }
 
+        /* Блок регистрации нового пользователя */
         composable(
             route = "registration"
         ) {
@@ -68,5 +69,7 @@ fun AppNavigation() {
         composable(route = "user_personal_info") {
             RegistrationPageUserInterest(navController)
         }
+
+        /****************************************/
     }
 }

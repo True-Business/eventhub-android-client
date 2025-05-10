@@ -35,7 +35,7 @@ import ru.truebusiness.liveposter_android_client.ui.theme.WelcomeScreenRegistrat
 @Composable
 fun WelcomePage(navController: NavController) {
     var email by remember { mutableStateOf("") }
-    var expanded by remember { mutableStateOf(false) }
+    var password by remember { mutableStateOf("") }
 
     val context = LocalContext.current
 
@@ -65,9 +65,19 @@ fun WelcomePage(navController: NavController) {
                 modifier = Modifier.fillMaxWidth()
             )
 
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text("Пароль") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+
             Button(
                 onClick = {
-                    if (email.isNotBlank() && Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                    if (email.isNotBlank() && Patterns.EMAIL_ADDRESS.matcher(email).matches() &&
+                        password.isNotBlank() && password.isNotEmpty()) {
                         /**
                          * Добавить логику входа по email
                          */

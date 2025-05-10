@@ -1,4 +1,4 @@
-package ru.truebusiness.liveposter_android_client.view
+package ru.truebusiness.liveposter_android_client.view.registration
 
 import android.util.Patterns
 import androidx.compose.foundation.layout.Arrangement

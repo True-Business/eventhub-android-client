@@ -1,4 +1,4 @@
-package ru.truebusiness.liveposter_android_client.view
+package ru.truebusiness.liveposter_android_client.view.registration
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement

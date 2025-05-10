@@ -1,4 +1,4 @@
-package ru.truebusiness.liveposter_android_client.view
+package ru.truebusiness.liveposter_android_client.view.registration
 
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -41,8 +41,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import ru.truebusiness.liveposter_android_client.data.UserPreferences
 import ru.truebusiness.liveposter_android_client.ui.theme.UserInterestRegistrationPageCategoryChipColor
-import ru.truebusiness.liveposter_android_client.ui.theme.UserInterestRegistrationPageCitySelectionMenuColor
 import ru.truebusiness.liveposter_android_client.ui.theme.UserInterestRegistrationPageContinueButtonColor
 import ru.truebusiness.liveposter_android_client.ui.theme.UserInterestRegistrationPageRadioButtonSelectedColor
 
@@ -334,14 +334,3 @@ private fun RadioButtonItem(
         )
     }
 }
-
-// Модель для хранения предпочтений
-data class UserPreferences(
-    val categories: List<String>,
-    val openness: String,
-    val paymentType: String,
-    val priceRange: String,
-    val dayTime: String,
-    val city: String,
-    val ratingImportance: String
-)
