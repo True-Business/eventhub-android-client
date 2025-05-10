@@ -1,6 +1,7 @@
 package ru.truebusiness.liveposter_android_client
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -14,16 +15,32 @@ import ru.truebusiness.liveposter_android_client.view.registration.RegistrationP
 import ru.truebusiness.liveposter_android_client.view.registration.RegistrationPagePersonalInfo
 import ru.truebusiness.liveposter_android_client.view.registration.RegistrationPageUserInterest
 import ru.truebusiness.liveposter_android_client.view.WelcomePage
+import ru.truebusiness.liveposter_android_client.view.viewmodel.AuthViewModel
 
 @Composable
-fun AppNavigation() {
+fun AppNavigation(
+    authViewModel: AuthViewModel
+) {
 
     val navController = rememberNavController()
     val repository = EventRepository()
 
+    // Проверяем авторизацию при старте приложения
+    LaunchedEffect(Unit) {
+        authViewModel.isLoggedIn.collect { isLoggedIn ->
+            if (isLoggedIn) {
+                navController.navigate("main") {
+                    popUpTo(navController.graph.startDestinationId) {
+                        inclusive = true
+                    }
+                }
+            }
+        }
+    }
+
     NavHost(navController = navController, startDestination = "welcome") {
         composable("welcome") {
-            WelcomePage(navController)
+            WelcomePage(navController, authViewModel)
         }
 
         composable("main") {

@@ -31,9 +31,13 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import ru.truebusiness.liveposter_android_client.ui.theme.WelcomeScreenEnterButtonColor
 import ru.truebusiness.liveposter_android_client.ui.theme.WelcomeScreenRegistrationButtonColor
+import ru.truebusiness.liveposter_android_client.view.viewmodel.AuthViewModel
 
 @Composable
-fun WelcomePage(navController: NavController) {
+fun WelcomePage(
+    navController: NavController,
+    authViewModel: AuthViewModel
+) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
@@ -81,6 +85,7 @@ fun WelcomePage(navController: NavController) {
                         /**
                          * Добавить логику входа по email
                          */
+                        authViewModel.login(email, password)
                         navController.navigate("main") {
                             popUpTo(navController.graph.startDestinationId) {
                                 inclusive = true
