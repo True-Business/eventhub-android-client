@@ -9,5 +9,6 @@ data class Event(
     val content: String,
     val startDate: String,
     val endDate: String,
-    val location: String
+    val location: String,
+    val posterUrl: Int, // временное решение, должна приходить ссылочка на картинку для превью
 )

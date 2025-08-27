@@ -12,7 +12,8 @@ val mockList = listOf(
         content = "Ежегодное мероприятие с множеством развлечений, концертом и т.п.",
         startDate = "2024-12-01",
         endDate = "2024-12-02",
-        location = "Академгородок, ул. Николаева, 11"),
+        location = "Академгородок, ул. Николаева, 11",
+        posterUrl = 1),
     Event(
         id = UUID.randomUUID(),
         category = listOf(EventCategory.ALL, EventCategory.FESTIVALS),
@@ -20,7 +21,8 @@ val mockList = listOf(
         content = "Пикник в дворике нового корпуса НГУ посвящённый дню знаний.",
         startDate = "2024-12-01",
         endDate = "2024-12-02",
-        location = "Академгородок, ул. Пирогова, 1"),
+        location = "Академгородок, ул. Пирогова, 1",
+        posterUrl = 2),
     Event(
         id = UUID.randomUUID(),
         category = listOf(EventCategory.ALL, EventCategory.MEETINGS),
@@ -28,7 +30,8 @@ val mockList = listOf(
         content = "Выставка факультетов, общение со студентами и многое другое.",
         startDate = "2024-12-01",
         endDate = "2024-12-02",
-        location = "Академгородок, ул. Пирогова, 1"),
+        location = "Академгородок, ул. Пирогова, 1",
+        posterUrl = 3),
     Event(
         id = UUID.randomUUID(),
         category = listOf(EventCategory.ALL, EventCategory.SHOWS),
@@ -36,7 +39,8 @@ val mockList = listOf(
         content = "Самое смешное юмористическое соревнование в Академгородке.",
         startDate = "2024-11-15",
         endDate = "2024-11-15",
-        location = "Академгородок, Проспект Строителей, 21"),
+        location = "Академгородок, Проспект Строителей, 21",
+        posterUrl = 4),
     Event(
         id = UUID.randomUUID(),
         category = listOf(EventCategory.ALL, EventCategory.MUSIC),
@@ -44,7 +48,8 @@ val mockList = listOf(
         content = "Концерт группы 3 дня дождя ",
         startDate = "2024-11-13",
         endDate = "2024-11-13",
-        location = "Новосибирск, Локомотив-Арена"),
+        location = "Новосибирск, Локомотив-Арена",
+        posterUrl = 5),
     Event(
         id = UUID.randomUUID(),
         category = listOf(EventCategory.ALL, EventCategory.SHOWS),
@@ -52,7 +57,8 @@ val mockList = listOf(
         content = "Стендап 18+",
         startDate = "2025-02-15",
         endDate = "2025-02-15",
-        location = "Новосибирск, ККК им.Маяковского"),
+        location = "Новосибирск, ККК им.Маяковского",
+        posterUrl = 6),
     Event(
         id = UUID.randomUUID(),
         category = listOf(EventCategory.ALL, EventCategory.FILMS),
@@ -62,5 +68,6 @@ val mockList = listOf(
                 "его инопланетные сородичи, угрожающие всему живому.",
         startDate = "2024-10-24",
         endDate = "2024-11-30",
-        location = "Академгородок, ул. Кутателадзе, 4/4"),
+        location = "Академгородок, ул. Кутателадзе, 4/4",
+        posterUrl = 7),
 )

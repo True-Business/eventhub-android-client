@@ -18,11 +18,21 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBox
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -47,6 +57,7 @@ import ru.truebusiness.liveposter_android_client.ui.theme.MainPageTopFooterButto
 import ru.truebusiness.liveposter_android_client.ui.theme.MainPageTopFooterButtonPressedColor
 import ru.truebusiness.liveposter_android_client.ui.theme.MainPageTopFooterColor
 import ru.truebusiness.liveposter_android_client.ui.theme.MainPageUserUnfoFooterColor
+import ru.truebusiness.liveposter_android_client.view.components.EventCard
 import ru.truebusiness.liveposter_android_client.view.viewmodel.EventsViewModel
 import java.util.Collections.emptyList
 
@@ -68,147 +79,131 @@ fun MainPage(
     val selectedCategoryState = eventsViewModel.selectedCategory.observeAsState(EventCategory.ALL)
     val selectedCategory = selectedCategoryState.value
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(1.dp)
-    ) {
-        TopAppBar(
-            title = {},
-            modifier = Modifier.fillMaxWidth(),
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = MainPageUserUnfoFooterColor
-            ),
-            actions = {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(65.dp)
-                        .width(200.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Start
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .width(65.dp) // Не знаю почему при 40 его сжимает по горизонтали
-                            .height(55.dp)
-                            .padding(start = 10.dp)
-                            .background(color = Color.White, shape = CircleShape)
-                    ) {
-                        Text(
-                            text = "ВЭ",
-                            modifier = Modifier
-                                .padding(start = 18.dp, top = 18.dp)
-                        )
-                    }
-
-                    Text(
-                        text = "Вартазарян Эдуард",
-                        fontSize = 18.sp,
-                        color = Color.Black,
-                        modifier = Modifier.padding(start = 30.dp)
-                    )
-
+    // Scaffold помогает организовать layout (TopBar, BottomBar, Body)
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {},
+                modifier = Modifier.fillMaxWidth(),
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MainPageUserUnfoFooterColor
+                ),
+                actions = {
                     Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(end = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        IconButton(
-                            onClick = {
-                                navController.navigate("registration")
-                            },
-                            modifier = Modifier
-                                .height(40.dp)
-                                .width(40.dp),
-                            content = {
-                                Image(
-                                    painter = painterResource(id = R.drawable.bell),
-                                    contentDescription = "Bell",
-                                    modifier = Modifier.size(24.dp)
-                                )
-                            }
-                        )
-                    }
-                }
-            }
-        )
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(MainPageTopFooterColor)
-        ) {
-            LazyRow(
-                contentPadding = PaddingValues(horizontal = 8.dp),
-                modifier = Modifier
-                    .padding(top = 8.dp, bottom = 8.dp)
-                    .background(MainPageTopFooterColor)
-            ) {
-                items(EventCategory.values()) { category ->
-
-                    Button(
-                        onClick = {
-                            eventsViewModel.setCategory(category)
-                        },
                         modifier = Modifier
-                            .padding(4.dp),
-                        shape = RoundedCornerShape(8.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = if (selectedCategory == category)
-                                MainPageTopFooterButtonPressedColor
-                            else
-                                MainPageTopFooterButtonColor
-                        )
+                            .fillMaxWidth()
+                            .height(65.dp)
+                            .width(200.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Start
                     ) {
-                        Text(category.displayName)
+                        Box(
+                            modifier = Modifier
+                                .width(65.dp)
+                                .height(55.dp)
+                                .padding(start = 10.dp)
+                                .background(color = Color.White, shape = CircleShape)
+                        ) {
+                            Text(
+                                text = "ВЭ",
+                                modifier = Modifier
+                                    .padding(start = 18.dp, top = 18.dp)
+                            )
+                        }
+
+                        Text(
+                            text = "Пупкин Василий",
+                            fontSize = 18.sp,
+                            color = Color.Black,
+                            modifier = Modifier.padding(start = 30.dp)
+                        )
+
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(end = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            IconButton(
+                                onClick = {
+                                    navController.navigate("registration")
+                                },
+                                modifier = Modifier
+                                    .height(40.dp)
+                                    .width(40.dp),
+                                content = {
+                                    Image(
+                                        painter = painterResource(id = R.drawable.bell),
+                                        contentDescription = "Bell",
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
+                            )
+                        }
                     }
                 }
+            )
+        },
+        bottomBar = {
+            NavigationBar {
+                NavigationBarItem(
+                    selected = false,
+                    onClick = { navController.navigate("Лента") },
+                    icon = { Icon(Icons.Default.Home, contentDescription = "Лента") },
+                    label = { Text("Лента") }
+                )
+                NavigationBarItem(
+                    selected = false,
+                    onClick = { navController.navigate("Поиск") },
+                    icon = { Icon(Icons.Default.Search, contentDescription = "Поиск") },
+                    label = { Text("Поиск") }
+                )
+                NavigationBarItem(
+                    selected = false,
+                    onClick = { navController.navigate("Друзья") },
+                    icon = { Icon(Icons.Default.AccountBox, contentDescription = "Друзья") },
+                    label = { Text("Друзья") }
+                )
+                NavigationBarItem(
+                    selected = false,
+                    onClick = { navController.navigate("Настройки") },
+                    icon = { Icon(Icons.Default.Settings, contentDescription = "Настройки") },
+                    label = { Text("Настройки") }
+                )
             }
         }
-
-        Box(
+    ) { innerPadding ->
+        Column(
             modifier = Modifier
+                .padding(innerPadding)
                 .fillMaxSize()
-                .background(MainPageBodyColor),
-            contentAlignment = Alignment.Center
+                .background(MainPageBodyColor)
         ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MainPageTopFooterColor)
+            ) {
+            }
+
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(bottom = 16.dp)
             ) {
                 items(events) { event ->
-                    Button(
-                        onClick = { navController.navigate("event/${event.id}") },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp),
-                        shape = RoundedCornerShape(8.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MainPageEventButtonColor,
-                            contentColor = Color.Black
-                        )
-                    ) {
-                        Text(
-                            event.title,
-                            fontSize = 18.sp,
-                            modifier = Modifier.padding(8.dp)
-                        )
-                    }
+                    EventCard(
+                        event = event,
+                        onClick = { navController.navigate("event/${event.id}") }
+                    )
                 }
 
-                item {
-                    if (isLoading.value) {
-                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                    }
-                }
             }
         }
     }
 
     LaunchedEffect(Unit) {
-        if(events.isEmpty()) {
+        if (events.isEmpty()) {
             eventsViewModel.loadEvents()
         }
     }
