@@ -67,4 +67,13 @@ class EventRepository {
             it.id.toString().equals( eventId)
         }.first()
     }
+
+    /**
+     * Метод делает поиск мероприятий по query
+     */
+    fun searchMockEvents(query: String, onResult: (List<Event>?) -> Unit) {
+        onResult(mockList.filter {
+            it.title.contains(query, ignoreCase = true)
+        })
+    }
 }

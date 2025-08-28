@@ -14,19 +14,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -50,11 +44,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import ru.truebusiness.liveposter_android_client.R
-import ru.truebusiness.liveposter_android_client.data.EventCategory
 import ru.truebusiness.liveposter_android_client.ui.theme.MainPageBodyColor
-import ru.truebusiness.liveposter_android_client.ui.theme.MainPageEventButtonColor
-import ru.truebusiness.liveposter_android_client.ui.theme.MainPageTopFooterButtonColor
-import ru.truebusiness.liveposter_android_client.ui.theme.MainPageTopFooterButtonPressedColor
 import ru.truebusiness.liveposter_android_client.ui.theme.MainPageTopFooterColor
 import ru.truebusiness.liveposter_android_client.ui.theme.MainPageUserUnfoFooterColor
 import ru.truebusiness.liveposter_android_client.view.components.EventCard
@@ -74,12 +64,6 @@ fun MainPage(
     val eventsState = eventsViewModel.events.observeAsState(emptyList())
     val events = eventsState.value
 
-    val isLoading = eventsViewModel.isLoading.observeAsState(false)
-
-    val selectedCategoryState = eventsViewModel.selectedCategory.observeAsState(EventCategory.ALL)
-    val selectedCategory = selectedCategoryState.value
-
-    // Scaffold помогает организовать layout (TopBar, BottomBar, Body)
     Scaffold(
         topBar = {
             TopAppBar(
@@ -149,13 +133,13 @@ fun MainPage(
             NavigationBar {
                 NavigationBarItem(
                     selected = false,
-                    onClick = { navController.navigate("Лента") },
+                    onClick = { navController.navigate("main") },
                     icon = { Icon(Icons.Default.Home, contentDescription = "Лента") },
                     label = { Text("Лента") }
                 )
                 NavigationBarItem(
                     selected = false,
-                    onClick = { navController.navigate("Поиск") },
+                    onClick = { navController.navigate("search") },
                     icon = { Icon(Icons.Default.Search, contentDescription = "Поиск") },
                     label = { Text("Поиск") }
                 )
@@ -184,8 +168,7 @@ fun MainPage(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(MainPageTopFooterColor)
-            ) {
-            }
+            ) {}
 
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),

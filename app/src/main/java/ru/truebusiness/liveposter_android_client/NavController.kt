@@ -10,6 +10,7 @@ import androidx.navigation.navArgument
 import ru.truebusiness.liveposter_android_client.repository.EventRepository
 import ru.truebusiness.liveposter_android_client.view.EventDetailsPage
 import ru.truebusiness.liveposter_android_client.view.MainPage
+import ru.truebusiness.liveposter_android_client.view.SearchPage
 import ru.truebusiness.liveposter_android_client.view.registration.RegistrationPage
 import ru.truebusiness.liveposter_android_client.view.registration.RegistrationPageEmailVerification
 import ru.truebusiness.liveposter_android_client.view.registration.RegistrationPagePersonalInfo
@@ -60,6 +61,16 @@ fun AppNavigation(
                 }
             }
         }
+
+        /* Нижний блок навигации по приложению */
+
+        composable(
+            route = "search"
+        ) {
+            SearchPage(navController)
+        }
+
+        /***************************************/
 
         /* Блок регистрации нового пользователя */
         composable(

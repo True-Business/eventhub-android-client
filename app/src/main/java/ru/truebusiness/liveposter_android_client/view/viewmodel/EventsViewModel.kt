@@ -53,4 +53,22 @@ class EventsViewModel: ViewModel() {
         _events.value = emptyList()
         loadEvents()
     }
+
+    /**
+     * 🔎 Поиск мероприятий по тексту (идёт на бэкенд)
+     */
+    fun searchEvents(query: String) {
+        if (_isLoading.value == true) return
+
+        _isLoading.value = true
+        Log.d(TAG, "Поиск мероприятий по запросу: $query")
+
+        // TODO(e.vartazaryan): Перейти на вызов api, а не использовать моки
+        repository.searchMockEvents(query) { newEvents ->
+            _isLoading.value = false
+            newEvents?.let {
+                _events.value = it
+            }
+        }
+    }
 }
