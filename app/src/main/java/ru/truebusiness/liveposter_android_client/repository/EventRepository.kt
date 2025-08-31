@@ -6,7 +6,7 @@ import retrofit2.Response
 import ru.truebusiness.liveposter_android_client.data.Event
 import ru.truebusiness.liveposter_android_client.data.EventCategory
 import ru.truebusiness.liveposter_android_client.repository.api.RetrofitInstance
-import ru.truebusiness.liveposter_android_client.repository.mocks.mockList
+import ru.truebusiness.liveposter_android_client.repository.mocks.mockEventList
 
 /**
  * Данный класс отвечает за логику загрузки мероприятий с бекенда
@@ -47,7 +47,7 @@ class EventRepository {
      */
     fun fetchEventsMock(category: EventCategory? = EventCategory.ALL,
                         onResult: (List<Event>?) -> Unit) {
-        onResult(mockList.filter {
+        onResult(mockEventList.filter {
             it.category.contains(category)
         })
     }
@@ -63,7 +63,7 @@ class EventRepository {
      * Метод достаёт мок мероприятия по его id
      */
     fun fetchEventMock(eventId: String): Event? {
-        return mockList.filter {
+        return mockEventList.filter {
             it.id.toString().equals( eventId)
         }.first()
     }
@@ -72,7 +72,7 @@ class EventRepository {
      * Метод делает поиск мероприятий по query
      */
     fun searchMockEvents(query: String, onResult: (List<Event>?) -> Unit) {
-        onResult(mockList.filter {
+        onResult(mockEventList.filter {
             it.title.contains(query, ignoreCase = true)
         })
     }

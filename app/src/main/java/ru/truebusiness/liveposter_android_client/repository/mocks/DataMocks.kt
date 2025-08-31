@@ -2,9 +2,10 @@ package ru.truebusiness.liveposter_android_client.repository.mocks
 
 import ru.truebusiness.liveposter_android_client.data.Event
 import ru.truebusiness.liveposter_android_client.data.EventCategory
+import ru.truebusiness.liveposter_android_client.data.Friend
 import java.util.UUID
 
-val mockList = listOf(
+val mockEventList = listOf(
     Event(
         id = UUID.randomUUID(),
         category = listOf(EventCategory.ALL, EventCategory.FESTIVALS),
@@ -70,4 +71,23 @@ val mockList = listOf(
         endDate = "2024-11-30",
         location = "Академгородок, ул. Кутателадзе, 4/4",
         posterUrl = 7),
+)
+
+val mockUserFriendsList = listOf(
+    Friend(
+        id = UUID.randomUUID(),
+        username = "Харченко Владимир Александрович"
+    ),
+    Friend(
+        id = UUID.randomUUID(),
+        username = "Мацько Александр Михайлович"
+    ),
+    Friend(
+        id = UUID.randomUUID(),
+        username = "Путин Владимир Владимирович"
+    ),
+    Friend(
+        id = UUID.randomUUID(),
+        username = "Пушкин Александр Сергеевич"
+    )
 )

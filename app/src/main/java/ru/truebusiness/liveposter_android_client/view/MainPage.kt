@@ -145,7 +145,7 @@ fun MainPage(
                 )
                 NavigationBarItem(
                     selected = false,
-                    onClick = { navController.navigate("Друзья") },
+                    onClick = { navController.navigate("friends") },
                     icon = { Icon(Icons.Default.AccountBox, contentDescription = "Друзья") },
                     label = { Text("Друзья") }
                 )
