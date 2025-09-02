@@ -1,6 +1,11 @@
-name: "Build and upload apk"
+name: "Build and upload apk prod"
 
-on: push
+on:
+    push:
+        branches:
+            - "main"
+        tags:
+            - "v*"
 
 jobs:
     build-and-upload-apk:
@@ -25,19 +30,10 @@ jobs:
             - name: Build gradle project
               run: ./gradlew build
         
-            - name: Build apk debug project
-              run: ./gradlew assembleDebug
-        
             - name: Build apk release project
-              run: ./gradlew assemble
+              run: ./gradlew assembleRelease
 
-            - name: Upload apk debug
-              uses: actions/upload-artifact@v4
-              with:
-                name: eventhub-debug-apk
-                path: app/build/outputs/apk/debug/
-
-            - name: Upload apk debug
+            - name: Upload apk release
               uses: actions/upload-artifact@v4
               with:
                 name: eventhub-release-apk
