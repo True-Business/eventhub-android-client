@@ -36,10 +36,12 @@ jobs:
               with:
                 name: eventhub-debug-apk
                 path: app/build/outputs/apk/debug/
+                compression-level: 0 # no compression
 
             - name: Upload apk debug
               uses: actions/upload-artifact@v4
               with:
                 name: eventhub-release-apk
                 path: app/build/outputs/apk/release/
+                compression-level: 0 # no compression
               
