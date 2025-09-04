@@ -89,7 +89,7 @@ fun MainPage(
                                 .background(color = Color.White, shape = CircleShape)
                         ) {
                             Text(
-                                text = "ВЭ",
+                                text = "ПВ",
                                 modifier = Modifier
                                     .padding(start = 18.dp, top = 18.dp)
                             )
