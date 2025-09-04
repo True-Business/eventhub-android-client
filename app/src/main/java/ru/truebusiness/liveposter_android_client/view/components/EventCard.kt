@@ -60,7 +60,7 @@ fun EventCard(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Ул. Зоологическая, д. 5А",
+                    text = event.location,
                     fontSize = 14.sp,
                     color = Color.Gray
                 )
