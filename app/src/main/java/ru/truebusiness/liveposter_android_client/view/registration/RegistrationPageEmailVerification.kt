@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import kotlinx.coroutines.delay
 import ru.truebusiness.liveposter_android_client.ui.theme.EmailVerificationPageConfirmButtonColor
+import ru.truebusiness.liveposter_android_client.view.components.GradientButton
 
 @Composable
 fun RegistrationPageEmailVerification(navController: NavController, email: String) {
@@ -100,22 +101,13 @@ fun RegistrationPageEmailVerification(navController: NavController, email: Strin
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Button(
-            onClick = {
-                if (verificationCode.length == 4) {
-                    //TODO: Добавить логику проверки корректности отправленного кода
-                    navController.navigate("user_personal_data")
-                } else {
-                    showError = true
-                }
-            },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = EmailVerificationPageConfirmButtonColor
-            )
-        ) {
-            Text(text = "Подтвердить", color = Color.Black)
+        GradientButton(text = "Подтвердить") {
+            if (verificationCode.length == 4) {
+                //TODO: Добавить логику проверки корректности отправленного кода
+                navController.navigate("user_personal_data")
+            } else {
+                showError = true
+            }
         }
 
         Spacer(modifier = Modifier.height(16.dp))

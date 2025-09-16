@@ -30,6 +30,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import ru.truebusiness.liveposter_android_client.ui.theme.UserPersonalInfoContinueEnabledButtonColor
+import ru.truebusiness.liveposter_android_client.view.components.GradientButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -97,29 +98,17 @@ fun RegistrationPagePersonalInfo(navController: NavController) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Button(
-            onClick = {
-                if (displayName.isBlank()) {
-                    Toast.makeText(context, "Введите ваше имя", Toast.LENGTH_SHORT).show()
-                    return@Button
-                }
-                if (!isUsernameValid || username.isBlank()) {
-                    Toast.makeText(context, "Некорректное имя пользователя", Toast.LENGTH_SHORT).show()
-                    return@Button
-                }
-                //TODO: Добавить логику сохранения данных
-                navController.navigate("user_personal_info")
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp),
-            enabled = displayName.isNotBlank() && isUsernameValid && username.isNotBlank(),
-            shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = UserPersonalInfoContinueEnabledButtonColor
-            )
-        ) {
-            Text(text = "Продолжить", color = Color.Black)
+        GradientButton(text = "Продолжить") {
+            if (displayName.isBlank()) {
+                Toast.makeText(context, "Введите ваше имя", Toast.LENGTH_SHORT).show()
+                return@GradientButton
+            }
+            if (!isUsernameValid || username.isBlank()) {
+                Toast.makeText(context, "Некорректное имя пользователя", Toast.LENGTH_SHORT).show()
+                return@GradientButton
+            }
+            //TODO(e.vartazaryan): Добавить логику сохранения данных
+            navController.navigate("user_personal_info")
         }
     }
 }

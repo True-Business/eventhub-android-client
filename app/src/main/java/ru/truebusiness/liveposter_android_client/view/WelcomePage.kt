@@ -9,8 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -29,8 +27,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import ru.truebusiness.liveposter_android_client.ui.theme.WelcomeScreenEnterButtonColor
-import ru.truebusiness.liveposter_android_client.ui.theme.WelcomeScreenRegistrationButtonColor
+import ru.truebusiness.liveposter_android_client.view.components.GradientButton
 import ru.truebusiness.liveposter_android_client.view.viewmodel.AuthViewModel
 
 @Composable
@@ -78,9 +75,8 @@ fun WelcomePage(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Button(
-                onClick = {
-                    if (email.isNotBlank() && Patterns.EMAIL_ADDRESS.matcher(email).matches() &&
+            GradientButton("Войти") {
+                if (email.isNotBlank() && Patterns.EMAIL_ADDRESS.matcher(email).matches() &&
                         password.isNotBlank() && password.isNotEmpty()) {
                         /**
                          * Добавить логику входа по email
@@ -95,13 +91,6 @@ fun WelcomePage(
                     } else {
                         Toast.makeText(context, "Введите корректный email", Toast.LENGTH_SHORT).show()
                     }
-                },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = WelcomeScreenEnterButtonColor
-                )
-            ) {
-                Text(text = "Войти", color = Color.Black)
             }
 
             Row(
@@ -123,14 +112,8 @@ fun WelcomePage(
                 )
             }
 
-            Button(
-                onClick = { navController.navigate("registration") },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = WelcomeScreenRegistrationButtonColor
-                )
-            ) {
-                Text(text = "Зарегистрироваться", color = Color.Black)
+            GradientButton(text = "Зарегистрироваться", colorAlpha = 0.5f) {
+                navController.navigate("registration")
             }
 
             TextButton(
