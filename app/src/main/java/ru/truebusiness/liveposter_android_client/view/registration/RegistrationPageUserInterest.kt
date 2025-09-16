@@ -41,10 +41,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import ru.truebusiness.liveposter_android_client.AppNavigation
 import ru.truebusiness.liveposter_android_client.data.UserPreferences
 import ru.truebusiness.liveposter_android_client.ui.theme.UserInterestRegistrationPageCategoryChipColor
 import ru.truebusiness.liveposter_android_client.ui.theme.UserInterestRegistrationPageContinueButtonColor
 import ru.truebusiness.liveposter_android_client.ui.theme.UserInterestRegistrationPageRadioButtonSelectedColor
+import ru.truebusiness.liveposter_android_client.view.components.GradientButton
+import ru.truebusiness.liveposter_android_client.view.viewmodel.AuthViewModel
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -95,7 +98,7 @@ fun RegistrationPageUserInterest(navController: NavController) {
                             },
                             label = { Text(category) },
                             colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = UserInterestRegistrationPageCategoryChipColor
+                                selectedContainerColor = Color(0xFFFF9800)
                             )
                         )
                     }
@@ -258,35 +261,27 @@ fun RegistrationPageUserInterest(navController: NavController) {
         )
 
         // Кнопка завершения
-        Button(
-            onClick = {
-                if (selectedCategories.isEmpty() || selectedCity.isEmpty()) {
-                    Toast.makeText(context, "Пожалуйста, ответьте на все обязательные вопросы", Toast.LENGTH_SHORT).show()
-                } else {
-                    val userPreferences = UserPreferences(
-                        categories = selectedCategories,
-                        openness = selectedOpenness,
-                        paymentType = selectedPaymentType,
-                        priceRange = selectedPriceRange,
-                        dayTime = selectedDayTime,
-                        city = selectedCity,
-                        ratingImportance = organizerRatingImportance
-                    )
+        GradientButton(text = "Завершить регистрацию") {
+            if (selectedCategories.isEmpty() || selectedCity.isEmpty()) {
+                Toast.makeText(context, "Пожалуйста, ответьте на все обязательные вопросы", Toast.LENGTH_SHORT).show()
+            } else {
+                // TODO(e.vartazaryan): передавать эти данные на бек; они нужны для рекомендательной модели
+                val userPreferences = UserPreferences(
+                    categories = selectedCategories,
+                    openness = selectedOpenness,
+                    paymentType = selectedPaymentType,
+                    priceRange = selectedPriceRange,
+                    dayTime = selectedDayTime,
+                    city = selectedCity,
+                    ratingImportance = organizerRatingImportance
+                )
 
-                    navController.navigate("main") {
-                        popUpTo(navController.graph.startDestinationId) {
-                            inclusive = true
-                        }
+                navController.navigate("main") {
+                    popUpTo(navController.graph.startDestinationId) {
+                        inclusive = true
                     }
                 }
-            },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = UserInterestRegistrationPageContinueButtonColor
-            )
-        ) {
-            Text(text = "Завершить регистрацию", color = Color.Black)
+            }
         }
     }
 }
@@ -300,7 +295,7 @@ private fun QuestionSection(
         Text(
             text = title,
             style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.9f)
+            color = Color(0xFFFF5722)
         )
         content()
     }
@@ -324,7 +319,7 @@ private fun RadioButtonItem(
             onClick = null,
             modifier = Modifier.size(24.dp),
             colors = RadioButtonDefaults.colors(
-                selectedColor = UserInterestRegistrationPageRadioButtonSelectedColor
+                selectedColor = Color(0xFFFF9800)
             )
         )
         Text(
