@@ -38,7 +38,7 @@ fun EventCard(
             modifier = Modifier.fillMaxWidth()
         ) {
             AsyncImage(
-                model = "https://picsum.photos/600/300?randon=${event.posterUrl}",
+                model = event.posterUrl,
                 contentDescription = event.title,
                 modifier = Modifier
                     .fillMaxWidth()

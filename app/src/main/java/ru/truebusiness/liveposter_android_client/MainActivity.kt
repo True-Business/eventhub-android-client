@@ -22,16 +22,6 @@ class MainActivity: ComponentActivity() {
     private val Context.dataStore by preferencesDataStore(name = "auth_prefs")
 
     override fun onCreate(savedInstanceState: Bundle?) {
-//        //позволяем приложению рисовать за системными панелями
-//        WindowCompat.setDecorFitsSystemWindows(window, false)
-//        //делаем панели прозрачными (чтобы "занимать" их своим фоном)
-//        window.statusBarColor = Color.TRANSPARENT
-//        window.navigationBarColor = Color.TRANSPARENT
-//
-//        //по желанию: светлые/тёмные иконки статуса/навигации
-//        val controller = WindowInsetsControllerCompat(window, window.decorView)
-//        controller.isAppearanceLightStatusBars = true      // true — тёмные иконки, false — светлые
-//        controller.isAppearanceLightNavigationBars = true  // аналогично для навигации
 
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
