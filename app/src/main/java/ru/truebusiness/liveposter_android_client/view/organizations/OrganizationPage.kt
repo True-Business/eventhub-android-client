@@ -38,8 +38,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
-import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -62,13 +62,16 @@ import ru.truebusiness.liveposter_android_client.data.User
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun OrganizationPage(org: Organization) {
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
+
+    val scrollState = rememberScrollState()
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val pageGradient = Brush.verticalGradient(
         0f to Color(0xFFCFCFCF),
         1f to Color(0xFFFF6D19)
     )
 
     Scaffold(
+        topBar = { AppBar(org.name, scrollBehavior) }
     ) { paddingValues ->
 
         Box(
@@ -79,14 +82,13 @@ fun OrganizationPage(org: Organization) {
             //TODO fix отслеживание скролла
             Column(
                 Modifier
-                    .verticalScroll(rememberScrollState())
                     .nestedScroll(scrollBehavior.nestedScrollConnection)
+                    .verticalScroll(scrollState)
 
             ) {
                 TopImageBlock(org)
                 ContentBody(org = org)
             }
-            AppBar(org.name, scrollBehavior)
 
         }
 
@@ -97,13 +99,13 @@ fun OrganizationPage(org: Organization) {
 @OptIn(ExperimentalMaterial3Api::class)
 fun AppBar(
     title: String,
-    scrollBehavior: TopAppBarScrollBehavior
+    scrollBehavior: TopAppBarScrollBehavior,
 ) {
     Box() {
         CenterAlignedTopAppBar(
             colors = TopAppBarColors(
                 containerColor = Color.Transparent,
-                scrolledContainerColor = Color.Black,
+                scrolledContainerColor = Color.Transparent,
                 navigationIconContentColor = Color.Black,
                 titleContentColor = Color.Black,
                 actionIconContentColor = Color.Black,
@@ -111,27 +113,11 @@ fun AppBar(
             scrollBehavior = scrollBehavior,
             title = {
 
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(28.dp))
-                        .background(Color.White.copy(alpha = 0.50f))
-                    //.shadow(elevation = 6.dp, shape = RoundedCornerShape(28.dp))
-                ) {
-                    Text(
-                        text = title,
-                        modifier = Modifier.padding(horizontal = 28.dp, vertical = 8.dp),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 22.sp,
-                        color = Color.Black
-                    )
-                }
-
             },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 12.dp)
                 .clip(RoundedCornerShape(20.dp)),
-            //.background(Color.White.copy(0.50f))
             navigationIcon = {
                 IconButton(
                     onClick = {//TODO on click//
@@ -166,17 +152,16 @@ fun AppBar(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(200.dp)
+                .height(120.dp)
                 .background(
                     Brush.verticalGradient(
                         colors = listOf(
-                            Color.Black,
-                            Color.Black.copy(alpha = 0.1f),
-                            Color.Transparent,
+                            Color.Black.copy(alpha = 1f),
+                            Color.Black.copy(alpha = 0.05f),
                             Color.Transparent,
                         ),
                     )
-                )
+                ),
         )
     }
 
@@ -184,10 +169,12 @@ fun AppBar(
 
 @Composable
 fun TopImageBlock(org: Organization) {
+    val height = 360.dp
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(360.dp)
+            .height(height)
     ) {
         AsyncImage(
             model = org.coverUrl,
@@ -196,6 +183,30 @@ fun TopImageBlock(org: Organization) {
                 .fillMaxSize(),
             contentScale = ContentScale.Crop
         )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            Color.Transparent,
+                            Color.Black.copy(alpha = 0.1f),
+                            Color.Black,
+                        ),
+                    )
+                ),
+            contentAlignment = Alignment.BottomStart
+        ) {
+            Text(
+                modifier = Modifier.padding(12.dp),
+                text = org.name,
+                color = Color.White,
+                fontSize = 44.sp, // Можешь настроить размер шрифта
+                fontWeight = FontWeight.Bold,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 3
+            )
+        }
     }
 }
 
