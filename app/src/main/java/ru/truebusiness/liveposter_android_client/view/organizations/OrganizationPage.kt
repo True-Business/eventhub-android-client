@@ -47,6 +47,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
@@ -58,6 +59,7 @@ import ru.truebusiness.liveposter_android_client.data.Event
 import ru.truebusiness.liveposter_android_client.data.Organization
 import ru.truebusiness.liveposter_android_client.data.User
 
+val accentColorText = Color(0xFFCB5615)
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -66,8 +68,10 @@ fun OrganizationPage(org: Organization) {
     val scrollState = rememberScrollState()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val pageGradient = Brush.verticalGradient(
-        0f to Color(0xFFCFCFCF),
-        1f to Color(0xFFFF6D19)
+        listOf(
+            Color(0xFFFF6D19),
+            Color(0xFFFFFFFF)
+        )
     )
 
     Scaffold(
@@ -149,20 +153,20 @@ fun AppBar(
             }
 
         )
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(120.dp)
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            Color.Black.copy(alpha = 1f),
-                            Color.Black.copy(alpha = 0.05f),
-                            Color.Transparent,
-                        ),
-                    )
-                ),
-        )
+//        Box(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .height(120.dp)
+//                .background(
+//                    Brush.verticalGradient(
+//                        colors = listOf(
+//                            Color.Black.copy(alpha = 1f),
+//                            Color.Black.copy(alpha = 0.05f),
+//                            Color.Transparent,
+//                        ),
+//                    )
+//                ),
+//        )
     }
 
 }
@@ -243,7 +247,7 @@ fun PicturesBlock(org: Organization, onClick: (index: Int) -> Unit = {}) {
         text = "Изображения",
         fontWeight = FontWeight.Bold,
         fontSize = 20.sp,
-        color = Color.White,
+        color = accentColorText,
         modifier = Modifier.padding(horizontal = 36.dp)
     )
     Spacer(modifier = Modifier.height(12.dp))
@@ -265,7 +269,7 @@ fun EventsBlock(events: List<Event>, onClick: (index: Int) -> Unit = {}) {
         text = "Мероприятия",
         fontWeight = FontWeight.Bold,
         fontSize = 20.sp,
-        color = Color.White,
+        color = accentColorText,
         modifier = Modifier.padding(horizontal = 24.dp)
     )
 
@@ -304,7 +308,7 @@ fun AdminsBlock(admins: List<User>, onClick: () -> Unit = {}) {
                 text = "Администраторы",
                 fontWeight = FontWeight.Bold,
                 fontSize = 18.sp,
-                color = Color.White
+                color = accentColorText
             )
 
             if (admins.isNotEmpty()) {
@@ -349,10 +353,11 @@ fun DescriptionBlock(org: Organization) {
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Text(
+
                 text = "Описание",
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp,
-                color = Color.White,
+                color = accentColorText,
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
