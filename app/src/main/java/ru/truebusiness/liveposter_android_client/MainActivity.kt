@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.datastore.preferences.preferencesDataStore
 import ru.truebusiness.liveposter_android_client.repository.AuthRepository
+import ru.truebusiness.liveposter_android_client.repository.api.RetrofitInstance
 import ru.truebusiness.liveposter_android_client.view.viewmodel.AuthViewModel
 
 
@@ -19,7 +20,8 @@ class MainActivity: ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        val authRepository = AuthRepository(dataStore)
+        val api = RetrofitInstance.authApi
+        val authRepository = AuthRepository(api, dataStore)
         val authViewModel = AuthViewModel(authRepository)
 
         setContent {

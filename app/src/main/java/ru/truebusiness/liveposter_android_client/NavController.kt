@@ -36,7 +36,6 @@ fun AppNavigation(
     val navController = rememberNavController()
     val repository = EventRepository()
 
-
     // Проверяем авторизацию при старте приложения
     LaunchedEffect(Unit) {
         authViewModel.isLoggedIn.collect { isLoggedIn ->
@@ -121,22 +120,31 @@ fun AppNavigation(
         composable(
             route = "registration"
         ) {
-            RegistrationPage(navController)
+            RegistrationPage(authViewModel, navController)
         }
 
         composable(
-            route = "email_verification/{email}",
-            arguments = listOf(navArgument("email") { type = NavType.StringType })
-        ) {
-            val email = it.arguments?.getString("email") ?: ""
+            route = "email_verification/{userId}",
+            arguments = listOf(navArgument("userId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId").orEmpty()
             RegistrationPageEmailVerification(
+                viewModel = authViewModel,
                 navController = navController,
-                email = email
+                userId = userId
             )
         }
 
-        composable(route = "user_personal_data") {
-            RegistrationPagePersonalInfo(navController)
+        composable(
+            route = "user_personal_data/{userId}",
+            arguments = listOf(navArgument("userId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId").orEmpty()
+            RegistrationPagePersonalInfo(
+                vm = authViewModel,
+                navController = navController,
+                userId = userId
+            )
         }
 
         composable(route = "user_personal_info") {
