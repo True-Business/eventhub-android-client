@@ -43,6 +43,7 @@ fun AppNavigation(
     val repository = EventRepository()
     val orgRepository = OrgRepository()
 
+
     // Проверяем авторизацию при старте приложения
 //    LaunchedEffect(Unit) {
 //        authViewModel.isLoggedIn.collect { isLoggedIn ->
