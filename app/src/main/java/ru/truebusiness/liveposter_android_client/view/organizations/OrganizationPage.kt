@@ -1,7 +1,9 @@
 package ru.truebusiness.liveposter_android_client.view.organizations
 
 import android.annotation.SuppressLint
+import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,25 +23,38 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,51 +62,100 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import ru.truebusiness.liveposter_android_client.data.Event
 import ru.truebusiness.liveposter_android_client.data.Organization
 import ru.truebusiness.liveposter_android_client.data.User
+import ru.truebusiness.liveposter_android_client.ui.theme.accentColorText
+import ru.truebusiness.liveposter_android_client.ui.theme.pageGradient
 
-val accentColorText = Color(0xFFCB5615)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun OrganizationPage(org: Organization) {
+fun OrganizationPage(org: Organization, navigator: NavHostController) {
+
 
     val scrollState = rememberScrollState()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    val pageGradient = Brush.verticalGradient(
-        listOf(
-            Color(0xFFFF6D19),
-            Color(0xFFFFFFFF)
-        )
-    )
+    var isEditing by remember { mutableStateOf(false) }
+
+
+// Local editable states (mocking local edits)
+    var name by remember { mutableStateOf(org.name) }
+    var description by remember { mutableStateOf(org.description) }
+    var address by remember { mutableStateOf(org.address) }
+
+
+// Mutable lists for images and events so we can delete / modify locally
+    val admins = remember { org.admins.toMutableStateList() }
+    val images = remember { org.images.toMutableStateList() }
+    val events = remember { org.events.toMutableStateList() }
+
+    val context = LocalContext.current
+
+
 
     Scaffold(
-        topBar = { AppBar(org.name, scrollBehavior) }
+        topBar = {
+            AppBar(
+                scrollBehavior,
+                isEditing = isEditing,
+                onEditToggle = {
+                    isEditing = !isEditing
+                },
+                onSave = {
+                    Toast.makeText(context, "Сохранено", Toast.LENGTH_SHORT).show()
+                    isEditing = false
+                }
+            )
+        }
     ) { paddingValues ->
 
         Box(
             modifier = Modifier
                 .background(pageGradient)
+                .fillMaxSize()
         ) {
 
-            //TODO fix отслеживание скролла
             Column(
                 Modifier
                     .nestedScroll(scrollBehavior.nestedScrollConnection)
                     .verticalScroll(scrollState)
 
             ) {
-                TopImageBlock(org)
-                ContentBody(org = org)
+                TopImageBlock(org, isEditing, onNameChanged = { name = it })
+                ContentBody(
+                    name = name,
+                    onNameChange = { name = it },
+                    description = description,
+                    onDescriptionChange = { description = it },
+                    address = address,
+                    onAddressChange = { address = it },
+                    images = images,
+                    onDeleteImage = { idx -> images.removeAt(idx) },
+                    events = events,
+                    onLockEvent = { ev ->
+                        Toast.makeText(
+                            context,
+                            "Mock: lock action for ${ev.title}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    },
+                    admins = admins,
+                    navigator = navigator,
+                    isEditing = isEditing
+                )
             }
 
         }
@@ -102,8 +166,10 @@ fun OrganizationPage(org: Organization) {
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun AppBar(
-    title: String,
     scrollBehavior: TopAppBarScrollBehavior,
+    isEditing: Boolean,
+    onEditToggle: () -> Unit,
+    onSave: () -> Unit
 ) {
     Box() {
         CenterAlignedTopAppBar(
@@ -114,9 +180,30 @@ fun AppBar(
                 titleContentColor = Color.Black,
                 actionIconContentColor = Color.Black,
             ),
-            scrollBehavior = scrollBehavior,
+            scrollBehavior = if (!isEditing) {
+                scrollBehavior
+            } else {
+                TopAppBarDefaults.pinnedScrollBehavior()
+            },
             title = {
-
+                if (isEditing) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(Color.White.copy(alpha = 0.50f))
+                            .height(50.dp)
+                            .padding(12.dp)
+                            .fillMaxWidth()
+                    ) {
+                        Text(
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center,
+                            fontWeight = FontWeight.Bold,
+                            overflow = TextOverflow.Ellipsis,
+                            text = "редактирование"
+                        )
+                    }
+                }
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -138,41 +225,42 @@ fun AppBar(
             },
 
             actions = {
-                IconButton(
-                    onClick = {//TODO on click//
-                    },
-                    modifier = Modifier
-                        .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.50f))
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = "edit"
-                    )
+                if (!isEditing) {
+                    IconButton(
+                        onClick = {
+                            onEditToggle()
+                        },
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.50f))
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = "edit"
+                        )
+                    }
+                } else {
+                    IconButton(
+                        onClick = { onSave() },
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.50f))
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = "save"
+                        )
+                    }
                 }
             }
 
         )
-//        Box(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .height(120.dp)
-//                .background(
-//                    Brush.verticalGradient(
-//                        colors = listOf(
-//                            Color.Black.copy(alpha = 1f),
-//                            Color.Black.copy(alpha = 0.05f),
-//                            Color.Transparent,
-//                        ),
-//                    )
-//                ),
-//        )
     }
 
 }
 
 @Composable
-fun TopImageBlock(org: Organization) {
+fun TopImageBlock(org: Organization, isEditing: Boolean, onNameChanged: (String) -> Unit = {}) {
     val height = 360.dp
 
     Box(
@@ -201,48 +289,101 @@ fun TopImageBlock(org: Organization) {
                 ),
             contentAlignment = Alignment.BottomStart
         ) {
-            Text(
-                modifier = Modifier.padding(12.dp),
-                text = org.name,
-                color = Color.White,
-                fontSize = 44.sp, // Можешь настроить размер шрифта
-                fontWeight = FontWeight.Bold,
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 3
-            )
+            if (isEditing) {
+                BasicTextField(
+                    value = org.name,
+                    onValueChange = onNameChanged,
+                    modifier = Modifier
+                        .padding(12.dp),
+                    textStyle = TextStyle(
+                        fontSize = 44.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                    ),
+                    maxLines = 3,
+                ) { inner ->
+                    Box {
+                        inner()
+                    }
+                }
+            } else {
+                Text(
+                    modifier = Modifier.padding(12.dp),
+                    text = org.name,
+                    color = Color.White,
+                    fontSize = 44.sp, // Можешь настроить размер шрифта
+                    fontWeight = FontWeight.Bold,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 3
+                )
+            }
         }
     }
 }
 
 
 @Composable
-fun ContentBody(org: Organization) {
+fun ContentBody(
+    name: String,
+    onNameChange: (String) -> Unit,
+    description: String,
+    onDescriptionChange: (String) -> Unit,
+    address: String,
+    onAddressChange: (String) -> Unit,
+    images: MutableList<String>,
+    onDeleteImage: (index: Int) -> Unit,
+    events: MutableList<Event>,
+    onLockEvent: (Event) -> Unit,
+    admins: MutableList<User>,
+    navigator: NavHostController?,
+    isEditing: Boolean
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 12.dp, bottom = 30.dp)
     ) {
-        LocationBlock(org)
+        LocationBlock(address = address, onAddressChange = onAddressChange, isEditing = isEditing)
 
-        DescriptionBlock(org)
 
-        Spacer(modifier = Modifier.height(16.dp))
+        DescriptionBlock(
+            description = description,
+            onDescriptionChange = onDescriptionChange,
+            isEditing = isEditing
+        )
 
-        AdminsBlock(org.admins)
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        EventsBlock(org.events)
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        PicturesBlock(org)
+
+        AdminsBlock(admins, onClick = { navigator?.navigate("organizationAdmins") })
+
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+
+        EventsBlock(events = events, isEditing = isEditing, onLock = onLockEvent)
+
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+
+        PicturesBlock(images = images, onDeleteImage = onDeleteImage, isEditing = isEditing)
+
 
     }
 }
 
 @Composable
-fun PicturesBlock(org: Organization, onClick: (index: Int) -> Unit = {}) {
+fun PicturesBlock(
+    images: MutableList<String>,
+    onDeleteImage: (index: Int) -> Unit,
+    isEditing: Boolean
+) {
+    var showFullScreenViewer by remember { mutableStateOf(false) }
+    var selectedImageIndex by remember { mutableStateOf(0) }
+
+
     Text(
         text = "Изображения",
         fontWeight = FontWeight.Bold,
@@ -257,14 +398,51 @@ fun PicturesBlock(org: Organization, onClick: (index: Int) -> Unit = {}) {
         contentPadding = PaddingValues(start = 12.dp, end = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        items(org.images) { url ->
-            ImageCard(imageUrl = url)
+        items(images.size) { index ->
+            val url = images[index]
+            Box {
+                ImageCard(
+                    imageUrl = url,
+                    onClick = {
+                        selectedImageIndex = index
+                        showFullScreenViewer = true
+                    }
+                )
+
+
+// Delete icon overlay in edit mode
+                if (isEditing) {
+                    IconButton(
+                        onClick = { onDeleteImage(index) },
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .offset(x = (-8).dp, y = 8.dp)
+                            .size(36.dp)
+                            .background(
+                                androidx.compose.ui.graphics.Color.White.copy(alpha = 0.8f),
+                                shape = CircleShape
+                            )
+                    ) {
+                        Icon(imageVector = Icons.Default.Delete, contentDescription = "delete")
+                    }
+                }
+            }
         }
+    }
+
+
+    if (showFullScreenViewer) {
+// Use provided list (images) so deletions are reflected
+        FullScreenImageViewer(
+            imageUrls = images,
+            initialIndex = selectedImageIndex,
+            onDismiss = { showFullScreenViewer = false }
+        )
     }
 }
 
 @Composable
-fun EventsBlock(events: List<Event>, onClick: (index: Int) -> Unit = {}) {
+fun EventsBlock(events: List<Event>, isEditing: Boolean, onLock: (Event) -> Unit) {
     Text(
         text = "Мероприятия",
         fontWeight = FontWeight.Bold,
@@ -272,6 +450,7 @@ fun EventsBlock(events: List<Event>, onClick: (index: Int) -> Unit = {}) {
         color = accentColorText,
         modifier = Modifier.padding(horizontal = 24.dp)
     )
+
 
     Spacer(modifier = Modifier.height(12.dp))
 
@@ -281,7 +460,11 @@ fun EventsBlock(events: List<Event>, onClick: (index: Int) -> Unit = {}) {
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         items(events) { ev ->
-            EventCard(event = ev)
+            EventCard(
+                event = ev,
+                withLabels = true,
+                isEditing = isEditing,
+                onLockClick = { onLock(ev) })
         }
     }
 }
@@ -289,13 +472,14 @@ fun EventsBlock(events: List<Event>, onClick: (index: Int) -> Unit = {}) {
 @Composable
 fun AdminsBlock(admins: List<User>, onClick: () -> Unit = {}) {
     Surface(
-        color = Color(0x83DFDFDF),
+        color = androidx.compose.ui.graphics.Color(0x83DFDFDF),
         tonalElevation = 2.dp,
         shape = RoundedCornerShape(16.dp),
         modifier = Modifier
             .fillMaxWidth()
             .height(72.dp)
             .padding(horizontal = 12.dp)
+            .clickable(onClick = onClick)
     ) {
         Row(
             modifier = Modifier
@@ -310,6 +494,7 @@ fun AdminsBlock(admins: List<User>, onClick: () -> Unit = {}) {
                 fontSize = 18.sp,
                 color = accentColorText
             )
+
 
             if (admins.isNotEmpty()) {
                 OverlappingAdminAvatars(adminAvatars = admins.map { it.coverUrl })
@@ -327,6 +512,7 @@ fun OverlappingAdminAvatars(adminAvatars: List<String>) {
         val visibleAvatars = adminAvatars.take(3)
         val avatarCount = visibleAvatars.size
 
+
         visibleAvatars.forEachIndexed { index, avatarUrl ->
             Box(
                 modifier = Modifier
@@ -341,9 +527,13 @@ fun OverlappingAdminAvatars(adminAvatars: List<String>) {
 
 
 @Composable
-fun DescriptionBlock(org: Organization) {
+fun DescriptionBlock(
+    description: String,
+    onDescriptionChange: (String) -> Unit,
+    isEditing: Boolean
+) {
     Surface(
-        color = Color(0x83DFDFDF),
+        color = androidx.compose.ui.graphics.Color(0x83DFDFDF),
         tonalElevation = 4.dp,
         shape = RoundedCornerShape(18.dp),
         modifier = Modifier
@@ -353,28 +543,47 @@ fun DescriptionBlock(org: Organization) {
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Text(
-
                 text = "Описание",
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp,
                 color = accentColorText,
             )
             Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = org.description,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(horizontal = 12.dp)
 
-            )
+
+            if (isEditing) {
+                BasicTextField(
+                    value = description,
+                    onValueChange = onDescriptionChange,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp),
+                    textStyle = androidx.compose.ui.text.TextStyle(
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = androidx.compose.ui.graphics.Color.Black
+                    ),
+                ) { inner ->
+                    Box(modifier = Modifier) {
+                        inner()
+                    }
+                }
+            } else {
+                Text(
+                    text = description,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(horizontal = 12.dp)
+                )
+            }
         }
     }
 }
 
 @Composable
-fun LocationBlock(org: Organization) {
+fun LocationBlock(address: String, onAddressChange: (String) -> Unit, isEditing: Boolean) {
     Row(
         modifier = Modifier.padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -386,13 +595,35 @@ fun LocationBlock(org: Organization) {
             modifier = Modifier.size(24.dp)
         )
         Spacer(Modifier.width(8.dp))
-        Text(
-            text = org.address,
-            fontWeight = FontWeight.Bold,
-            fontSize = 16.sp,
-            color = Color.Black,
-            textDecoration = TextDecoration.Underline,
-        )
+
+
+        if (isEditing) {
+            BasicTextField(
+                value = address,
+                onValueChange = onAddressChange,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(end = 12.dp),
+                textStyle = androidx.compose.ui.text.TextStyle(
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    color = androidx.compose.ui.graphics.Color.Black,
+                    textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline
+                )
+            ) { inner ->
+                Box {
+                    inner()
+                }
+            }
+        } else {
+            Text(
+                text = address,
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp,
+                color = androidx.compose.ui.graphics.Color.Black,
+                textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline,
+            )
+        }
     }
 }
 
@@ -409,7 +640,13 @@ fun AdminAvatar(coverUrl: String) {
 }
 
 @Composable
-fun EventCard(event: Event, withLabels: Boolean = true) {
+fun EventCard(
+    event: Event,
+    withLabels: Boolean = true,
+    isEditing: Boolean = false,
+    onLockClick: () -> Unit = {}
+) {
+
 
     Column(modifier = Modifier.width(160.dp)) {
         Card(
@@ -418,15 +655,35 @@ fun EventCard(event: Event, withLabels: Boolean = true) {
             shape = RoundedCornerShape(18.dp),
             elevation = CardDefaults.cardElevation(defaultElevation = 20.dp)
         ) {
-            AsyncImage(
-                model = event.posterUrl,
-                contentDescription = event.title,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp)),
-                contentScale = ContentScale.Crop
-            )
+            Box {
+                AsyncImage(
+                    model = event.posterUrl,
+                    contentDescription = event.title,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp)),
+                    contentScale = ContentScale.Crop
+                )
+
+
+                if (isEditing) {
+                    IconButton(
+                        onClick = onLockClick,
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(8.dp)
+                            .size(36.dp)
+                            .background(
+                                androidx.compose.ui.graphics.Color.White.copy(alpha = 0.8f),
+                                shape = CircleShape
+                            )
+                    ) {
+                        Icon(imageVector = Icons.Default.Lock, contentDescription = "lock")
+                    }
+                }
+            }
         }
+
 
         if (withLabels) {
             Spacer(modifier = Modifier.height(8.dp))
@@ -438,24 +695,25 @@ fun EventCard(event: Event, withLabels: Boolean = true) {
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
 
+
                     )
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
                     event.startDate,
                     fontSize = 12.sp,
-                    color = Color.White
+                    color = androidx.compose.ui.graphics.Color.White
                 )
             }
         }
     }
 }
 
-
 @Composable
-fun ImageCard(imageUrl: String) {
+fun ImageCard(imageUrl: String, onClick: () -> Unit = {}) {
     Card(
         modifier = Modifier
-            .size(width = 320.dp, height = 200.dp),
+            .size(width = 320.dp, height = 200.dp)
+            .clickable(onClick = onClick),
         shape = RoundedCornerShape(18.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {

@@ -1,5 +1,6 @@
 package ru.truebusiness.liveposter_android_client.ui.theme
 
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
 val Purple80 = Color(0xFFD0BCFF)
@@ -34,3 +35,12 @@ val UserInterestRegistrationPageContinueButtonColor = Color(0xFFF5B841)
 val UserInterestRegistrationPageCategoryChipColor = Color(0xFFF5B841)
 val UserInterestRegistrationPageRadioButtonSelectedColor = Color(0xFFF5B841)
 val UserInterestRegistrationPageCitySelectionMenuColor = Color(0xFFFFD998)
+
+val pageGradient = Brush.verticalGradient(
+    listOf(
+        Color(0xFFFF6D19),
+        Color(0xFFFFFFFF)
+    )
+)
+
+val accentColorText = Color(0xFFCB5615)
