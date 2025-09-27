@@ -2,6 +2,11 @@ package ru.truebusiness.liveposter_android_client.view.organizations
 
 import android.annotation.SuppressLint
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -33,6 +38,9 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -48,6 +56,7 @@ import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -76,31 +85,33 @@ import coil.compose.AsyncImage
 import ru.truebusiness.liveposter_android_client.data.Event
 import ru.truebusiness.liveposter_android_client.data.Organization
 import ru.truebusiness.liveposter_android_client.data.User
+import ru.truebusiness.liveposter_android_client.ui.theme.accentColor
 import ru.truebusiness.liveposter_android_client.ui.theme.accentColorText
 import ru.truebusiness.liveposter_android_client.ui.theme.pageGradient
+import ru.truebusiness.liveposter_android_client.view.viewmodel.OrganizationViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun OrganizationPage(org: Organization, navigator: NavHostController) {
+fun OrganizationPage(orgViewMod: OrganizationViewModel, navigator: NavHostController) {
 
-
+    val org = orgViewMod.currentOrganization.collectAsState().value
     val scrollState = rememberScrollState()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     var isEditing by remember { mutableStateOf(false) }
 
 
 // Local editable states (mocking local edits)
-    var name by remember { mutableStateOf(org.name) }
-    var description by remember { mutableStateOf(org.description) }
-    var address by remember { mutableStateOf(org.address) }
+    var name by remember { mutableStateOf(org?.name) }
+    var description by remember { mutableStateOf(org?.description) }
+    var address by remember { mutableStateOf(org?.address) }
 
 
 // Mutable lists for images and events so we can delete / modify locally
-    val admins = remember { org.admins.toMutableStateList() }
-    val images = remember { org.images.toMutableStateList() }
-    val events = remember { org.events.toMutableStateList() }
+    val admins = remember { org?.admins?.toMutableStateList() }
+    val images = remember { org?.images?.toMutableStateList() }
+    val events = remember { org?.events?.toMutableStateList() }
 
     val context = LocalContext.current
 
@@ -115,8 +126,30 @@ fun OrganizationPage(org: Organization, navigator: NavHostController) {
                     isEditing = !isEditing
                 },
                 onSave = {
-                    Toast.makeText(context, "Сохранено", Toast.LENGTH_SHORT).show()
+                    //TODO on save callback
                     isEditing = false
+                    orgViewMod.updateOrganization(
+                        name = name ?: "",
+                        description = description ?: "",
+                        address = address ?: "",
+                        admins = admins ?: emptyList(),
+                        images = images ?: emptyList()
+                    )
+                },
+                onCancel = {
+                    isEditing = false
+                    name = org?.name
+                    description = org?.description
+                    address = org?.address
+
+                    images?.clear()
+                    images?.addAll(org?.images)
+                    admins?.clear()
+                    admins?.addAll(org?.admins)
+                    events?.clear()
+                    events?.addAll(org?.events)
+
+
                 }
             )
         }
@@ -134,10 +167,11 @@ fun OrganizationPage(org: Organization, navigator: NavHostController) {
                     .verticalScroll(scrollState)
 
             ) {
-                TopImageBlock(org, isEditing, onNameChanged = { name = it })
-                ContentBody(
+                TopImageBlock(
                     name = name,
-                    onNameChange = { name = it },
+                    onNameChange = { name = it }, org, isEditing
+                )
+                ContentBody(
                     description = description,
                     onDescriptionChange = { description = it },
                     address = address,
@@ -169,9 +203,32 @@ fun AppBar(
     scrollBehavior: TopAppBarScrollBehavior,
     isEditing: Boolean,
     onEditToggle: () -> Unit,
-    onSave: () -> Unit
+    onSave: () -> Unit,
+    onCancel: () -> Unit
 ) {
     Box() {
+
+        AnimatedVisibility(
+            visible = isEditing,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            Box(
+                modifier = Modifier
+                    .height(200.dp)
+                    .fillMaxWidth()
+                    .background(
+
+                        Brush.verticalGradient(
+                            listOf(
+                                Color(0xFF000000),
+                                Color(0x00FFFFFF)
+                            ),
+                        )
+                    )
+            )
+        }
+
         CenterAlignedTopAppBar(
             colors = TopAppBarColors(
                 containerColor = Color.Transparent,
@@ -186,7 +243,15 @@ fun AppBar(
                 TopAppBarDefaults.pinnedScrollBehavior()
             },
             title = {
-                if (isEditing) {
+                AnimatedVisibility(
+                    visible = isEditing,
+                    enter = slideInVertically(
+                        initialOffsetY = { -it - 30 }
+                    ),
+                    exit = slideOutVertically(
+                        targetOffsetY = { -it - 30 }
+                    )
+                ) {
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(10.dp))
@@ -209,18 +274,36 @@ fun AppBar(
                 .fillMaxWidth()
                 .padding(horizontal = 12.dp)
                 .clip(RoundedCornerShape(20.dp)),
-            navigationIcon = {
-                IconButton(
-                    onClick = {//TODO on click//
-                    },
-                    modifier = Modifier
-                        .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.50f))
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "back"
-                    )
+            navigationIcon = if (!isEditing) {
+                {
+                    IconButton(
+                        onClick = {
+                        },
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.50f))
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "back"
+                        )
+                    }
+                }
+            } else {
+                {
+                    IconButton(
+                        onClick = {
+                            onCancel()
+                        },
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.50f))
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Close,
+                            contentDescription = "back"
+                        )
+                    }
                 }
             },
 
@@ -260,7 +343,10 @@ fun AppBar(
 }
 
 @Composable
-fun TopImageBlock(org: Organization, isEditing: Boolean, onNameChanged: (String) -> Unit = {}) {
+fun TopImageBlock(
+    name: String,
+    onNameChange: (String) -> Unit, org: Organization, isEditing: Boolean
+) {
     val height = 360.dp
 
     Box(
@@ -291,8 +377,8 @@ fun TopImageBlock(org: Organization, isEditing: Boolean, onNameChanged: (String)
         ) {
             if (isEditing) {
                 BasicTextField(
-                    value = org.name,
-                    onValueChange = onNameChanged,
+                    value = name,
+                    onValueChange = { name -> onNameChange(name) },
                     modifier = Modifier
                         .padding(12.dp),
                     textStyle = TextStyle(
@@ -300,9 +386,8 @@ fun TopImageBlock(org: Organization, isEditing: Boolean, onNameChanged: (String)
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
                     ),
-                    maxLines = 3,
                 ) { inner ->
-                    Box {
+                    Box(modifier = Modifier) {
                         inner()
                     }
                 }
@@ -324,8 +409,6 @@ fun TopImageBlock(org: Organization, isEditing: Boolean, onNameChanged: (String)
 
 @Composable
 fun ContentBody(
-    name: String,
-    onNameChange: (String) -> Unit,
     description: String,
     onDescriptionChange: (String) -> Unit,
     address: String,
@@ -410,20 +493,29 @@ fun PicturesBlock(
                 )
 
 
-// Delete icon overlay in edit mode
-                if (isEditing) {
+                AnimatedVisibility(
+                    visible = isEditing,
+                    enter = fadeIn(),
+                    exit = fadeOut(),
+                    modifier = Modifier.align(Alignment.Center)
+                ) {
                     IconButton(
                         onClick = { onDeleteImage(index) },
                         modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .offset(x = (-8).dp, y = 8.dp)
-                            .size(36.dp)
+                            .align(Alignment.Center)
+                            .width(95.dp)
+                            .height(65.dp)
                             .background(
-                                androidx.compose.ui.graphics.Color.White.copy(alpha = 0.8f),
-                                shape = CircleShape
+                                Color.Black.copy(alpha = 0.8f),
+                                shape = RoundedCornerShape(20.dp)
                             )
                     ) {
-                        Icon(imageVector = Icons.Default.Delete, contentDescription = "delete")
+                        Icon(
+                            imageVector = Icons.Outlined.Delete,
+                            contentDescription = "delete",
+                            tint = accentColor,
+                            modifier = Modifier.size(48.dp)
+                        )
                     }
                 }
             }
@@ -666,19 +758,29 @@ fun EventCard(
                 )
 
 
-                if (isEditing) {
+                androidx.compose.animation.AnimatedVisibility(
+                    visible = isEditing,
+                    enter = fadeIn(),
+                    exit = fadeOut(),
+                    modifier = Modifier.align(Alignment.Center)
+                ) {
                     IconButton(
                         onClick = onLockClick,
                         modifier = Modifier
-                            .align(Alignment.TopEnd)
+                            .align(Alignment.Center)
                             .padding(8.dp)
-                            .size(36.dp)
+                            .height(65.dp)
+                            .width(95.dp)
                             .background(
-                                androidx.compose.ui.graphics.Color.White.copy(alpha = 0.8f),
-                                shape = CircleShape
+                                Color.Black.copy(alpha = 0.8f),
+                                shape = RoundedCornerShape(20.dp)
                             )
                     ) {
-                        Icon(imageVector = Icons.Default.Lock, contentDescription = "lock")
+                        Icon(
+                            tint = accentColor,
+                            imageVector = Icons.Outlined.Lock, contentDescription = "lock",
+                            modifier = Modifier.size(48.dp)
+                        )
                     }
                 }
             }
@@ -701,7 +803,7 @@ fun EventCard(
                 Text(
                     event.startDate,
                     fontSize = 12.sp,
-                    color = androidx.compose.ui.graphics.Color.White
+                    color = accentColorText
                 )
             }
         }

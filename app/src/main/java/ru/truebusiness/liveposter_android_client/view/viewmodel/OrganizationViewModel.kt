@@ -30,6 +30,25 @@ class OrganizationViewModel : ViewModel() {
         Log.d(TAG, "current organization: ${organization.name}")
     }
 
+    fun updateOrganization(
+        name: String,
+        description: String,
+        address: String,
+        admins: List<User>,
+        images: List<String>
+    ) {
+        _currentOrganization.update { org ->
+            org?.copy(
+                name = name,
+                description = description,
+                address = address,
+                admins = admins,
+                images = images
+            )
+        }
+
+    }
+
     fun updateAdmins(newAdmins: List<User>) {
         _currentOrganization.update { org ->
             org?.copy(admins = newAdmins)

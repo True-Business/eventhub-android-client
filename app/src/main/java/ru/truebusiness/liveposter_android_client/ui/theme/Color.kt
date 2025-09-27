@@ -43,4 +43,6 @@ val pageGradient = Brush.verticalGradient(
     )
 )
 
+val accentColor = Color(0xFFFF6D19)
+
 val accentColorText = Color(0xFFCB5615)
