@@ -8,8 +8,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.datastore.preferences.preferencesDataStore
 import ru.truebusiness.liveposter_android_client.repository.AuthRepository
 import ru.truebusiness.liveposter_android_client.view.viewmodel.AuthViewModel
-import ru.truebusiness.liveposter_android_client.repository.mocks.mockOrganization
-import ru.truebusiness.liveposter_android_client.view.organizations.OrganizationPage
 
 
 class MainActivity: ComponentActivity() {
@@ -25,9 +23,7 @@ class MainActivity: ComponentActivity() {
         val authViewModel = AuthViewModel(authRepository)
 
         setContent {
-          //AppNavigation(authViewModel)
-            AppNavigation()
-            //OrganizationPage(mockOrganization)
+            AppNavigation(authViewModel)
         }
     }
 }

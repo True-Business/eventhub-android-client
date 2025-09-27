@@ -10,17 +10,18 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import ru.truebusiness.liveposter_android_client.data.Organization
 import ru.truebusiness.liveposter_android_client.data.User
+import ru.truebusiness.liveposter_android_client.data.emptyOrganization
 import ru.truebusiness.liveposter_android_client.repository.OrgRepository
 
 
 class OrganizationViewModel : ViewModel() {
     private val TAG = "ORGANIZATION_VIEW_MODEL"
 
-    private val repository = OrgRepository()
+    val repository = OrgRepository()
 
 
-    private var _currentOrganization = MutableStateFlow<Organization?>(null)
-    var currentOrganization: StateFlow<Organization?> = _currentOrganization
+    private var _currentOrganization = MutableStateFlow(emptyOrganization())
+    var currentOrganization: StateFlow<Organization> = _currentOrganization
 
     //TODO update this to check if user is admin
     var isMy: StateFlow<Boolean> = MutableStateFlow(true)
@@ -38,7 +39,7 @@ class OrganizationViewModel : ViewModel() {
         images: List<String>
     ) {
         _currentOrganization.update { org ->
-            org?.copy(
+            org.copy(
                 name = name,
                 description = description,
                 address = address,
@@ -51,7 +52,7 @@ class OrganizationViewModel : ViewModel() {
 
     fun updateAdmins(newAdmins: List<User>) {
         _currentOrganization.update { org ->
-            org?.copy(admins = newAdmins)
+            org.copy(admins = newAdmins)
         }
         Log.d(TAG, "admins count: ${newAdmins.size}")
     }

@@ -1,6 +1,7 @@
 package ru.truebusiness.liveposter_android_client.view.organizations
 
 import android.annotation.SuppressLint
+import android.view.animation.Transformation
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -24,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -36,17 +38,19 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavHostController
 import ru.truebusiness.liveposter_android_client.data.User
 import ru.truebusiness.liveposter_android_client.ui.theme.pageGradient
+import ru.truebusiness.liveposter_android_client.view.viewmodel.OrganizationViewModel
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalAnimationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun AdminsScreen(
-    adminsState: List<User>,
+    orgViewModel: OrganizationViewModel,
     navigator: NavHostController,
     onSaveEditing: (List<User>) -> Unit = {}
 ) {
+    val organization by orgViewModel.currentOrganization.collectAsState()
 
-    val admins = remember(adminsState) { adminsState.toMutableStateList() }
+    val admins = remember { organization.admins.toMutableStateList() }
     val isEditing = remember { mutableStateOf(false) }
 
     Scaffold(
@@ -63,7 +67,7 @@ fun AdminsScreen(
             modifier = Modifier
                 .fillMaxSize()
         ) {
-            if (adminsState.isEmpty()) {
+            if (admins.isEmpty()) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()

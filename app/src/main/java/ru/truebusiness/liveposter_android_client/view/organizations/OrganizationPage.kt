@@ -103,15 +103,15 @@ fun OrganizationPage(orgViewMod: OrganizationViewModel, navigator: NavHostContro
 
 
 // Local editable states (mocking local edits)
-    var name by remember { mutableStateOf(org?.name) }
-    var description by remember { mutableStateOf(org?.description) }
-    var address by remember { mutableStateOf(org?.address) }
+    var name by remember { mutableStateOf(org.name) }
+    var description by remember { mutableStateOf(org.description) }
+    var address by remember { mutableStateOf(org.address) }
 
 
 // Mutable lists for images and events so we can delete / modify locally
-    val admins = remember { org?.admins?.toMutableStateList() }
-    val images = remember { org?.images?.toMutableStateList() }
-    val events = remember { org?.events?.toMutableStateList() }
+    val admins = remember { org.admins.toMutableStateList() }
+    val images = remember { org.images.toMutableStateList() }
+    val events = remember { org.events.toMutableStateList() }
 
     val context = LocalContext.current
 
@@ -129,25 +129,25 @@ fun OrganizationPage(orgViewMod: OrganizationViewModel, navigator: NavHostContro
                     //TODO on save callback
                     isEditing = false
                     orgViewMod.updateOrganization(
-                        name = name ?: "",
-                        description = description ?: "",
-                        address = address ?: "",
-                        admins = admins ?: emptyList(),
-                        images = images ?: emptyList()
+                        name = name,
+                        description = description,
+                        address = address,
+                        admins = admins,
+                        images = images
                     )
                 },
                 onCancel = {
                     isEditing = false
-                    name = org?.name
-                    description = org?.description
-                    address = org?.address
+                    name = org.name
+                    description = org.description
+                    address = org.address
 
-                    images?.clear()
-                    images?.addAll(org?.images)
-                    admins?.clear()
-                    admins?.addAll(org?.admins)
-                    events?.clear()
-                    events?.addAll(org?.events)
+                    images.clear()
+                    images.addAll(org.images)
+                    admins.clear()
+                    admins.addAll(org.admins)
+                    events.clear()
+                    events.addAll(org.events)
 
 
                 }
