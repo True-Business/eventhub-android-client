@@ -52,6 +52,7 @@ fun AdminsScreen(
 
     val admins = remember { organization.admins.toMutableStateList() }
     val isEditing = remember { mutableStateOf(false) }
+    val isAdmin by orgViewModel.isMy.collectAsState()
 
     Scaffold(
         topBar = {
@@ -59,6 +60,7 @@ fun AdminsScreen(
                 admins,
                 isEditing,
                 navigator = navigator,
+                isAdmin,
                 onSaveEditing,
             )
         },
@@ -107,6 +109,7 @@ fun AppBar(
     admins: List<User>,
     isEditing: MutableState<Boolean>,
     navigator: NavHostController,
+    isAdmin: Boolean,
     onSaveEditing: (List<User>) -> Unit
 ) {
     Box() {
@@ -157,37 +160,41 @@ fun AppBar(
                 }
             },
 
-            actions = {
-                if (isEditing.value) {
-                    IconButton(
-                        onClick = {},
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.50f))
-                    ) {
-                        Icon(Icons.Default.Add, contentDescription = "Добавить")
-                    }
-                    Spacer(modifier = Modifier.width(12.dp))
-                    IconButton(
-                        onClick = {
-                            onSaveEditing(admins)
-                            isEditing.value = false
-                        },
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.50f))
-                    ) {
-                        Icon(Icons.Default.Check, contentDescription = "Сохранить")
-                    }
-                } else {
-                    IconButton(
-                        onClick = { isEditing.value = true }, modifier = Modifier
-                            .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.50f))
-                    ) {
-                        Icon(Icons.Default.Edit, contentDescription = "Редактировать")
+            actions = if (isAdmin) {
+                {
+                    if (isEditing.value) {
+                        IconButton(
+                            onClick = {},
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(Color.White.copy(alpha = 0.50f))
+                        ) {
+                            Icon(Icons.Default.Add, contentDescription = "Добавить")
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        IconButton(
+                            onClick = {
+                                onSaveEditing(admins)
+                                isEditing.value = false
+                            },
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(Color.White.copy(alpha = 0.50f))
+                        ) {
+                            Icon(Icons.Default.Check, contentDescription = "Сохранить")
+                        }
+                    } else {
+                        IconButton(
+                            onClick = { isEditing.value = true }, modifier = Modifier
+                                .clip(CircleShape)
+                                .background(Color.White.copy(alpha = 0.50f))
+                        ) {
+                            Icon(Icons.Default.Edit, contentDescription = "Редактировать")
+                        }
                     }
                 }
+            } else {
+                {}
             }
 
         )

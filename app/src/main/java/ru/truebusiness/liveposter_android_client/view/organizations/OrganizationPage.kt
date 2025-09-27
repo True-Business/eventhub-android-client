@@ -114,6 +114,7 @@ fun OrganizationPage(orgViewMod: OrganizationViewModel, navigator: NavHostContro
     val events = remember { org.events.toMutableStateList() }
 
     val context = LocalContext.current
+    val isAdmin by orgViewMod.isMy.collectAsState()
 
 
 
@@ -125,6 +126,7 @@ fun OrganizationPage(orgViewMod: OrganizationViewModel, navigator: NavHostContro
                 onEditToggle = {
                     isEditing = !isEditing
                 },
+                isAdmin = isAdmin,
                 onSave = {
                     //TODO on save callback
                     isEditing = false
@@ -202,6 +204,7 @@ fun OrganizationPage(orgViewMod: OrganizationViewModel, navigator: NavHostContro
 fun AppBar(
     scrollBehavior: TopAppBarScrollBehavior,
     isEditing: Boolean,
+    isAdmin: Boolean,
     onEditToggle: () -> Unit,
     onSave: () -> Unit,
     onCancel: () -> Unit
@@ -307,34 +310,38 @@ fun AppBar(
                 }
             },
 
-            actions = {
-                if (!isEditing) {
-                    IconButton(
-                        onClick = {
-                            onEditToggle()
-                        },
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.50f))
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = "edit"
-                        )
-                    }
-                } else {
-                    IconButton(
-                        onClick = { onSave() },
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.50f))
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Check,
-                            contentDescription = "save"
-                        )
+            actions = if (isAdmin) {
+                {
+                    if (!isEditing) {
+                        IconButton(
+                            onClick = {
+                                onEditToggle()
+                            },
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(Color.White.copy(alpha = 0.50f))
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = "edit"
+                            )
+                        }
+                    } else {
+                        IconButton(
+                            onClick = { onSave() },
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(Color.White.copy(alpha = 0.50f))
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = "save"
+                            )
+                        }
                     }
                 }
+            } else {
+                {}
             }
 
         )
