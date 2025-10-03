@@ -80,6 +80,7 @@ import ru.truebusiness.liveposter_android_client.data.User
 import ru.truebusiness.liveposter_android_client.ui.theme.accentColor
 import ru.truebusiness.liveposter_android_client.ui.theme.accentColorText
 import ru.truebusiness.liveposter_android_client.ui.theme.pageGradient
+import ru.truebusiness.liveposter_android_client.view.components.FullScreenImageViewer
 import ru.truebusiness.liveposter_android_client.view.viewmodel.OrganizationViewModel
 
 
