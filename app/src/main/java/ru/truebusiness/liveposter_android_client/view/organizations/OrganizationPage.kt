@@ -81,6 +81,7 @@ import ru.truebusiness.liveposter_android_client.ui.theme.accentColor
 import ru.truebusiness.liveposter_android_client.ui.theme.accentColorText
 import ru.truebusiness.liveposter_android_client.ui.theme.pageGradient
 import ru.truebusiness.liveposter_android_client.view.components.FullScreenImageViewer
+import ru.truebusiness.liveposter_android_client.view.components.TinyEventCard
 import ru.truebusiness.liveposter_android_client.view.viewmodel.OrganizationViewModel
 
 
@@ -552,7 +553,7 @@ fun EventsBlock(events: List<Event>, isEditing: Boolean, onLock: (Event) -> Unit
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         items(events) { ev ->
-            EventCard(
+            TinyEventCard(
                 event = ev,
                 withLabels = true,
                 isEditing = isEditing,
@@ -729,85 +730,6 @@ fun AdminAvatar(coverUrl: String) {
             .clip(CircleShape),
         contentScale = ContentScale.Crop
     )
-}
-
-@Composable
-fun EventCard(
-    event: Event,
-    withLabels: Boolean = true,
-    isEditing: Boolean = false,
-    onLockClick: () -> Unit = {}
-) {
-
-
-    Column(modifier = Modifier.width(160.dp)) {
-        Card(
-            modifier = Modifier
-                .size(width = 160.dp, height = 160.dp),
-            shape = RoundedCornerShape(18.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 20.dp)
-        ) {
-            Box {
-                AsyncImage(
-                    model = event.posterUrl,
-                    contentDescription = event.title,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp)),
-                    contentScale = ContentScale.Crop
-                )
-
-
-                androidx.compose.animation.AnimatedVisibility(
-                    visible = isEditing,
-                    enter = fadeIn(),
-                    exit = fadeOut(),
-                    modifier = Modifier.align(Alignment.Center)
-                ) {
-                    IconButton(
-                        onClick = onLockClick,
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .padding(8.dp)
-                            .height(65.dp)
-                            .width(95.dp)
-                            .background(
-                                Color.Black.copy(alpha = 0.8f),
-                                shape = RoundedCornerShape(20.dp)
-                            )
-                    ) {
-                        Icon(
-                            tint = accentColor,
-                            imageVector = Icons.Outlined.Lock, contentDescription = "lock",
-                            modifier = Modifier.size(48.dp)
-                        )
-                    }
-                }
-            }
-        }
-
-
-        if (withLabels) {
-            Spacer(modifier = Modifier.height(8.dp))
-            Column(modifier = Modifier.padding(horizontal = 8.dp)) {
-                Text(
-                    event.title,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-
-
-                    )
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    event.startDate,
-                    fontSize = 12.sp,
-                    color = accentColorText
-                )
-            }
-        }
-    }
 }
 
 @Composable
