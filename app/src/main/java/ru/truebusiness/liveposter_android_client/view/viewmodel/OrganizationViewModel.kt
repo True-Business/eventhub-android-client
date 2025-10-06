@@ -12,12 +12,24 @@ import ru.truebusiness.liveposter_android_client.data.Organization
 import ru.truebusiness.liveposter_android_client.data.User
 import ru.truebusiness.liveposter_android_client.data.emptyOrganization
 import ru.truebusiness.liveposter_android_client.repository.OrgRepository
+import java.util.UUID
+import kotlin.uuid.Uuid
 
 
 class OrganizationViewModel : ViewModel() {
+
+    sealed class OrganizationState {
+        object Loading : OrganizationState()
+        data class Success(val org: Organization) : OrganizationState()
+        data class Error(val message: String) : OrganizationState()
+    }
+
+    private val _organizationState = MutableStateFlow<OrganizationState>(OrganizationState.Loading)
+    val organizationState: StateFlow<OrganizationState> get() = _organizationState
+
     private val TAG = "ORGANIZATION_VIEW_MODEL"
 
-    val repository = OrgRepository()
+    private val repository = OrgRepository()
 
 
     private var _currentOrganization = MutableStateFlow(emptyOrganization())
@@ -29,6 +41,17 @@ class OrganizationViewModel : ViewModel() {
     fun setCurrentOrganization(organization: Organization) {
         _currentOrganization.value = organization
         Log.d(TAG, "current organization: ${organization.name}")
+    }
+
+    fun fetchOrganizationFromRepo(orgId: UUID) {
+        val org = repository.fetchOrganizationMock(orgId)
+        if (org != null) {
+            _organizationState.value = OrganizationState.Success(org)
+            // TODO delete
+            _currentOrganization.value = org
+        } else {
+            _organizationState.value = OrganizationState.Error("organization not found")
+        }
     }
 
     fun updateOrganization(

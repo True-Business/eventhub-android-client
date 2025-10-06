@@ -2,6 +2,8 @@ package ru.truebusiness.liveposter_android_client
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -78,16 +80,12 @@ fun AppNavigation(
             val orgString = backStackEntry.arguments?.getString("orgId")
             val uuid = UUID.fromString(orgString)
 
-            val org = orgViewModel.repository.fetchOrganization(uuid)
-            if (org != null) {
-                orgViewModel.setCurrentOrganization(org)
-                OrganizationPage(
-                    orgViewModel,
-                    navController
-                )
-            } else {
-                //handle error
-            }
+            orgViewModel.fetchOrganizationFromRepo(uuid)
+
+            OrganizationPage(
+                orgViewModel,
+                navController
+            )
 
         }
 

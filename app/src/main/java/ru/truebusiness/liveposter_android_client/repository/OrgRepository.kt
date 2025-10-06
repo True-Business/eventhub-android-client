@@ -6,7 +6,7 @@ import java.util.UUID
 
 class OrgRepository {
 
-    fun fetchOrganization(eventId: UUID): Organization? {
+    fun fetchOrganizationMock(eventId: UUID): Organization? {
         return mockOrganization
     }
 
