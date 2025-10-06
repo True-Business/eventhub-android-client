@@ -15,6 +15,7 @@ class MainActivity: ComponentActivity() {
     private val Context.dataStore by preferencesDataStore(name = "auth_prefs")
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
@@ -22,7 +23,7 @@ class MainActivity: ComponentActivity() {
         val authViewModel = AuthViewModel(authRepository)
 
         setContent {
-           AppNavigation(authViewModel)
+            AppNavigation(authViewModel)
         }
     }
 }

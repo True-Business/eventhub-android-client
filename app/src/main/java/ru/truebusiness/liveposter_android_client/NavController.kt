@@ -2,6 +2,9 @@ package ru.truebusiness.liveposter_android_client
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -17,15 +20,22 @@ import ru.truebusiness.liveposter_android_client.view.registration.RegistrationP
 import ru.truebusiness.liveposter_android_client.view.registration.RegistrationPagePersonalInfo
 import ru.truebusiness.liveposter_android_client.view.registration.RegistrationPageUserInterest
 import ru.truebusiness.liveposter_android_client.view.WelcomePage
+import ru.truebusiness.liveposter_android_client.view.organizations.AdminsScreen
+import ru.truebusiness.liveposter_android_client.view.organizations.OrganizationPage
 import ru.truebusiness.liveposter_android_client.view.viewmodel.AuthViewModel
+import ru.truebusiness.liveposter_android_client.view.viewmodel.OrganizationViewModel
+import java.util.UUID
 
 @Composable
 fun AppNavigation(
     authViewModel: AuthViewModel
 ) {
 
+    val orgViewModel: OrganizationViewModel = viewModel()
+
     val navController = rememberNavController()
     val repository = EventRepository()
+
 
     // Проверяем авторизацию при старте приложения
     LaunchedEffect(Unit) {
@@ -61,6 +71,34 @@ fun AppNavigation(
                     navController.popBackStack()
                 }
             }
+        }
+
+        composable(
+            route = "organizations/{orgId}",
+            arguments = listOf(navArgument("orgId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val orgString = backStackEntry.arguments?.getString("orgId")
+            val uuid = UUID.fromString(orgString)
+
+            orgViewModel.fetchOrganizationFromRepo(uuid)
+
+            OrganizationPage(
+                orgViewModel,
+                navController
+            )
+
+        }
+
+        composable(
+            route = "organizationAdmins",
+        ) { backStackEntry ->
+            AdminsScreen(
+                orgViewModel,
+                navController,
+                onSaveEditing = ({ users ->
+                    orgViewModel.updateAdmins(users)
+                })
+            )
         }
 
         /* Нижний блок навигации по приложению */
