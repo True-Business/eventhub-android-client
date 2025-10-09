@@ -6,6 +6,7 @@ import ru.truebusiness.liveposter_android_client.data.Friend
 import ru.truebusiness.liveposter_android_client.data.Organization
 import ru.truebusiness.liveposter_android_client.data.User
 import java.util.UUID
+import kotlin.random.Random
 
 val mockEventList = listOf(
     Event(
@@ -122,3 +123,36 @@ val mockOrganization = Organization(
         "https://ksonline.ru/wp-content/uploads/2017/03/ngu.jpg"
     ),
 )
+
+private val baseCovers = listOf(
+    "https://sesc.nsu.ru/upload/resize_cache/iblock/b4c/919_517_2/%D0%9D%D0%93%D0%A3.jpg",
+    "https://ksonline.ru/wp-content/uploads/2022/05/NSU.jpg",
+    "https://ksonline.ru/wp-content/uploads/2017/03/ngu.jpg",
+    "https://upload.wikimedia.org/wikipedia/commons/2/2f/Googleplex_HQ.jpg",
+    "https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_Store.jpg",
+)
+
+val mockOrganizationsPool: List<Organization> = buildList {
+    val cities = listOf("Новосибирск", "Москва", "Санкт-Петербург", "Казань", "Екатеринбург")
+    repeat(100) { i ->
+        val city = cities[i % cities.size]
+        add(
+            Organization(
+                id = UUID.randomUUID(),
+                name = when (i % 5) {
+                    0 -> "NSU #$i"
+                    1 -> "Google #$i"
+                    2 -> "Apple #$i"
+                    3 -> "Yandex #$i"
+                    else -> "JetBrains #$i"
+                },
+                coverUrl = baseCovers[i % baseCovers.size],
+                address = "г. $city, ул. Пирогова, д. ${Random.nextInt(1, 50)}",
+                description = "Описание организации №$i. Короткий текст о деятельности.",
+                admins = mockUsersList,
+                events = mockEventList,
+                images = baseCovers.shuffled().take(2)
+            )
+        )
+    }
+}
