@@ -13,6 +13,8 @@ fun emptyOrganization(): Organization {
         admins = emptyList(),
         events = emptyList(),
         images = emptyList(),
+        isSubscribed = false,
+        isMine = false
     )
 }
 
@@ -25,4 +27,6 @@ data class Organization(
     val admins: List<User>,
     val events: List<Event>,
     val images: List<String>,
+    val isSubscribed: Boolean,  //TODO временно, пока нет точного контракта??
+    val isMine: Boolean
 )
