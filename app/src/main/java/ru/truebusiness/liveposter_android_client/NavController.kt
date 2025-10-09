@@ -14,6 +14,8 @@ import ru.truebusiness.liveposter_android_client.repository.EventRepository
 import ru.truebusiness.liveposter_android_client.view.EventDetailsPage
 import ru.truebusiness.liveposter_android_client.view.FriendsPage
 import ru.truebusiness.liveposter_android_client.view.MainPage
+import ru.truebusiness.liveposter_android_client.view.ProfilePage
+import ru.truebusiness.liveposter_android_client.view.ProfileSettingsPage
 import ru.truebusiness.liveposter_android_client.view.SearchPage
 import ru.truebusiness.liveposter_android_client.view.registration.RegistrationPage
 import ru.truebusiness.liveposter_android_client.view.registration.RegistrationPageEmailVerification
@@ -98,6 +100,13 @@ fun AppNavigation(
                     orgViewModel.updateAdmins(users)
                 })
             )
+        }
+
+        composable("profile-settings") {
+            ProfileSettingsPage(navController)
+        }
+        composable("profile") {
+            ProfilePage(navController)
         }
 
         /* Нижний блок навигации по приложению */
