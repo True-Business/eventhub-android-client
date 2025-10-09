@@ -8,10 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -29,12 +26,16 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import ru.truebusiness.liveposter_android_client.ui.theme.UserPersonalInfoContinueEnabledButtonColor
 import ru.truebusiness.liveposter_android_client.view.components.GradientButton
+import ru.truebusiness.liveposter_android_client.view.viewmodel.AuthViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegistrationPagePersonalInfo(navController: NavController) {
+fun RegistrationPagePersonalInfo(
+    vm: AuthViewModel,
+    navController: NavController,
+    userId: String
+) {
     var displayName by remember { mutableStateOf("") }
     var username by remember { mutableStateOf("") }
     var isUsernameValid by remember { mutableStateOf(true) }
@@ -107,8 +108,9 @@ fun RegistrationPagePersonalInfo(navController: NavController) {
                 Toast.makeText(context, "Некорректное имя пользователя", Toast.LENGTH_SHORT).show()
                 return@GradientButton
             }
-            //TODO(e.vartazaryan): Добавить логику сохранения данных
-            navController.navigate("user_personal_info")
+            navController.navigate("main") {
+                popUpTo(navController.graph.startDestinationId) { inclusive = true }
+            }
         }
     }
 }

@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -19,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -32,16 +31,21 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import kotlinx.coroutines.delay
-import ru.truebusiness.liveposter_android_client.ui.theme.EmailVerificationPageConfirmButtonColor
 import ru.truebusiness.liveposter_android_client.view.components.GradientButton
+import ru.truebusiness.liveposter_android_client.view.viewmodel.AuthViewModel
 
 @Composable
-fun RegistrationPageEmailVerification(navController: NavController, email: String) {
+fun RegistrationPageEmailVerification(
+    viewModel: AuthViewModel,
+    navController: NavController,
+    userId: String
+) {
     var verificationCode by remember { mutableStateOf("") }
     var isResendEnabled by remember { mutableStateOf(true) }
     var countdown by remember { mutableIntStateOf(60) }
     var showError by remember { mutableStateOf(false) }
     val context = LocalContext.current
+    val email by viewModel.email.collectAsState(initial = null)
 
     // Таймер для кнопки переотправки
     LaunchedEffect(isResendEnabled, countdown) {
@@ -103,8 +107,10 @@ fun RegistrationPageEmailVerification(navController: NavController, email: Strin
 
         GradientButton(text = "Подтвердить") {
             if (verificationCode.length == 4) {
-                //TODO: Добавить логику проверки корректности отправленного кода
-                navController.navigate("user_personal_data")
+                viewModel.verifyCode(verificationCode) { returnedId ->
+                    val nextId = returnedId ?: userId
+                    navController.navigate("user_personal_data/$nextId")
+                }
             } else {
                 showError = true
             }
@@ -115,7 +121,7 @@ fun RegistrationPageEmailVerification(navController: NavController, email: Strin
         TextButton(
             onClick = {
                 if (isResendEnabled) {
-                    //TODO: Добавить логику переотпраки кода на почту
+                    viewModel.sendCode(userId)
                     Toast.makeText(context, "Код отправлен повторно", Toast.LENGTH_SHORT).show()
                     isResendEnabled = false
                 }
