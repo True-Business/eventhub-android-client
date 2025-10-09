@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
@@ -154,6 +155,12 @@ fun MainPage(
                     onClick = { navController.navigate("Настройки") },
                     icon = { Icon(Icons.Default.Settings, contentDescription = "Настройки") },
                     label = { Text("Настройки") }
+                )
+                NavigationBarItem(
+                    selected = false,
+                    onClick = {navController.navigate("events")},
+                    icon = { Icon(Icons.Default.DateRange, contentDescription = "Мероприятия") },
+                    label = { Text("Мероприятия") }
                 )
             }
         }
