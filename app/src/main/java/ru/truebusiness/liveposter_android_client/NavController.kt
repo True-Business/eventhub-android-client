@@ -10,6 +10,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import ru.truebusiness.liveposter_android_client.data.Event
 import ru.truebusiness.liveposter_android_client.repository.EventRepository
 import ru.truebusiness.liveposter_android_client.view.EventDetailsPage
 import ru.truebusiness.liveposter_android_client.view.FriendsPage
@@ -153,9 +154,15 @@ fun AppNavigation(
         }
 
         composable(
-            route="events"
+            route = "events"
         ) {
-            MainScreen()
+            var events: List<Event> = emptyList()
+            repository.fetchEventsMock(onResult = { ev ->
+                if (ev != null) {
+                    events = ev
+                }
+            })
+            MainScreen(navController, events)
         }
 
         /****************************************/

@@ -6,7 +6,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -43,10 +45,11 @@ fun TinyEventCard(
 ) {
 
 
-    Column(modifier = Modifier.width(160.dp)) {
+    Column {
         Card(
             modifier = Modifier
-                .size(width = 160.dp, height = 160.dp),
+                .fillMaxWidth()
+                .aspectRatio(1f),
             shape = RoundedCornerShape(18.dp),
             elevation = CardDefaults.cardElevation(defaultElevation = 20.dp)
         ) {

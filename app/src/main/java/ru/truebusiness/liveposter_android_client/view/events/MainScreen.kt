@@ -1,14 +1,26 @@
 package ru.truebusiness.liveposter_android_client.view.events
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -16,120 +28,181 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import ru.truebusiness.liveposter_android_client.R
-import ru.truebusiness.liveposter_android_client.ui.theme.pageGradient
+import androidx.navigation.NavHostController
 import ru.truebusiness.liveposter_android_client.data.Event
+import ru.truebusiness.liveposter_android_client.ui.theme.ChipBackground
+import ru.truebusiness.liveposter_android_client.ui.theme.pageGradient
 import ru.truebusiness.liveposter_android_client.view.components.*
-import java.util.UUID
+import java.util.*
 
+enum class EventCategory(val displayName: String) {
+    DRAFTS("Черновики"),
+    COMPLETED("Завершенные"),
+    SCHEDULED("Запланированные")
+}
 
-@OptIn(ExperimentalAnimationApi::class)
+enum class VisitsCategory(val displayName: String) {
+    WILLGO("Я пойду"),
+    VISITED("Посещенные")
+}
+
+@OptIn(ExperimentalAnimationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen() {
-    var mainTab by remember { mutableStateOf(MainTab.EVENTS) }
+fun MainScreen(
+    navController: NavHostController,
+    events: List<Event>
+
+    ) {
+    var mainTab by remember { mutableStateOf(MainTab.VISITS) }
     var showFilter by remember { mutableStateOf(false) }
     var filterState by remember { mutableStateOf(FilterState()) }
+    var selectedSubcategory by remember { mutableStateOf(0) }
+    val density = LocalDensity.current
+    var subcategoryButtonsHeight by remember { mutableStateOf(0.dp) }
 
-    Column(
+
+    val gridState = rememberLazyGridState()
+    val isScrolled by remember {
+        derivedStateOf {
+            gridState.firstVisibleItemIndex > 0 || gridState.firstVisibleItemScrollOffset > 0
+        }
+    }
+
+    val subcategoryLabels = when (mainTab) {
+        MainTab.VISITS -> listOf(
+            VisitsCategory.WILLGO.displayName,
+            VisitsCategory.VISITED.displayName
+        )
+
+        MainTab.EVENTS -> listOf(
+            EventCategory.DRAFTS.displayName,
+            EventCategory.COMPLETED.displayName,
+            EventCategory.SCHEDULED.displayName
+        )
+    }
+
+    val topPadding by animateDpAsState(
+        targetValue = if (isScrolled) 0.dp else subcategoryButtonsHeight + 12.dp
+    )
+    val cornerRadius by animateDpAsState(targetValue = if (isScrolled) 0.dp else 24.dp)
+
+    LaunchedEffect(mainTab) {
+        selectedSubcategory = 0
+    }
+
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(brush = pageGradient)
     ) {
-        AppTopBar(
-            onBack = { /* handle back */ },
-            onFilter = { showFilter = true },
-            titleContent = {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
+        Column(modifier = Modifier.fillMaxSize()) {
+            AppTopBar(
+                onBack = {
+                    navController.popBackStack()
+                },
+                onFilter = { showFilter = true },
+                titleContent = {
+                    LazyRow(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp)
+                            .clip(RoundedCornerShape(12.dp)),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        item {
+                            AnimatedSelectionChip(
+                                text = "Посещения",
+                                selected = mainTab == MainTab.VISITS,
+                                onClick = { mainTab = MainTab.VISITS })
+                        }
+                        item {
+                            Spacer(modifier = Modifier.width(12.dp))
+                        }
+                        item {
+                            AnimatedSelectionChip(
+                                text = "Мероприятия",
+                                selected = mainTab == MainTab.EVENTS,
+                                onClick = { mainTab = MainTab.EVENTS }
+                            )
+                        }
+                    }
+                }
+            )
+
+            if (showFilter) {
+                FilterDialog(
+                    initial = filterState,
+                    onDismiss = { showFilter = false },
+                    onApply = { newState ->
+                        filterState = newState
+                        showFilter = false
+                    })
+            }
+
+            Box(modifier = Modifier.fillMaxSize()) {
+                AnimatedContent(
+                    targetState = subcategoryLabels
+                ) { targetState ->
+                    SubcategoryButtons(
+                        labels = targetState,
+                        selectedIndex = selectedSubcategory,
+                        onSelect = { selectedSubcategory = it },
+                        modifier = Modifier.onGloballyPositioned { coordinates ->
+                            subcategoryButtonsHeight =
+                                with(density) { coordinates.size.height.toDp() }
+                        }
+                    )
+                }
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(top = topPadding)
+                        .clip(RoundedCornerShape(topStart = cornerRadius, topEnd = cornerRadius))
+                        .background(Color.White)
                 ) {
-                    TabButton(
-                        text = "Посещения",
-                        selected = mainTab == MainTab.VISITS,
-                        onClick = { mainTab = MainTab.VISITS })
-                    Spacer(modifier = Modifier.width(8.dp))
-                    TabButton(
-                        text = "Мероприятия",
-                        selected = mainTab == MainTab.EVENTS,
-                        onClick = { mainTab = MainTab.EVENTS })
+                    LazyVerticalGrid(
+                        state = gridState,
+                        columns = GridCells.Fixed(2),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(events) { event ->
+                            TinyEventCard(event = event)
+                        }
+                    }
                 }
             }
-        )
-
-        if (showFilter) {
-            FilterDialog(
-                initial = filterState,
-                onDismiss = { showFilter = false },
-                onApply = { newState ->
-                    filterState = newState
-                    showFilter = false
-                })
         }
 
-        AnimatedContent(
-            targetState = mainTab,
-        ) { target ->
-            when (target) {
-                MainTab.VISITS -> VisitsScreen(itemsProvider = {
-                    List(12) { i ->
-                        Event(
-                            id = UUID.randomUUID(),
-                            category = emptyList(),
-                            title = if (i % 2 == 0) "Научный пикник" else "Интер неделя",
-                            content = "Подробности...",
-                            startDate = if (i % 2 == 0) "25.07.2025" else "17.04.2025",
-                            endDate = "",
-                            location = "Онлайн",
-                            posterUrl = "https://i.pravatar.cc/300?img=$i"
-                        )
-                    }
-                })
 
-                MainTab.EVENTS -> EventsScreen(itemsProvider = {
-                    List(8) { i ->
-                        Event(
-                            id = UUID.randomUUID(),
-                            category = emptyList(),
-                            title = if (i % 2 != 0) "Научный пикник" else "Интер неделя",
-                            content = "Подробности...",
-                            startDate = if (i % 2 != 0) "25.07.2025" else "17.04.2025",
-                            endDate = "",
-                            location = "Оффлайн",
-                            posterUrl = "https://i.pravatar.cc/300?img=${i + 12}"
-                        )
-                    }
-                })
+
+        AnimatedVisibility(
+            visible = mainTab == MainTab.EVENTS && subcategoryLabels.getOrNull(selectedSubcategory) == EventCategory.DRAFTS.displayName,
+            enter = scaleIn(),
+            exit = scaleOut(),
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(horizontal = 24.dp, vertical = 24.dp),
+        ) {
+            FloatingActionButton(
+                onClick = {
+                    //TODO navigate to create event
+                },
+                shape = CircleShape,
+                containerColor = ChipBackground
+            ) {
+                Icon(Icons.Filled.Add, "create event")
             }
         }
     }
 }
 
-
-@Composable
-private fun TabButton(text: String, selected: Boolean, onClick: () -> Unit) {
-    val background = if (selected) Color(0xFFFCEEE4) else Color.Transparent
-    val textColor = if (selected) Color(0xFF4E260F) else Color.White
-
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(20.dp))
-            .background(background)
-            .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = text,
-            color = textColor,
-            fontWeight = FontWeight.Medium,
-            fontSize = 16.sp
-        )
-    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -140,16 +213,31 @@ fun AppTopBar(
 ) {
     TopAppBar(
         navigationIcon = {
-            IconButton(onClick = onBack) {
-                Icon(Icons.Filled.ArrowBack, contentDescription = "Назад", tint = Color.White)
+            IconButton(
+                onClick = onBack,
+                modifier = Modifier
+                    .padding(horizontal = 12.dp)
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.50f))
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "back"
+                )
             }
         },
         actions = {
-            IconButton(onClick = onFilter) {
+            IconButton(
+                onClick = onFilter,
+                modifier = Modifier
+                    .padding(horizontal = 12.dp)
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.50f))
+            ) {
                 Icon(
                     Icons.Filled.DateRange,
-                    contentDescription = "Фильтр",
-                    tint = Color.White
+                    contentDescription = "filter",
+                    tint = Color.Black
                 )
             }
         },

@@ -38,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -152,15 +153,9 @@ fun MainPage(
                 )
                 NavigationBarItem(
                     selected = false,
-                    onClick = { navController.navigate("Настройки") },
-                    icon = { Icon(Icons.Default.Settings, contentDescription = "Настройки") },
-                    label = { Text("Настройки") }
-                )
-                NavigationBarItem(
-                    selected = false,
-                    onClick = {navController.navigate("events")},
+                    onClick = { navController.navigate("events") },
                     icon = { Icon(Icons.Default.DateRange, contentDescription = "Мероприятия") },
-                    label = { Text("Мероприятия") }
+                    label = { Text(text = "Мероприятия", maxLines = 1, overflow = TextOverflow.Ellipsis) }
                 )
             }
         }
