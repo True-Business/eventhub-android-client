@@ -2,14 +2,18 @@ package ru.truebusiness.liveposter_android_client.view.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
 import ru.truebusiness.liveposter_android_client.data.dto.RegistrationResponseDto
 import ru.truebusiness.liveposter_android_client.repository.AuthRepository
+import java.io.IOException
 
 
 data class AuthState(
@@ -28,7 +32,9 @@ data class AuthState(
 
 class AuthViewModel(
     private val authRepository: AuthRepository
-): ViewModel() {
+) : ViewModel() {
+    private val _errors = MutableSharedFlow<String>(extraBufferCapacity = 1)
+    val errors: SharedFlow<String> = _errors
     private val _state = MutableStateFlow(AuthState())
     val state: StateFlow<AuthState> = _state.asStateFlow()
     val isLoggedIn = authRepository.isLoggedIn.stateIn(viewModelScope, SharingStarted.Eagerly, false)
@@ -40,20 +46,50 @@ class AuthViewModel(
         onPending: (String?) -> Unit = {}
     ) {
         viewModelScope.launch {
-            _state.emit(_state.value.copy(loading = true, error = null, email = email, password = password))
+            _state.emit(
+                _state.value.copy(
+                    loading = true,
+                    error = null,
+                    email = email,
+                    password = password
+                )
+            )
             try {
                 val response = authRepository.preRegister(email, password)
-                _state.emit(_state.value.copy(loading = false, response = response, currentUserId = response.id))
+                _state.emit(
+                    _state.value.copy(
+                        loading = false,
+                        response = response,
+                        currentUserId = response.id
+                    )
+                )
                 onPending(response.id)
+            } catch (e: HttpException) {
+                _state.emit(_state.value.copy(loading = false, error = e.message))
+                val serverMessage = e.message()
+                val msg = when (e.code()) {
+                    500 -> serverMessage.ifBlank { "Внутренняя ошибка сервера (500)" }
+                    400 -> serverMessage.ifBlank { "Некорректные данные запроса" }
+                    409 -> serverMessage.ifBlank { "Конфликт данных" }
+                    else -> serverMessage.ifBlank { "Ошибка сервера (${e.code()})" }
+                }
+                _errors.tryEmit(msg)
+            } catch (e: IOException) {
+                _state.emit(_state.value.copy(loading = false, error = e.message))
+                _errors.tryEmit("Проблема с сетью. Проверьте подключение и попробуйте ещё раз.")
             } catch (e: Exception) {
                 _state.emit(_state.value.copy(loading = false, error = e.message))
+                _errors.tryEmit(e.message ?: "Неизвестная ошибка")
             }
         }
     }
 
     fun sendCode(userId: String) {
         viewModelScope.launch {
-            try { authRepository.sendCode(userId) } catch (_: Exception) {}
+            try {
+                authRepository.sendCode(userId)
+            } catch (_: Exception) {
+            }
         }
     }
 
@@ -65,7 +101,13 @@ class AuthViewModel(
             _state.emit(_state.value.copy(loading = true, error = null))
             try {
                 val res = authRepository.verifyCode(code)
-                _state.emit(_state.value.copy(loading = false, response = res, currentUserId = res.id))
+                _state.emit(
+                    _state.value.copy(
+                        loading = false,
+                        response = res,
+                        currentUserId = res.id
+                    )
+                )
                 onSuccess(res.id)
             } catch (e: Exception) {
                 _state.emit(_state.value.copy(loading = false, error = e.message))
@@ -80,7 +122,14 @@ class AuthViewModel(
         onSuccess: () -> Unit = {}
     ) {
         viewModelScope.launch {
-            _state.emit(_state.value.copy(loading = true, error = null, username = username, shortId = shortId))
+            _state.emit(
+                _state.value.copy(
+                    loading = true,
+                    error = null,
+                    username = username,
+                    shortId = shortId
+                )
+            )
             try {
                 val s = _state.value
                 val res = authRepository.postRegister(
@@ -90,7 +139,14 @@ class AuthViewModel(
                     email = s.email,
                     password = s.password
                 )
-                _state.emit(_state.value.copy(loading = false, response = res, currentUserId = res.id, isLoggedIn = true))
+                _state.emit(
+                    _state.value.copy(
+                        loading = false,
+                        response = res,
+                        currentUserId = res.id,
+                        isLoggedIn = true
+                    )
+                )
                 onSuccess()
             } catch (e: Exception) {
                 _state.emit(_state.value.copy(loading = false, error = e.message))
