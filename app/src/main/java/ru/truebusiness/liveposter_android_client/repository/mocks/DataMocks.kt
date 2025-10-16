@@ -122,6 +122,8 @@ val mockOrganization = Organization(
         "https://ksonline.ru/wp-content/uploads/2022/05/NSU.jpg",
         "https://ksonline.ru/wp-content/uploads/2017/03/ngu.jpg"
     ),
+    isSubscribed = true,
+    isMine = false
 )
 
 private val baseCovers = listOf(
@@ -139,19 +141,15 @@ val mockOrganizationsPool: List<Organization> = buildList {
         add(
             Organization(
                 id = UUID.randomUUID(),
-                name = when (i % 5) {
-                    0 -> "NSU #$i"
-                    1 -> "Google #$i"
-                    2 -> "Apple #$i"
-                    3 -> "Yandex #$i"
-                    else -> "JetBrains #$i"
-                },
+                name = "NSU #$i",
                 coverUrl = baseCovers[i % baseCovers.size],
                 address = "г. $city, ул. Пирогова, д. ${Random.nextInt(1, 50)}",
                 description = "Описание организации №$i. Короткий текст о деятельности.",
                 admins = mockUsersList,
                 events = mockEventList,
-                images = baseCovers.shuffled().take(2)
+                images = baseCovers.shuffled().take(2),
+                isSubscribed = i % 3 == 0,
+                isMine = i % 5 == 0
             )
         )
     }

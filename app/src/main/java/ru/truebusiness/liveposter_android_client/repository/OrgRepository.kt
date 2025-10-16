@@ -3,6 +3,7 @@ package ru.truebusiness.liveposter_android_client.repository
 import ru.truebusiness.liveposter_android_client.data.Organization
 import ru.truebusiness.liveposter_android_client.repository.mocks.mockOrganization
 import ru.truebusiness.liveposter_android_client.repository.mocks.mockOrganizationsPool
+import ru.truebusiness.liveposter_android_client.view.organizationslist.OrganizationTab
 import java.util.UUID
 
 class OrgRepository {
@@ -11,18 +12,20 @@ class OrgRepository {
         return mockOrganization
     }
 
-    suspend fun fetchOrganizationsPage(
+    fun fetchOrganizationsPage(
         page: Int,
         pageSize: Int,
-        query: String?
+        tab: OrganizationTab
     ): List<Organization> {
-        val full = mockOrganizationsPool
-            .filter { query.isNullOrBlank() || it.name.contains(query, ignoreCase = true) }
-
+        val full = mockOrganizationsPool.filter { org ->
+            when (tab) {
+                OrganizationTab.ALL -> true
+                OrganizationTab.SUBSCRIPTIONS -> org.isSubscribed
+                OrganizationTab.MINE -> org.isMine
+            }
+        }
         val from = page * pageSize
-        val toExclusive = minOf(from + pageSize, full.size)
-
-        return if (from >= full.size) emptyList() else full.subList(from, toExclusive)
+        val to = minOf(from + pageSize, full.size)
+        return if (from >= full.size) emptyList() else full.subList(from, to)
     }
-
 }

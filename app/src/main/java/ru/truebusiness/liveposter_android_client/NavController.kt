@@ -2,8 +2,6 @@ package ru.truebusiness.liveposter_android_client
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -22,8 +20,10 @@ import ru.truebusiness.liveposter_android_client.view.registration.RegistrationP
 import ru.truebusiness.liveposter_android_client.view.WelcomePage
 import ru.truebusiness.liveposter_android_client.view.organizations.AdminsScreen
 import ru.truebusiness.liveposter_android_client.view.organizations.OrganizationPage
+import ru.truebusiness.liveposter_android_client.view.organizationslist.OrganizationsListPage
 import ru.truebusiness.liveposter_android_client.view.viewmodel.AuthViewModel
 import ru.truebusiness.liveposter_android_client.view.viewmodel.OrganizationViewModel
+import ru.truebusiness.liveposter_android_client.view.viewmodel.OrganizationsViewModel
 import java.util.UUID
 
 @Composable
@@ -32,6 +32,7 @@ fun AppNavigation(
 ) {
 
     val orgViewModel: OrganizationViewModel = viewModel()
+    val organizationsListViewModel: OrganizationsViewModel = viewModel()
 
     val navController = rememberNavController()
     val repository = EventRepository()
@@ -71,6 +72,13 @@ fun AppNavigation(
                     navController.popBackStack()
                 }
             }
+        }
+
+        composable(
+            route = "organizations",
+
+        ) {
+            OrganizationsListPage(organizationsListViewModel, navController)
         }
 
         composable(
