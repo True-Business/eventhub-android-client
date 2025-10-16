@@ -19,8 +19,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -149,11 +149,12 @@ fun MainPage(
                     icon = { Icon(Icons.Default.AccountBox, contentDescription = "Друзья") },
                     label = { Text("Друзья") }
                 )
+                // TODO: добавить иконку, если хотим навигацию через bottomBar
                 NavigationBarItem(
                     selected = false,
-                    onClick = { navController.navigate("Настройки") },
-                    icon = { Icon(Icons.Default.Settings, contentDescription = "Настройки") },
-                    label = { Text("Настройки") }
+                    onClick = { navController.navigate("organizations") },
+                    icon = { Icon(Icons.Default.Info, contentDescription = "Организации") },
+                    label = { Text("Организации") }
                 )
             }
         }
