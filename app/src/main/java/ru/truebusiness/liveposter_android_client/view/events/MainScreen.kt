@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,20 +32,29 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import ru.truebusiness.liveposter_android_client.data.Event
+import ru.truebusiness.liveposter_android_client.data.MainTab
+import ru.truebusiness.liveposter_android_client.data.VisitsCategory
+import ru.truebusiness.liveposter_android_client.data.EventsCategory
+import ru.truebusiness.liveposter_android_client.data.SortField
+import ru.truebusiness.liveposter_android_client.data.SortOrder
 import ru.truebusiness.liveposter_android_client.ui.theme.ChipBackground
 import ru.truebusiness.liveposter_android_client.ui.theme.pageGradient
 import ru.truebusiness.liveposter_android_client.view.components.*
+import ru.truebusiness.liveposter_android_client.view.viewmodel.EventsViewModel
 import java.util.*
 
+// Legacy enums for compatibility - these are now in data package
 enum class EventCategory(val displayName: String) {
     DRAFTS("Черновики"),
     COMPLETED("Завершенные"),
     SCHEDULED("Запланированные")
 }
 
-enum class VisitsCategory(val displayName: String) {
+// Legacy enum for compatibility - this is now in data package
+enum class VisitsCategoryLegacy(val displayName: String) {
     WILLGO("Я пойду"),
     VISITED("Посещенные")
 }
@@ -53,16 +63,41 @@ enum class VisitsCategory(val displayName: String) {
 @Composable
 fun MainScreen(
     navController: NavHostController,
-    events: List<Event>
+    eventsViewModel: EventsViewModel = viewModel()
+) {
+    // Get state from ViewModel
+    val events by eventsViewModel.events.observeAsState(emptyList())
+    val isLoading by eventsViewModel.isLoading.observeAsState(false)
+    val filterState by eventsViewModel.filterState.observeAsState()
+    val currentMainTab by eventsViewModel.currentMainTab.observeAsState(MainTab.VISITS)
+    val currentVisitsCategory by eventsViewModel.currentVisitsCategory.observeAsState(VisitsCategory.WILLGO)
+    val currentEventsCategory by eventsViewModel.currentEventsCategory.observeAsState(EventsCategory.DRAFTS)
 
-    ) {
-    var mainTab by remember { mutableStateOf(MainTab.VISITS) }
+    // Local UI state
     var showFilter by remember { mutableStateOf(false) }
-    var filterState by remember { mutableStateOf(FilterState()) }
     var selectedSubcategory by remember { mutableStateOf(0) }
     val density = LocalDensity.current
     var subcategoryButtonsHeight by remember { mutableStateOf(0.dp) }
 
+    // Initialize ViewModel on first composition
+    LaunchedEffect(Unit) {
+        eventsViewModel.initialize()
+    }
+
+    // Update selected subcategory when ViewModel state changes
+    LaunchedEffect(currentVisitsCategory, currentEventsCategory) {
+        selectedSubcategory = when (currentMainTab) {
+            MainTab.VISITS -> when (currentVisitsCategory) {
+                VisitsCategory.WILLGO -> 0
+                VisitsCategory.VISITED -> 1
+            }
+            MainTab.EVENTS -> when (currentEventsCategory) {
+                EventsCategory.DRAFTS -> 0
+                EventsCategory.PLANNED -> 1
+                EventsCategory.COMPLETED -> 2
+            }
+        }
+    }
 
     val gridState = rememberLazyGridState()
     val isScrolled by remember {
@@ -71,16 +106,16 @@ fun MainScreen(
         }
     }
 
-    val subcategoryLabels = when (mainTab) {
+    val subcategoryLabels = when (currentMainTab) {
         MainTab.VISITS -> listOf(
             VisitsCategory.WILLGO.displayName,
             VisitsCategory.VISITED.displayName
         )
 
         MainTab.EVENTS -> listOf(
-            EventCategory.DRAFTS.displayName,
-            EventCategory.COMPLETED.displayName,
-            EventCategory.SCHEDULED.displayName
+            EventsCategory.DRAFTS.displayName,
+            EventsCategory.PLANNED.displayName,
+            EventsCategory.COMPLETED.displayName
         )
     }
 
@@ -88,10 +123,6 @@ fun MainScreen(
         targetValue = if (isScrolled) 0.dp else subcategoryButtonsHeight + 12.dp
     )
     val cornerRadius by animateDpAsState(targetValue = if (isScrolled) 0.dp else 24.dp)
-
-    LaunchedEffect(mainTab) {
-        selectedSubcategory = 0
-    }
 
     Box(
         modifier = Modifier
@@ -116,8 +147,10 @@ fun MainScreen(
                         item {
                             AnimatedSelectionChip(
                                 text = "Посещения",
-                                selected = mainTab == MainTab.VISITS,
-                                onClick = { mainTab = MainTab.VISITS })
+                                selected = currentMainTab == MainTab.VISITS,
+                                onClick = {
+                                    eventsViewModel.setMainTab(MainTab.VISITS)
+                                })
                         }
                         item {
                             Spacer(modifier = Modifier.width(12.dp))
@@ -125,22 +158,26 @@ fun MainScreen(
                         item {
                             AnimatedSelectionChip(
                                 text = "Мероприятия",
-                                selected = mainTab == MainTab.EVENTS,
-                                onClick = { mainTab = MainTab.EVENTS }
+                                selected = currentMainTab == MainTab.EVENTS,
+                                onClick = {
+                                    eventsViewModel.setMainTab(MainTab.EVENTS)
+                                }
                             )
                         }
                     }
                 }
             )
 
-            if (showFilter) {
+            if (showFilter && filterState != null) {
                 FilterDialog(
-                    initial = filterState,
+                    initialSortBy = filterState!!.sortBy,
+                    initialSortOrder = filterState!!.sortOrder,
                     onDismiss = { showFilter = false },
-                    onApply = { newState ->
-                        filterState = newState
+                    onApply = { sortBy, sortOrder ->
+                        eventsViewModel.updateSortOrder(sortBy, sortOrder)
                         showFilter = false
-                    })
+                    }
+                )
             }
 
             Box(modifier = Modifier.fillMaxSize()) {
@@ -150,7 +187,28 @@ fun MainScreen(
                     SubcategoryButtons(
                         labels = targetState,
                         selectedIndex = selectedSubcategory,
-                        onSelect = { selectedSubcategory = it },
+                        onSelect = { index ->
+                            selectedSubcategory = index
+                            when (currentMainTab) {
+                                MainTab.VISITS -> {
+                                    val category = when (index) {
+                                        0 -> VisitsCategory.WILLGO
+                                        1 -> VisitsCategory.VISITED
+                                        else -> VisitsCategory.WILLGO
+                                    }
+                                    eventsViewModel.setVisitsCategory(category)
+                                }
+                                MainTab.EVENTS -> {
+                                    val category = when (index) {
+                                        0 -> EventsCategory.DRAFTS
+                                        1 -> EventsCategory.PLANNED
+                                        2 -> EventsCategory.COMPLETED
+                                        else -> EventsCategory.DRAFTS
+                                    }
+                                    eventsViewModel.setEventsCategory(category)
+                                }
+                            }
+                        },
                         modifier = Modifier.onGloballyPositioned { coordinates ->
                             subcategoryButtonsHeight =
                                 with(density) { coordinates.size.height.toDp() }
@@ -183,7 +241,7 @@ fun MainScreen(
 
 
         AnimatedVisibility(
-            visible = mainTab == MainTab.EVENTS && subcategoryLabels.getOrNull(selectedSubcategory) == EventCategory.DRAFTS.displayName,
+            visible = currentMainTab == MainTab.EVENTS && subcategoryLabels.getOrNull(selectedSubcategory) == EventsCategory.DRAFTS.displayName,
             enter = scaleIn(),
             exit = scaleOut(),
             modifier = Modifier

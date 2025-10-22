@@ -1,122 +1,86 @@
 package ru.truebusiness.liveposter_android_client.view.components
 
+import android.R
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-
-
-enum class MainTab { VISITS, EVENTS }
-
-
-enum class VisitsCategory { GOING, VISITED, FAVORITES }
-
-
-enum class EventsCategory { DRAFTS, PAST, PLANNED }
-
-
-data class Item(
-    val id: Int,
-    val title: String,
-    val subtitle: String
-)
-
-
-data class FilterState(
-    val query: String = "",
-    val onlyMine: Boolean = false,
-    val sortBy: SortBy = SortBy.DATE_DESC
-)
-
-
-enum class SortBy { DATE_DESC, DATE_ASC, NAME }
+import ru.truebusiness.liveposter_android_client.data.SortField
+import ru.truebusiness.liveposter_android_client.data.SortOrder
+import ru.truebusiness.liveposter_android_client.ui.theme.accentColor
+import ru.truebusiness.liveposter_android_client.ui.theme.accentColorText
 
 @Composable
 fun FilterDialog(
-    initial: FilterState,
+    initialSortBy: SortField,
+    initialSortOrder: SortOrder,
     onDismiss: () -> Unit,
-    onApply: (FilterState) -> Unit
+    onApply: (SortField, SortOrder) -> Unit
 ) {
-    var query by remember { mutableStateOf(initial.query) }
-    var onlyMine by remember { mutableStateOf(initial.onlyMine) }
-    var sortBy by remember { mutableStateOf(initial.sortBy) }
-
+    var sortBy by remember { mutableStateOf(initialSortBy) }
+    var sortOrder by remember { mutableStateOf(initialSortOrder) }
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(shape = MaterialTheme.shapes.medium) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text(text = "Фильтры", style = MaterialTheme.typography.headlineMedium)
+                Text(text = "Сортировка", style = MaterialTheme.typography.headlineMedium)
                 Spacer(Modifier.height(12.dp))
 
-
-                OutlinedTextField(
-                    value = query,
-                    onValueChange = { query = it },
-                    label = { Text("Поиск") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-
-                Spacer(Modifier.height(8.dp))
-
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(checked = onlyMine, onCheckedChange = { onlyMine = it })
-                    Spacer(Modifier.width(8.dp))
-                    Text(text = "Только мои")
+                Text(text = "Поле для сортировки")
+                Column {
+                    SortField.entries.forEach { field ->
+                        RadioButtonWithText(
+                            selected = sortBy == field,
+                            onSelect = { sortBy = field },
+                            text = when (field) {
+                                SortField.START_DATE -> "Дата начала"
+                                SortField.TITLE -> "Название"
+                                SortField.PRICE -> "Цена"
+                                SortField.LOCATION -> "Местоположение"
+                            }
+                        )
+                    }
                 }
 
-
                 Spacer(Modifier.height(12.dp))
 
-
-                Text(text = "Сортировка")
+                Text(text = "Порядок сортировки")
                 Column {
                     RadioButtonWithText(
-                        selected = sortBy == SortBy.DATE_DESC,
-                        onSelect = { sortBy = SortBy.DATE_DESC },
-                        text = "По убыванию даты"
+                        selected = sortOrder == SortOrder.ASC,
+                        onSelect = { sortOrder = SortOrder.ASC },
+                        text = "По возрастанию"
                     )
                     RadioButtonWithText(
-                        selected = sortBy == SortBy.DATE_ASC,
-                        onSelect = { sortBy = SortBy.DATE_ASC },
-                        text = "По возрастанию даты"
-                    )
-                    RadioButtonWithText(
-                        selected = sortBy == SortBy.NAME,
-                        onSelect = { sortBy = SortBy.NAME },
-                        text = "По названию"
+                        selected = sortOrder == SortOrder.DESC,
+                        onSelect = { sortOrder = SortOrder.DESC },
+                        text = "По убыванию"
                     )
                 }
-
 
                 Spacer(Modifier.height(16.dp))
 
-
                 Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
-                    TextButton(onClick = onDismiss) { Text("Назад") }
+                    TextButton(onClick = onDismiss) { Text("Назад", color = accentColorText) }
                     Spacer(Modifier.width(8.dp))
-                    Button(onClick = {
-                        onApply(
-                            FilterState(
-                                query,
-                                onlyMine,
-                                sortBy
-                            )
-                        )
-                    }) { Text("Применить") }
+                    Button(
+                        onClick = { onApply(sortBy, sortOrder) },
+                        colors = ButtonDefaults.buttonColors(accentColor)
+                    ) { Text("Применить") }
                 }
             }
         }
@@ -131,7 +95,11 @@ private fun RadioButtonWithText(selected: Boolean, onSelect: () -> Unit, text: S
             .fillMaxWidth()
             .clickable { onSelect() }
             .padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-        RadioButton(selected = selected, onClick = onSelect)
+        RadioButton(
+            selected = selected,
+            onClick = onSelect,
+            colors = RadioButtonDefaults.colors(accentColor)
+        )
         Spacer(Modifier.width(8.dp))
         Text(text = text)
     }

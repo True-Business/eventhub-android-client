@@ -35,6 +35,7 @@ import coil.compose.AsyncImage
 import ru.truebusiness.liveposter_android_client.data.Event
 import ru.truebusiness.liveposter_android_client.ui.theme.accentColor
 import ru.truebusiness.liveposter_android_client.ui.theme.accentColorText
+import ru.truebusiness.liveposter_android_client.utils.DateUtils.formatEventDate
 
 @Composable
 fun TinyEventCard(
@@ -107,7 +108,7 @@ fun TinyEventCard(
                     )
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
-                    event.startDate,
+                    formatEventDate(event.startDate),
                     fontSize = 12.sp,
                     color = accentColorText
                 )

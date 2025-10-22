@@ -25,6 +25,7 @@ import ru.truebusiness.liveposter_android_client.view.events.MainScreen
 import ru.truebusiness.liveposter_android_client.view.organizations.AdminsScreen
 import ru.truebusiness.liveposter_android_client.view.organizations.OrganizationPage
 import ru.truebusiness.liveposter_android_client.view.viewmodel.AuthViewModel
+import ru.truebusiness.liveposter_android_client.view.viewmodel.EventsViewModel
 import ru.truebusiness.liveposter_android_client.view.viewmodel.OrganizationViewModel
 import java.util.UUID
 
@@ -34,6 +35,8 @@ fun AppNavigation(
 ) {
 
     val orgViewModel: OrganizationViewModel = viewModel()
+    val eventsViewModel: EventsViewModel = viewModel()
+    eventsViewModel.initialize()
 
     val navController = rememberNavController()
     val repository = EventRepository()
@@ -156,13 +159,7 @@ fun AppNavigation(
         composable(
             route = "events"
         ) {
-            var events: List<Event> = emptyList()
-            repository.fetchEventsMock(onResult = { ev ->
-                if (ev != null) {
-                    events = ev
-                }
-            })
-            MainScreen(navController, events)
+            MainScreen(navController, eventsViewModel)
         }
 
         /****************************************/
