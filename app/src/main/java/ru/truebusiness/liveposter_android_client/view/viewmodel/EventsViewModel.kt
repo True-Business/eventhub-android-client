@@ -144,6 +144,7 @@ class EventsViewModel: ViewModel() {
         }
 
         loadEventsWithFilters()
+        sortEventsLocally()
     }
 
     /**
