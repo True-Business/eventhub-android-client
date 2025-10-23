@@ -162,7 +162,7 @@ class EventsViewModel: ViewModel() {
             maxDuration = null,
             organizer = null, // не учитывать
             userParticipating = true, // участвую
-            eventStatus = EventStatus.PLANNED, // запланировано
+            eventStatus = EventStatus.PUBLISHED, // запланировано
             isPublic = null, // все
             sortBy = getDefaultSortField(MainTab.VISITS, VisitsCategory.WILLGO),
             sortOrder = SortOrder.ASC, // по возрастанию
@@ -232,7 +232,7 @@ class EventsViewModel: ViewModel() {
             organizer = null, // не учитывать
             organizerId = mockCurrentUserId, // id-пользователя
             userParticipating = null, // все
-            eventStatus = EventStatus.PLANNED, // запланировано
+            eventStatus = EventStatus.PUBLISHED, // запланировано
             isPublic = null, // все
             sortBy = getDefaultSortField(MainTab.EVENTS, eventsCategory = EventsCategory.PLANNED),
             sortOrder = SortOrder.ASC, // по возрастанию (сначала ближайшие)
@@ -287,9 +287,9 @@ class EventsViewModel: ViewModel() {
         val sortedEvents = when (filter.sortBy) {
             SortField.START_DATE -> {
                 if (filter.sortOrder == SortOrder.ASC) {
-                    currentEvents.sortedBy { java.time.LocalDateTime.parse(it.startDate) }
+                    currentEvents.sortedBy { it.startDate }
                 } else {
-                    currentEvents.sortedByDescending { java.time.LocalDateTime.parse(it.startDate) }
+                    currentEvents.sortedByDescending { it.startDate }
                 }
             }
             SortField.TITLE -> {

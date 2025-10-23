@@ -234,7 +234,10 @@ fun MainScreen(
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         items(events) { event ->
-                            TinyEventCard(event = event)
+                            TinyEventCard(
+                                event = event,
+                                onClick = { navController.navigate("event/${event.id}") }
+                            )
                         }
                     }
                 }

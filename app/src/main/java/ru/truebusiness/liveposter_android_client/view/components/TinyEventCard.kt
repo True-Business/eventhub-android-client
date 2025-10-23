@@ -3,6 +3,7 @@ package ru.truebusiness.liveposter_android_client.view.components
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -42,7 +43,8 @@ fun TinyEventCard(
     event: Event,
     withLabels: Boolean = true,
     isEditing: Boolean = false,
-    onLockClick: () -> Unit = {}
+    onLockClick: () -> Unit = {},
+    onClick: () -> Unit = {}
 ) {
 
 
@@ -50,7 +52,8 @@ fun TinyEventCard(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .aspectRatio(1f),
+                .aspectRatio(1f)
+                .clickable { onClick() },
             shape = RoundedCornerShape(18.dp),
             elevation = CardDefaults.cardElevation(defaultElevation = 20.dp)
         ) {

@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import ru.truebusiness.liveposter_android_client.data.Event
 import ru.truebusiness.liveposter_android_client.ui.theme.EventPageBodyColor
 import ru.truebusiness.liveposter_android_client.ui.theme.EventPageTopFooterColor
+import ru.truebusiness.liveposter_android_client.utils.DateUtils.formatEventDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,8 +50,8 @@ fun EventDetailsPage(event: Event, onBack: () -> Unit) {
             }
         )
         Spacer(modifier = Modifier.height(8.dp))
-        Text(text = "Дата начала: ${event.startDate}")
-        Text(text = "Дата окончания: ${event.endDate}")
+        Text(text = "Дата начала: ${formatEventDate(event.startDate)}")
+        Text(text = "Дата окончания: ${formatEventDate(event.endDate)}")
         Text(text = "Место: ${event.location}")
         Spacer(modifier = Modifier.height(16.dp))
         Text(text = event.content)

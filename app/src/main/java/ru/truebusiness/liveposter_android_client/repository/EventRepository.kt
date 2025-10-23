@@ -8,6 +8,10 @@ import ru.truebusiness.liveposter_android_client.data.EventCategory
 import ru.truebusiness.liveposter_android_client.data.FilterState
 import ru.truebusiness.liveposter_android_client.data.SortField
 import ru.truebusiness.liveposter_android_client.data.SortOrder
+import ru.truebusiness.liveposter_android_client.data.dto.EventDto
+import ru.truebusiness.liveposter_android_client.data.dto.toDomainEvents
+import ru.truebusiness.liveposter_android_client.data.dto.toCreateUpdateDto
+import ru.truebusiness.liveposter_android_client.data.dto.toDomainEvent
 import ru.truebusiness.liveposter_android_client.repository.api.RetrofitInstance
 import ru.truebusiness.liveposter_android_client.repository.mocks.mockEventList
 import java.time.LocalDateTime
@@ -27,22 +31,19 @@ class EventRepository {
                     category: EventCategory? = EventCategory.ALL) {
         RetrofitInstance.eventApi
             .getEvents(category.toString())
-            .enqueue(object : Callback<List<Event>> {
-            override fun onResponse(call: Call<List<Event>?>, response: Response<List<Event>?>) {
+            .enqueue(object : Callback<List<EventDto>> {
+            override fun onResponse(call: Call<List<EventDto>>, response: Response<List<EventDto>>) {
                 if (response.isSuccessful) {
-                    onResult(response.body())
+                    val events = response.body()?.toDomainEvents()
+                    onResult(events)
                 } else {
                     onResult(null)
                 }
             }
 
-            override fun onFailure(
-                call: Call<List<Event>?>,
-                t: Throwable
-            ) {
-                TODO("Not yet implemented")
+            override fun onFailure(call: Call<List<EventDto>>, t: Throwable) {
+                onResult(null)
             }
-
         })
     }
 
@@ -59,8 +60,22 @@ class EventRepository {
     /**
      * Метод загружает одно мероприятие с бекенда по его id
      */
-    fun fetchEvent(eventId: String) {
+    fun fetchEvent(eventId: String, onResult: (Event?) -> Unit) {
         RetrofitInstance.eventApi.getEvent(eventId)
+            .enqueue(object : Callback<EventDto> {
+                override fun onResponse(call: Call<EventDto>, response: Response<EventDto>) {
+                    if (response.isSuccessful) {
+                        val event = response.body()?.toDomainEvent()
+                        onResult(event)
+                    } else {
+                        onResult(null)
+                    }
+                }
+
+                override fun onFailure(call: Call<EventDto>, t: Throwable) {
+                    onResult(null)
+                }
+            })
     }
 
     /**
@@ -115,14 +130,14 @@ class EventRepository {
             val minDateTime = if (minTime == "now") now
             else LocalDateTime.parse(minTime)
             filteredEvents = filteredEvents.filter {
-                LocalDateTime.parse(it.startDate) >= minDateTime
+                it.startDate >= minDateTime
             }
         }
         filter.maxStartTime?.let { maxTime ->
             val maxDateTime = if (maxTime == "now") now
             else LocalDateTime.parse(maxTime)
             filteredEvents = filteredEvents.filter {
-                LocalDateTime.parse(it.startDate) <= maxDateTime
+                it.startDate <= maxDateTime
             }
         }
 
@@ -186,9 +201,9 @@ class EventRepository {
         filteredEvents = when (filter.sortBy) {
             SortField.START_DATE -> {
                 if (filter.sortOrder == SortOrder.ASC) {
-                    filteredEvents.sortedBy { LocalDateTime.parse(it.startDate) }
+                    filteredEvents.sortedBy { it.startDate }
                 } else {
-                    filteredEvents.sortedByDescending { LocalDateTime.parse(it.startDate) }
+                    filteredEvents.sortedByDescending { it.startDate }
                 }
             }
             SortField.TITLE -> {
@@ -218,5 +233,63 @@ class EventRepository {
         filteredEvents = mockEventList
 
         onResult(filteredEvents)
+    }
+
+    /**
+     * Создает новое событие через API
+     */
+    fun createEvent(event: Event, onResult: (Event?) -> Unit) {
+        RetrofitInstance.eventApi.createEvent(event.toCreateUpdateDto())
+            .enqueue(object : Callback<EventDto> {
+                override fun onResponse(call: Call<EventDto>, response: Response<EventDto>) {
+                    if (response.isSuccessful) {
+                        val createdEvent = response.body()?.toDomainEvent()
+                        onResult(createdEvent)
+                    } else {
+                        onResult(null)
+                    }
+                }
+
+                override fun onFailure(call: Call<EventDto>, t: Throwable) {
+                    onResult(null)
+                }
+            })
+    }
+
+    /**
+     * Обновляет существующее событие через API
+     */
+    fun updateEvent(eventId: String, event: Event, onResult: (Event?) -> Unit) {
+        RetrofitInstance.eventApi.updateEvent(eventId, event.toCreateUpdateDto())
+            .enqueue(object : Callback<EventDto> {
+                override fun onResponse(call: Call<EventDto>, response: Response<EventDto>) {
+                    if (response.isSuccessful) {
+                        val updatedEvent = response.body()?.toDomainEvent()
+                        onResult(updatedEvent)
+                    } else {
+                        onResult(null)
+                    }
+                }
+
+                override fun onFailure(call: Call<EventDto>, t: Throwable) {
+                    onResult(null)
+                }
+            })
+    }
+
+    /**
+     * Удаляет событие в статусе DRAFT через API
+     */
+    fun deleteEvent(eventId: String, onResult: (Boolean) -> Unit) {
+        RetrofitInstance.eventApi.deleteEvent(eventId)
+            .enqueue(object : Callback<Void> {
+                override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                    onResult(response.isSuccessful)
+                }
+
+                override fun onFailure(call: Call<Void>, t: Throwable) {
+                    onResult(false)
+                }
+            })
     }
 }
