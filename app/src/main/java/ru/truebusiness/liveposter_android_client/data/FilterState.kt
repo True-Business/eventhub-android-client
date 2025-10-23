@@ -58,3 +58,34 @@ enum class VisitsCategory(val displayName: String) {
     WILLGO("Я пойду"),
     VISITED("Посещенные")
 }
+
+/**
+ * Helper function to get available sort fields for specific tab/category combinations
+ */
+fun getAvailableSortFields(mainTab: MainTab, visitsCategory: VisitsCategory? = null, eventsCategory: EventsCategory? = null): List<SortField> {
+    return when (mainTab) {
+        MainTab.VISITS -> {
+            when (visitsCategory) {
+                VisitsCategory.WILLGO -> listOf(SortField.START_DATE) // Мои посещения - по дате
+                VisitsCategory.VISITED -> listOf(SortField.START_DATE) // Посещенные - по дате
+                null -> listOf(SortField.START_DATE) // fallback
+            }
+        }
+        MainTab.EVENTS -> {
+            when (eventsCategory) {
+                EventsCategory.DRAFTS -> listOf(SortField.TITLE) // Мои мероприятия - по названию
+                EventsCategory.PLANNED -> listOf(SortField.START_DATE) // Запланированные - по дате
+                EventsCategory.COMPLETED -> listOf(SortField.START_DATE) // Проведенные - по дате
+                null -> listOf(SortField.START_DATE) // fallback
+            }
+        }
+    }
+}
+
+/**
+ * Helper function to get the default sort field for specific tab/category combinations
+ */
+fun getDefaultSortField(mainTab: MainTab, visitsCategory: VisitsCategory? = null, eventsCategory: EventsCategory? = null): SortField {
+    val availableFields = getAvailableSortFields(mainTab, visitsCategory, eventsCategory)
+    return availableFields.firstOrNull() ?: SortField.START_DATE
+}

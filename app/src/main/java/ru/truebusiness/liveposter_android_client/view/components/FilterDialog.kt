@@ -21,6 +21,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import ru.truebusiness.liveposter_android_client.data.SortField
 import ru.truebusiness.liveposter_android_client.data.SortOrder
+import ru.truebusiness.liveposter_android_client.data.MainTab
+import ru.truebusiness.liveposter_android_client.data.VisitsCategory
+import ru.truebusiness.liveposter_android_client.data.EventsCategory
+import ru.truebusiness.liveposter_android_client.data.getAvailableSortFields
 import ru.truebusiness.liveposter_android_client.ui.theme.accentColor
 import ru.truebusiness.liveposter_android_client.ui.theme.accentColorText
 
@@ -28,11 +32,19 @@ import ru.truebusiness.liveposter_android_client.ui.theme.accentColorText
 fun FilterDialog(
     initialSortBy: SortField,
     initialSortOrder: SortOrder,
+    mainTab: MainTab,
+    visitsCategory: VisitsCategory? = null,
+    eventsCategory: EventsCategory? = null,
     onDismiss: () -> Unit,
     onApply: (SortField, SortOrder) -> Unit
 ) {
     var sortBy by remember { mutableStateOf(initialSortBy) }
     var sortOrder by remember { mutableStateOf(initialSortOrder) }
+    
+    // Get available sort fields for current tab/category
+    val availableSortFields = remember(mainTab, visitsCategory, eventsCategory) {
+        getAvailableSortFields(mainTab, visitsCategory, eventsCategory)
+    }
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(shape = MaterialTheme.shapes.medium) {
@@ -42,7 +54,7 @@ fun FilterDialog(
 
                 Text(text = "Поле для сортировки")
                 Column {
-                    SortField.entries.forEach { field ->
+                    availableSortFields.forEach { field ->
                         RadioButtonWithText(
                             selected = sortBy == field,
                             onSelect = { sortBy = field },

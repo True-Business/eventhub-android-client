@@ -172,6 +172,9 @@ fun MainScreen(
                 FilterDialog(
                     initialSortBy = filterState!!.sortBy,
                     initialSortOrder = filterState!!.sortOrder,
+                    mainTab = currentMainTab,
+                    visitsCategory = currentVisitsCategory,
+                    eventsCategory = currentEventsCategory,
                     onDismiss = { showFilter = false },
                     onApply = { sortBy, sortOrder ->
                         eventsViewModel.updateSortOrder(sortBy, sortOrder)

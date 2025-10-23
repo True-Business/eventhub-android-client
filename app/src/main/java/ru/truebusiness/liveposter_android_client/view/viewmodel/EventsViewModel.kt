@@ -13,6 +13,8 @@ import ru.truebusiness.liveposter_android_client.data.EventStatus
 import ru.truebusiness.liveposter_android_client.data.SortField
 import ru.truebusiness.liveposter_android_client.data.SortOrder
 import ru.truebusiness.liveposter_android_client.data.EventsCategory
+import ru.truebusiness.liveposter_android_client.data.getAvailableSortFields
+import ru.truebusiness.liveposter_android_client.data.getDefaultSortField
 import ru.truebusiness.liveposter_android_client.repository.EventRepository
 import ru.truebusiness.liveposter_android_client.repository.mocks.mockCurrentUserId
 import ru.truebusiness.liveposter_android_client.utils.DateUtils
@@ -161,7 +163,7 @@ class EventsViewModel: ViewModel() {
             userParticipating = true, // участвую
             eventStatus = EventStatus.PLANNED, // запланировано
             isPublic = null, // все
-            sortBy = SortField.START_DATE,
+            sortBy = getDefaultSortField(MainTab.VISITS, VisitsCategory.WILLGO),
             sortOrder = SortOrder.ASC, // по возрастанию
             query = ""
         )
@@ -184,7 +186,7 @@ class EventsViewModel: ViewModel() {
             userParticipating = true, // участвую
             eventStatus = EventStatus.COMPLETED, // завершено
             isPublic = null, // все
-            sortBy = SortField.START_DATE,
+            sortBy = getDefaultSortField(MainTab.VISITS, VisitsCategory.VISITED),
             sortOrder = SortOrder.DESC, // по убыванию
             query = ""
         )
@@ -207,7 +209,7 @@ class EventsViewModel: ViewModel() {
             userParticipating = null, // все
             eventStatus = EventStatus.DRAFT, // черновик
             isPublic = null, // все
-            sortBy = SortField.TITLE, // название
+            sortBy = getDefaultSortField(MainTab.EVENTS, eventsCategory = EventsCategory.DRAFTS),
             sortOrder = SortOrder.ASC, // по возрастанию (а -> я)
             query = ""
         )
@@ -231,7 +233,7 @@ class EventsViewModel: ViewModel() {
             userParticipating = null, // все
             eventStatus = EventStatus.PLANNED, // запланировано
             isPublic = null, // все
-            sortBy = SortField.START_DATE,
+            sortBy = getDefaultSortField(MainTab.EVENTS, eventsCategory = EventsCategory.PLANNED),
             sortOrder = SortOrder.ASC, // по возрастанию (сначала ближайшие)
             query = ""
         )
@@ -255,14 +257,14 @@ class EventsViewModel: ViewModel() {
             userParticipating = null, // все
             eventStatus = EventStatus.COMPLETED, // завершено
             isPublic = null, // все
-            sortBy = SortField.START_DATE,
+            sortBy = getDefaultSortField(MainTab.EVENTS, eventsCategory = EventsCategory.COMPLETED),
             sortOrder = SortOrder.DESC, // по убыванию (сначала ближайшие)
             query = ""
         )
     }
 
     /**
-     * Update sort order from filter dialog
+     * Update sort order from filter dialog - applies sorting locally to existing data
      */
     fun updateSortOrder(sortBy: SortField, sortOrder: SortOrder) {
         val currentFilter = _filterState.value ?: FilterState()
@@ -270,7 +272,49 @@ class EventsViewModel: ViewModel() {
             sortBy = sortBy,
             sortOrder = sortOrder
         )
-        loadEventsWithFilters()
+        // Apply sorting locally to existing events without API call
+        sortEventsLocally()
+    }
+
+    /**
+     * Sort events locally based on current filter state
+     */
+    private fun sortEventsLocally() {
+        val currentEvents = _events.value ?: return
+        val filter = _filterState.value ?: return
+        
+        val sortedEvents = when (filter.sortBy) {
+            SortField.START_DATE -> {
+                if (filter.sortOrder == SortOrder.ASC) {
+                    currentEvents.sortedBy { java.time.LocalDateTime.parse(it.startDate) }
+                } else {
+                    currentEvents.sortedByDescending { java.time.LocalDateTime.parse(it.startDate) }
+                }
+            }
+            SortField.TITLE -> {
+                if (filter.sortOrder == SortOrder.ASC) {
+                    currentEvents.sortedBy { it.title }
+                } else {
+                    currentEvents.sortedByDescending { it.title }
+                }
+            }
+            SortField.PRICE -> {
+                if (filter.sortOrder == SortOrder.ASC) {
+                    currentEvents.sortedBy { it.price ?: Double.MAX_VALUE }
+                } else {
+                    currentEvents.sortedByDescending { it.price ?: 0.0 }
+                }
+            }
+            SortField.LOCATION -> {
+                if (filter.sortOrder == SortOrder.ASC) {
+                    currentEvents.sortedBy { it.location }
+                } else {
+                    currentEvents.sortedByDescending { it.location }
+                }
+            }
+        }
+        
+        _events.value = sortedEvents
     }
 
     /**
