@@ -3,10 +3,13 @@ package ru.truebusiness.liveposter_android_client.view.components
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -33,20 +36,24 @@ import coil.compose.AsyncImage
 import ru.truebusiness.liveposter_android_client.data.Event
 import ru.truebusiness.liveposter_android_client.ui.theme.accentColor
 import ru.truebusiness.liveposter_android_client.ui.theme.accentColorText
+import ru.truebusiness.liveposter_android_client.utils.DateUtils.formatEventDate
 
 @Composable
 fun TinyEventCard(
     event: Event,
     withLabels: Boolean = true,
     isEditing: Boolean = false,
-    onLockClick: () -> Unit = {}
+    onLockClick: () -> Unit = {},
+    onClick: () -> Unit = {}
 ) {
 
 
-    Column(modifier = Modifier.width(160.dp)) {
+    Column {
         Card(
             modifier = Modifier
-                .size(width = 160.dp, height = 160.dp),
+                .fillMaxWidth()
+                .aspectRatio(1f)
+                .clickable { onClick() },
             shape = RoundedCornerShape(18.dp),
             elevation = CardDefaults.cardElevation(defaultElevation = 20.dp)
         ) {
@@ -104,7 +111,7 @@ fun TinyEventCard(
                     )
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
-                    event.startDate,
+                    formatEventDate(event.startDate),
                     fontSize = 12.sp,
                     color = accentColorText
                 )

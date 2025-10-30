@@ -7,7 +7,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import kotlin.getValue
 
 object RetrofitInstance {
-    private const val BASE_URL = "http://eventhub-backend.ru/"
+    private const val BASE_URL = "http://eventhub-backend.ru/dev/"
 
     private val client by lazy {
         val logger = HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY }

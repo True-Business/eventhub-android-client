@@ -36,11 +36,15 @@ val UserInterestRegistrationPageCategoryChipColor = Color(0xFFF5B841)
 val UserInterestRegistrationPageRadioButtonSelectedColor = Color(0xFFF5B841)
 val UserInterestRegistrationPageCitySelectionMenuColor = Color(0xFFFFD998)
 
+val GradientStart = Color(0xFFFF6D19)
+val GradientEnd = Color(0xFFFFFFFF)
+
+val ChipBackground = Color(0xFFFCEEE4)
+val ChipBorder = Color(0xFFD46A38)
+val ChipText = Color(0xFF4E260F)
+
 val pageGradient = Brush.verticalGradient(
-    listOf(
-        Color(0xFFFF6D19),
-        Color(0xFFFFFFFF)
-    )
+    colors = listOf(GradientStart, GradientEnd)
 )
 
 val accentColor = Color(0xFFFF6D19)

@@ -10,6 +10,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import ru.truebusiness.liveposter_android_client.data.Event
 import ru.truebusiness.liveposter_android_client.repository.EventRepository
 import ru.truebusiness.liveposter_android_client.view.EventDetailsPage
 import ru.truebusiness.liveposter_android_client.view.FriendsPage
@@ -20,9 +21,11 @@ import ru.truebusiness.liveposter_android_client.view.registration.RegistrationP
 import ru.truebusiness.liveposter_android_client.view.registration.RegistrationPagePersonalInfo
 import ru.truebusiness.liveposter_android_client.view.registration.RegistrationPageUserInterest
 import ru.truebusiness.liveposter_android_client.view.WelcomePage
+import ru.truebusiness.liveposter_android_client.view.events.MainScreen
 import ru.truebusiness.liveposter_android_client.view.organizations.AdminsScreen
 import ru.truebusiness.liveposter_android_client.view.organizations.OrganizationPage
 import ru.truebusiness.liveposter_android_client.view.viewmodel.AuthViewModel
+import ru.truebusiness.liveposter_android_client.view.viewmodel.EventsViewModel
 import ru.truebusiness.liveposter_android_client.view.viewmodel.OrganizationViewModel
 import java.util.UUID
 
@@ -32,6 +35,8 @@ fun AppNavigation(
 ) {
 
     val orgViewModel: OrganizationViewModel = viewModel()
+    val eventsViewModel: EventsViewModel = viewModel()
+    eventsViewModel.initialize()
 
     val navController = rememberNavController()
     val repository = EventRepository()
@@ -149,6 +154,12 @@ fun AppNavigation(
 
         composable(route = "user_personal_info") {
             RegistrationPageUserInterest(navController)
+        }
+
+        composable(
+            route = "events"
+        ) {
+            MainScreen(navController, eventsViewModel)
         }
 
         /****************************************/

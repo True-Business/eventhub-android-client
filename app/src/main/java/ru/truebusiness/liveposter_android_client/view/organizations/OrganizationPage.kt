@@ -446,7 +446,7 @@ fun ContentBody(
         Spacer(modifier = Modifier.height(16.dp))
 
 
-        EventsBlock(events = events, isEditing = isEditing, onLock = onLockEvent)
+        EventsBlock(navigator, events = events, isEditing = isEditing, onLock = onLockEvent)
 
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -535,7 +535,9 @@ fun PicturesBlock(
 }
 
 @Composable
-fun EventsBlock(events: List<Event>, isEditing: Boolean, onLock: (Event) -> Unit) {
+fun EventsBlock(
+    navigator : NavHostController?,
+    events: List<Event>, isEditing: Boolean, onLock: (Event) -> Unit) {
     Text(
         text = "Мероприятия",
         fontWeight = FontWeight.Bold,
@@ -557,7 +559,8 @@ fun EventsBlock(events: List<Event>, isEditing: Boolean, onLock: (Event) -> Unit
                 event = ev,
                 withLabels = true,
                 isEditing = isEditing,
-                onLockClick = { onLock(ev) })
+                onLockClick = { onLock(ev) },
+                onClick = { navigator?.navigate("event/${ev.id}") })
         }
     }
 }
