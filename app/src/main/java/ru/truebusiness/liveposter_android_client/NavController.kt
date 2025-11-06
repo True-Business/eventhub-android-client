@@ -2,15 +2,12 @@ package ru.truebusiness.liveposter_android_client
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import ru.truebusiness.liveposter_android_client.data.Event
 import ru.truebusiness.liveposter_android_client.repository.EventRepository
 import ru.truebusiness.liveposter_android_client.view.EventDetailsPage
 import ru.truebusiness.liveposter_android_client.view.FriendsPage
@@ -21,7 +18,7 @@ import ru.truebusiness.liveposter_android_client.view.registration.RegistrationP
 import ru.truebusiness.liveposter_android_client.view.registration.RegistrationPagePersonalInfo
 import ru.truebusiness.liveposter_android_client.view.registration.RegistrationPageUserInterest
 import ru.truebusiness.liveposter_android_client.view.WelcomePage
-import ru.truebusiness.liveposter_android_client.view.events.MainScreen
+import ru.truebusiness.liveposter_android_client.view.events.EventsMainScreen
 import ru.truebusiness.liveposter_android_client.view.organizations.AdminsScreen
 import ru.truebusiness.liveposter_android_client.view.organizations.OrganizationPage
 import ru.truebusiness.liveposter_android_client.view.viewmodel.AuthViewModel
@@ -159,7 +156,7 @@ fun AppNavigation(
         composable(
             route = "events"
         ) {
-            MainScreen(navController, eventsViewModel)
+            EventsMainScreen(navController, eventsViewModel)
         }
 
         /****************************************/

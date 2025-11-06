@@ -4,11 +4,9 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -34,17 +32,13 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import ru.truebusiness.liveposter_android_client.data.Event
 import ru.truebusiness.liveposter_android_client.data.MainTab
 import ru.truebusiness.liveposter_android_client.data.VisitsCategory
 import ru.truebusiness.liveposter_android_client.data.EventsCategory
-import ru.truebusiness.liveposter_android_client.data.SortField
-import ru.truebusiness.liveposter_android_client.data.SortOrder
 import ru.truebusiness.liveposter_android_client.ui.theme.ChipBackground
 import ru.truebusiness.liveposter_android_client.ui.theme.pageGradient
 import ru.truebusiness.liveposter_android_client.view.components.*
 import ru.truebusiness.liveposter_android_client.view.viewmodel.EventsViewModel
-import java.util.*
 
 // Legacy enums for compatibility - these are now in data package
 enum class EventCategory(val displayName: String) {
@@ -61,7 +55,7 @@ enum class VisitsCategoryLegacy(val displayName: String) {
 
 @OptIn(ExperimentalAnimationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(
+fun EventsMainScreen(
     navController: NavHostController,
     eventsViewModel: EventsViewModel = viewModel()
 ) {
