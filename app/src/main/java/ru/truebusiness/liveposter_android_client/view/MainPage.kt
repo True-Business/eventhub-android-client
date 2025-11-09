@@ -2,6 +2,7 @@ package ru.truebusiness.liveposter_android_client.view
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,6 +33,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,6 +49,7 @@ import ru.truebusiness.liveposter_android_client.R
 import ru.truebusiness.liveposter_android_client.ui.theme.MainPageBodyColor
 import ru.truebusiness.liveposter_android_client.ui.theme.MainPageTopFooterColor
 import ru.truebusiness.liveposter_android_client.ui.theme.MainPageUserUnfoFooterColor
+import ru.truebusiness.liveposter_android_client.view.components.AppNavigationBar
 import ru.truebusiness.liveposter_android_client.view.components.EventCard
 import ru.truebusiness.liveposter_android_client.view.viewmodel.EventsViewModel
 import java.util.Collections.emptyList
@@ -87,6 +90,7 @@ fun MainPage(
                                 .height(55.dp)
                                 .padding(start = 10.dp)
                                 .background(color = Color.White, shape = CircleShape)
+                                .clickable(onClick = { navController.navigate("profile-settings") })
                         ) {
                             Text(
                                 text = "ПВ",
@@ -130,32 +134,7 @@ fun MainPage(
             )
         },
         bottomBar = {
-            NavigationBar {
-                NavigationBarItem(
-                    selected = false,
-                    onClick = { navController.navigate("main") },
-                    icon = { Icon(Icons.Default.Home, contentDescription = "Лента") },
-                    label = { Text("Лента") }
-                )
-                NavigationBarItem(
-                    selected = false,
-                    onClick = { navController.navigate("search") },
-                    icon = { Icon(Icons.Default.Search, contentDescription = "Поиск") },
-                    label = { Text("Поиск") }
-                )
-                NavigationBarItem(
-                    selected = false,
-                    onClick = { navController.navigate("friends") },
-                    icon = { Icon(Icons.Default.AccountBox, contentDescription = "Друзья") },
-                    label = { Text("Друзья") }
-                )
-                NavigationBarItem(
-                    selected = false,
-                    onClick = { navController.navigate("Настройки") },
-                    icon = { Icon(Icons.Default.Settings, contentDescription = "Настройки") },
-                    label = { Text("Настройки") }
-                )
-            }
+            AppNavigationBar(navController, "main")
         }
     ) { innerPadding ->
         Column(
