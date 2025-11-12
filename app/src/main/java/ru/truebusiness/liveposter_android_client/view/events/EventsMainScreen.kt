@@ -216,7 +216,7 @@ fun EventsMainScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(top = topPadding)
+                        .padding(top = topPadding, bottom = 12.dp)
                         .clip(RoundedCornerShape(topStart = cornerRadius, topEnd = cornerRadius))
                         .background(Color.White)
                 ) {
