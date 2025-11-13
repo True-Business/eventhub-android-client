@@ -121,6 +121,7 @@ fun OrganizationPage(orgViewMod: OrganizationViewModel, navigator: NavHostContro
                     isEditing = !isEditing
                 },
                 isAdmin = isAdmin,
+                onBack = { navigator.navigate("organizations") },
                 onSave = {
                     //TODO on save callback
                     isEditing = false
@@ -199,6 +200,7 @@ fun AppBar(
     scrollBehavior: TopAppBarScrollBehavior,
     isEditing: Boolean,
     isAdmin: Boolean,
+    onBack: () -> Unit,
     onEditToggle: () -> Unit,
     onSave: () -> Unit,
     onCancel: () -> Unit
@@ -274,8 +276,7 @@ fun AppBar(
             navigationIcon = if (!isEditing) {
                 {
                     IconButton(
-                        onClick = {
-                        },
+                        onClick = onBack,
                         modifier = Modifier
                             .clip(CircleShape)
                             .background(Color.White.copy(alpha = 0.50f))

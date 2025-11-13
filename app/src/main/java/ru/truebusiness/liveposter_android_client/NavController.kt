@@ -23,9 +23,11 @@ import ru.truebusiness.liveposter_android_client.view.WelcomePage
 import ru.truebusiness.liveposter_android_client.view.events.EventsMainScreen
 import ru.truebusiness.liveposter_android_client.view.organizations.AdminsScreen
 import ru.truebusiness.liveposter_android_client.view.organizations.OrganizationPage
+import ru.truebusiness.liveposter_android_client.view.organizationslist.OrganizationsListPage
 import ru.truebusiness.liveposter_android_client.view.viewmodel.AuthViewModel
 import ru.truebusiness.liveposter_android_client.view.viewmodel.EventsViewModel
 import ru.truebusiness.liveposter_android_client.view.viewmodel.OrganizationViewModel
+import ru.truebusiness.liveposter_android_client.view.viewmodel.OrganizationsViewModel
 import java.util.UUID
 
 @Composable
@@ -36,6 +38,7 @@ fun AppNavigation(
     val orgViewModel: OrganizationViewModel = viewModel()
     val eventsViewModel: EventsViewModel = viewModel()
     eventsViewModel.initialize()
+    val organizationsListViewModel: OrganizationsViewModel = viewModel()
 
     val navController = rememberNavController()
     val repository = EventRepository()
@@ -74,6 +77,13 @@ fun AppNavigation(
                     navController.popBackStack()
                 }
             }
+        }
+
+        composable(
+            route = "organizations",
+
+        ) {
+            OrganizationsListPage(organizationsListViewModel, navController)
         }
 
         composable(
