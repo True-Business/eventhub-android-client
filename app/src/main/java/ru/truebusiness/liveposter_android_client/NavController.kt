@@ -2,8 +2,6 @@ package ru.truebusiness.liveposter_android_client
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -11,7 +9,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import ru.truebusiness.liveposter_android_client.repository.EventRepository
-import ru.truebusiness.liveposter_android_client.view.EventDetailsPage
+import ru.truebusiness.liveposter_android_client.view.event.EventDetailsPage
 import ru.truebusiness.liveposter_android_client.view.FriendsPage
 import ru.truebusiness.liveposter_android_client.view.MainPage
 import ru.truebusiness.liveposter_android_client.view.SearchPage
@@ -23,6 +21,7 @@ import ru.truebusiness.liveposter_android_client.view.WelcomePage
 import ru.truebusiness.liveposter_android_client.view.organizations.AdminsScreen
 import ru.truebusiness.liveposter_android_client.view.organizations.OrganizationPage
 import ru.truebusiness.liveposter_android_client.view.viewmodel.AuthViewModel
+import ru.truebusiness.liveposter_android_client.view.viewmodel.EventDetailsViewModel
 import ru.truebusiness.liveposter_android_client.view.viewmodel.OrganizationViewModel
 import java.util.UUID
 
@@ -61,15 +60,18 @@ fun AppNavigation(
         composable(
             route = "event/{eventId}",
             arguments = listOf(navArgument("eventId") { type = NavType.StringType })
-        ) {
-            val arg = it.arguments?.getString("eventId")
-            val event = repository.fetchEventMock(arg!!)
-
-            if (event != null) {
-                EventDetailsPage(event) {
-                    navController.popBackStack()
-                }
+        ) { backStackEntry ->
+            val eventId = backStackEntry.arguments?.getString("eventId") ?: return@composable
+            val eventViewModel: EventDetailsViewModel = viewModel()
+            LaunchedEffect(eventId) {
+                eventViewModel.loadEvent(eventId)
             }
+
+            EventDetailsPage(
+                viewModel = eventViewModel,
+                onBack = { navController.popBackStack() }
+            )
+
         }
 
         composable(
