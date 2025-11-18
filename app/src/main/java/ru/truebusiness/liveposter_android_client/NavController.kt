@@ -21,6 +21,8 @@ import ru.truebusiness.liveposter_android_client.view.registration.RegistrationP
 import ru.truebusiness.liveposter_android_client.view.registration.RegistrationPageUserInterest
 import ru.truebusiness.liveposter_android_client.view.WelcomePage
 import ru.truebusiness.liveposter_android_client.view.events.EventsMainScreen
+import ru.truebusiness.liveposter_android_client.view.events.EventCreationPage
+import ru.truebusiness.liveposter_android_client.view.events.EventCreationSettingsPage
 import ru.truebusiness.liveposter_android_client.view.organizations.AdminsScreen
 import ru.truebusiness.liveposter_android_client.view.organizations.OrganizationPage
 import ru.truebusiness.liveposter_android_client.view.organizationslist.OrganizationsListPage
@@ -63,6 +65,14 @@ fun AppNavigation(
 
         composable("main") {
             MainPage(navController)
+        }
+
+        composable("event-creation") {
+            EventCreationPage(navController)
+        }
+
+        composable("event-creation-settings") {
+            EventCreationSettingsPage(navController)
         }
 
         composable(
