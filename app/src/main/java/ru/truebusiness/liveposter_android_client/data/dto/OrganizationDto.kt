@@ -63,7 +63,7 @@ fun OrganizationDto.toDomainOrganization(): Organization {
         // TODO: В будущем эти поля могут быть получены из отдельных API вызовов
         admins = emptyList(),
         events = emptyList(),
-        images = if (this.pictureUrl.isNotBlank()) listOf(this.pictureUrl) else emptyList(),
+        images = emptyList(),
         isSubscribed = false,
         isMine = false,
     )

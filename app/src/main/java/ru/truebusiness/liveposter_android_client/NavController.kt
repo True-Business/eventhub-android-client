@@ -103,11 +103,10 @@ fun AppNavigation(
             val orgString = backStackEntry.arguments?.getString("orgId")
             val uuid = UUID.fromString(orgString)
 
-            orgViewModel.fetchOrganizationFromRepo(uuid)
-
             OrganizationPage(
-                orgViewModel,
-                navController
+                orgViewMod = orgViewModel,
+                navigator = navController,
+                organizationId = uuid
             )
 
         }

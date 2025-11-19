@@ -46,7 +46,6 @@ class OrganizationViewModel : ViewModel() {
     }
 
     fun fetchOrganizationFromRepo(orgId: UUID) {
-        _organizationState.value = OrganizationState.Loading
         viewModelScope.launch {
             val organization = repository.fetchOrganization(orgId)
             if (organization != null) {
@@ -58,6 +57,18 @@ class OrganizationViewModel : ViewModel() {
                 Log.e(TAG, "Failed to load organization with ID: $orgId")
             }
         }
+    }
+
+    fun loadOrRefreshOrganization(orgId: UUID) {
+        val currentOrgId = (_organizationState.value as? OrganizationState.Success)?.org?.id
+        if (currentOrgId != orgId) {
+            _organizationState.value = OrganizationState.Loading
+            fetchOrganizationFromRepo(orgId)
+        }
+    }
+
+    fun clearState() {
+        _organizationState.value = OrganizationState.Loading
     }
 
     /**

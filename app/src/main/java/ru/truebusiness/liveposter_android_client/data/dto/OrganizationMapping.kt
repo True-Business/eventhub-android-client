@@ -12,18 +12,7 @@ object OrganizationMapping {
      * Преобразует OrganizationDto в доменную модель Organization
      */
     fun toDomain(dto: OrganizationDto): Organization {
-        return Organization(
-            id = dto.id,
-            name = dto.name,
-            description = dto.description,
-            address = dto.address,
-            coverUrl = dto.pictureUrl,
-            admins = emptyList(),
-            events = emptyList(),
-            images = if (dto.pictureUrl.isNotBlank()) listOf(dto.pictureUrl) else emptyList(),
-            isSubscribed = false,
-            isMine = false
-        )
+        return dto.toDomainOrganization()
     }
 
     /**
