@@ -1,6 +1,7 @@
 package ru.truebusiness.liveposter_android_client.view.organizations
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -123,14 +124,14 @@ fun OrganizationPage(orgViewMod: OrganizationViewModel, navigator: NavHostContro
                 isAdmin = isAdmin,
                 onBack = { navigator.navigate("organizations") },
                 onSave = {
-                    //TODO on save callback
                     isEditing = false
-                    orgViewMod.updateOrganization(
-                        name = name,
-                        description = description,
-                        address = address,
-                        admins = admins,
-                        images = images
+                    orgViewMod.saveOrganizationChanges(
+                        onSuccess = {
+                            Log.d("OrganizationPage", "Organization saved successfully")
+                        },
+                        onError = { error ->
+                            Toast.makeText(context, "Ошибка сохранения: $error", Toast.LENGTH_LONG).show()
+                        }
                     )
                 },
                 onCancel = {
@@ -428,32 +429,38 @@ fun ContentBody(
             .fillMaxWidth()
             .padding(top = 12.dp, bottom = 30.dp)
     ) {
-        LocationBlock(address = address, onAddressChange = onAddressChange, isEditing = isEditing)
+        if (address.isNotBlank()) {
+            LocationBlock(
+                address = address,
+                onAddressChange = onAddressChange,
+                isEditing = isEditing
+            )
+        }
+
+        if (description.isNotBlank()) {
+            DescriptionBlock(
+                description = description,
+                onDescriptionChange = onDescriptionChange,
+                isEditing = isEditing
+            )
+        }
 
 
-        DescriptionBlock(
-            description = description,
-            onDescriptionChange = onDescriptionChange,
-            isEditing = isEditing
-        )
+        if (admins.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(16.dp))
+            AdminsBlock(admins, onClick = { navigator?.navigate("organizationAdmins") })
+        }
+
+        if (events.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(16.dp))
+            EventsBlock(navigator, events = events, isEditing = isEditing, onLock = onLockEvent)
+        }
 
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-
-        AdminsBlock(admins, onClick = { navigator?.navigate("organizationAdmins") })
-
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-
-        EventsBlock(navigator, events = events, isEditing = isEditing, onLock = onLockEvent)
-
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-
-        PicturesBlock(images = images, onDeleteImage = onDeleteImage, isEditing = isEditing)
+        if (images.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(16.dp))
+            PicturesBlock(images = images, onDeleteImage = onDeleteImage, isEditing = isEditing)
+        }
 
 
     }
@@ -474,7 +481,7 @@ fun PicturesBlock(
         fontWeight = FontWeight.Bold,
         fontSize = 20.sp,
         color = accentColorText,
-        modifier = Modifier.padding(horizontal = 36.dp)
+        modifier = Modifier.padding(horizontal = 24.dp)
     )
     Spacer(modifier = Modifier.height(12.dp))
 
