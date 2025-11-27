@@ -39,16 +39,16 @@ class OrgRepository {
         creatorShortId: String? = null,
         address: String? = null,
         onlyVerified: Boolean? = null,
-        onlySubscribed: Boolean? = null,
-        onlyAdministrated: Boolean? = null
+        onlySubscribed: Boolean,
+        onlyAdministrated: Boolean
     ): List<Organization>? {
         val request = SearchOrganizationRequestDto(
             search = search?: "",
             creatorShortId = creatorShortId?: "",
             address = address?: "",
             onlyVerified = onlyVerified?: false,
-            onlySubscribed = onlySubscribed?: false,
-            onlyAdministrated = onlyAdministrated?: false
+            onlySubscribed = onlySubscribed,
+            onlyAdministrated = onlyAdministrated
         )
         return try {
             val dtos = RetrofitInstance.organizationApi.searchOrganizations(request)

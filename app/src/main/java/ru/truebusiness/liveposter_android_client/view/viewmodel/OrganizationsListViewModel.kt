@@ -41,9 +41,9 @@ class OrganizationsListViewModel(
         _state.update { it.copy(isInitialLoading = true, error = null) }
         viewModelScope.launch {
             val (onlySubscribed, onlyAdministrated) = when (_state.value.selectedTab) {
-                OrganizationTab.ALL -> Pair(null, null)
-                OrganizationTab.SUBSCRIPTIONS -> Pair(true, null)
-                OrganizationTab.MINE -> Pair(null, true)
+                OrganizationTab.ALL -> Pair(false, false)
+                OrganizationTab.SUBSCRIPTIONS -> Pair(true, false)
+                OrganizationTab.MINE -> Pair(false, true)
             }
 
             val result = orgRepository.searchOrganizations(
