@@ -31,25 +31,29 @@ import ru.truebusiness.liveposter_android_client.ui.theme.pageGradient
 import ru.truebusiness.liveposter_android_client.view.organizationslist.components.FilterTabsSection
 import ru.truebusiness.liveposter_android_client.view.components.OrganizationCard
 import ru.truebusiness.liveposter_android_client.view.organizationslist.components.TopBarSection
-import ru.truebusiness.liveposter_android_client.view.viewmodel.OrganizationsViewModel
+import ru.truebusiness.liveposter_android_client.view.viewmodel.OrganizationsListViewModel
 
 enum class OrganizationTab { ALL, SUBSCRIPTIONS, MINE }
 
 @Composable
-fun OrganizationsListPage(vm: OrganizationsViewModel, navigator: NavHostController) {
+fun OrganizationsListPage(vm: OrganizationsListViewModel, navigator: NavHostController) {
     val state by vm.state.collectAsState()
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
 
     // триггер дозагрузки за ~3 элемента до конца
+    /*
+    // пагинация пока не поддерживается
     val shouldLoadMore by remember {
         derivedStateOf {
             val last = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
             val total = listState.layoutInfo.totalItemsCount
-            total > 0 && last >= total - 4 && !state.endReached && !state.isPaging
+            total > 0 && last >= total - 4
         }
     }
-    LaunchedEffect(shouldLoadMore) { if (shouldLoadMore) vm.loadNextPage() }
+    // LaunchedEffect(shouldLoadMore) { if (shouldLoadMore) vm.loadOrganizations() }
+    */
+    // LaunchedEffect(shouldLoadMore) { if (shouldLoadMore) vm.loadNextPage() }
 
     if (state.isInitialLoading) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -103,6 +107,8 @@ fun OrganizationsListPage(vm: OrganizationsViewModel, navigator: NavHostControll
             }
             item {
                 when {
+                    /*
+                    // пагинация пока не поддерживается
                     state.isPaging -> {
                         Box(
                             Modifier
@@ -113,6 +119,7 @@ fun OrganizationsListPage(vm: OrganizationsViewModel, navigator: NavHostControll
                             CircularProgressIndicator()
                         }
                     }
+                    */
                     state.error != null -> {
                         Text(
                             "Ошибка: ${state.error}",
