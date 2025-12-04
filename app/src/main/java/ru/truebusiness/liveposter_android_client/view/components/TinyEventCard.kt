@@ -48,10 +48,9 @@ fun TinyEventCard(
 ) {
 
 
-    Column {
+    Column(modifier = Modifier.width(150.dp)) {
         Card(
             modifier = Modifier
-                .fillMaxWidth()
                 .aspectRatio(1f)
                 .clickable { onClick() },
             shape = RoundedCornerShape(18.dp),
