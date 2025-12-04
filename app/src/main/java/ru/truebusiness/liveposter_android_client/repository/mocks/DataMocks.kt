@@ -2,6 +2,9 @@ package ru.truebusiness.liveposter_android_client.repository.mocks
 
 import ru.truebusiness.liveposter_android_client.data.Event
 import ru.truebusiness.liveposter_android_client.data.EventCategory
+import ru.truebusiness.liveposter_android_client.data.EventDetails
+import ru.truebusiness.liveposter_android_client.data.EventOrganizer
+import ru.truebusiness.liveposter_android_client.data.EventPost
 import ru.truebusiness.liveposter_android_client.data.EventStatus
 import ru.truebusiness.liveposter_android_client.data.Friend
 import ru.truebusiness.liveposter_android_client.data.Organization
@@ -25,7 +28,7 @@ val mockEventList = listOf(
         endDate = parseIsoDateTime("2025-05-07T18:00:00"),
         location = "Академгородок, ул. Николаева, 11",
         posterUrl = "https://nadvizh.ru/media/events_img/67/smart-piknik_logo.jpg",
-        
+
         // API fields
         organizerId = mockCurrentUserId,
         organizationId = UUID.fromString("12345678-1234-1234-1234-123456789def"),
@@ -37,15 +40,45 @@ val mockEventList = listOf(
         registerEndDateTime = parseIsoDateTime("2025-05-06T23:59:59Z"),
         withRegister = true,
         open = true,
-        
+
         // Existing fields
         price = 500.0,
         duration = 300, // 5 hours
         organizer = "NSU Events",
         isUserParticipating = true,
         eventStatus = EventStatus.PUBLISHED,
-        isPublic = true
-    ),
+        isPublic = true,
+
+        schedule = "7 мая 2025 13:00 - 14:00",
+        isClosed = false,
+        participantsCount = 56,
+        participantLimit = 120,
+        description = "Городской пикник с лекториями, творческими мастер-классами и концертной программой.",
+        howToGet = "До остановки \"Университет\" на маршрутах 15 и 34, далее 5 минут пешком до главного входа.",
+        isUserParticipant = false,
+        isFinished = false,
+        participants = listOf(
+            User(
+                userName = "Мария",
+                coverUrl = "https://images.unsplash.com/photo-1524504388940-b1c1722653e1"),
+            User(
+                userName = "Артём",
+                coverUrl = "https://images.unsplash.com/photo-1521572267360-ee0c2909d518"),
+            User(
+                userName = "Ксения",
+                coverUrl = "https://images.unsplash.com/photo-1544723795-3fb6469f5b39")
+        ),
+        posts = listOf(
+            EventPost(
+                publishedAt = "3 мая 2025 09:30",
+                description = "Анонсируем расписание главной сцены — любимые локальные команды будут играть весь день!",
+                images = listOf("https://images.unsplash.com/photo-1514525253161-7a46d19cd819")),
+            EventPost(
+                publishedAt = "28 апреля 2025 18:10",
+                description = "Собрали подборку мастер-классов для детей и взрослых. Сохраняйте себе и делитесь с друзьями!")
+        ),
+        canManage = true,
+        shareLink = "https://liveposter.ru/events/smart-picnic"),
     Event(
         id = UUID.randomUUID(),
         category = listOf(EventCategory.ALL, EventCategory.MEETINGS),
@@ -55,7 +88,7 @@ val mockEventList = listOf(
         endDate = parseIsoDateTime("2025-06-10T15:00:00Z"),
         location = "Академгородок, ул. Пирогова, 1",
         posterUrl = "https://static.tildacdn.com/tild3337-6465-4835-a130-623838656562/1680900--------2.jpg",
-        
+
         // API fields
         organizerId = mockCurrentUserId,
         organizationId = UUID.fromString("12345678-1234-1234-1234-123456789def"),
@@ -67,7 +100,7 @@ val mockEventList = listOf(
         registerEndDateTime = parseIsoDateTime("2025-06-09T23:59:59Z"),
         withRegister = true,
         open = true,
-        
+
         // Existing fields
         price = null, // free
         duration = 300, // 5 hours
@@ -85,7 +118,7 @@ val mockEventList = listOf(
         endDate = parseIsoDateTime("2024-11-15T21:00:00Z"),
         location = "Академгородок, Проспект Строителей, 21",
         posterUrl = "https://sun9-12.userapi.com/Tjc3E_Yysjm5NfzuxndPMHgTXAO1S7T6-Ks87Q/iSYEIaVpiX4.jpg",
-        
+
         // API fields
         organizerId = mockCurrentUserId,
         organizationId = UUID.fromString("12345678-1234-1234-1234-123456789def"),
@@ -97,7 +130,7 @@ val mockEventList = listOf(
         registerEndDateTime = parseIsoDateTime("2024-11-14T23:59:59Z"),
         withRegister = true,
         open = true,
-        
+
         // Existing fields
         price = 300.0,
         duration = 120, // 2 hours
@@ -116,7 +149,7 @@ val mockEventList = listOf(
         endDate = parseIsoDateTime("2025-12-01T23:00:00Z"),
         location = "Новосибирск, Локомотив-Арена",
         posterUrl = "https://geopro-photos.storage.yandexcloud.net/resize_cache/48245238/e14e74968349be09ee1354fc509cee5d/iblock/aea/aeabbb2f275ef6812990534d33cb64d2/photo_2024_08_29-00.27.34.jpeg",
-        
+
         // API fields
         organizerId = mockCurrentUserId,
         organizationId = UUID.fromString("12345678-1234-1234-1234-123456789def"),
@@ -128,7 +161,7 @@ val mockEventList = listOf(
         registerEndDateTime = parseIsoDateTime("2025-11-30T23:59:59Z"),
         withRegister = true,
         open = true,
-        
+
         // Existing fields
         price = 1500.0,
         duration = 180, // 3 hours
@@ -164,7 +197,7 @@ val mockEventList = listOf(
         endDate = parseIsoDateTime("2025-04-15T16:00:00Z"),
         location = "Академгородок, ул. Пирогова, 1",
         posterUrl = "https://static.tildacdn.com/tild3230-3163-4439-b733-366633643931/DSC_4453.jpg",
-        
+
         // API fields
         organizerId = UUID.fromString("87654321-4321-4321-4321-210987654321"),
         organizationId = UUID.fromString("12345678-1234-1234-1234-123456789def"),
@@ -176,7 +209,7 @@ val mockEventList = listOf(
         registerEndDateTime = parseIsoDateTime("2025-04-14T23:59:59Z"),
         withRegister = false,
         open = true,
-        
+
         // Existing fields
         price = null, // free
         duration = 240, // 4 hours
@@ -194,7 +227,7 @@ val mockEventList = listOf(
         endDate = parseIsoDateTime("2025-02-15T21:00:00Z"),
         location = "Новосибирск, ККК им.Маяковского",
         posterUrl = "https://live.mts.ru/image/full/505d782c-73eb-2170-a0e5-b28853d839b0.jpg",
-        
+
         // API fields
         organizerId = UUID.fromString("87654321-4321-4321-4321-210987654322"),
         organizationId = UUID.fromString("87654321-4321-4321-4321-210987654320"),
@@ -206,7 +239,7 @@ val mockEventList = listOf(
         registerEndDateTime = parseIsoDateTime("2025-02-14T23:59:59Z"),
         withRegister = true,
         open = true,
-        
+
         // Existing fields
         price = 800.0,
         duration = 120, // 2 hours
@@ -226,7 +259,7 @@ val mockEventList = listOf(
         endDate = parseIsoDateTime("2024-10-24T16:30:00Z"),
         location = "Академгородок, ул. Кутателадзе, 4/4",
         posterUrl = "https://images.iptv.rt.ru/images/cvj4k3rir4sqiatdopl0.jpg",
-        
+
         // API fields
         organizerId = UUID.fromString("87654321-4321-4321-4321-210987654323"),
         organizationId = UUID.fromString("87654321-4321-4321-4321-210987654321"),
@@ -238,7 +271,7 @@ val mockEventList = listOf(
         registerEndDateTime = parseIsoDateTime("2024-10-23T23:59:59Z"),
         withRegister = true,
         open = true,
-        
+
         // Existing fields
         price = 250.0,
         duration = 150, // 2.5 hours
@@ -358,6 +391,54 @@ private val baseCovers = listOf(
     "https://upload.wikimedia.org/wikipedia/commons/2/2f/Googleplex_HQ.jpg",
     "https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_Store.jpg",
 )
+
+val mockEventDetails = mockEventList.associate { event ->
+    val baseParticipants = mockUsersList
+    val posts = listOf(
+        EventPost(
+            id = UUID.randomUUID(),
+            publishedAt = "7 мая 2025 13:00",
+            description = "Подтвердили выступление главной группы и готовим сцену. Ждём всех заранее!",
+            images = listOf(
+                "https://geopro-photos.storage.yandexcloud.net/resize_cache/48245238/e14e74968349be09ee1354fc509cee5d/iblock/aea/aeabbb2f275ef6812990534d33cb64d2/photo_2024_08_29-00.27.34.jpeg",
+                "https://t3.ftcdn.net/jpg/02/99/04/20/360_F_299042079_vGBD7wIlSeNl7vOevWHiL93G4koMM967.jpg"
+            )
+        ),
+        EventPost(
+            id = UUID.randomUUID(),
+            publishedAt = "6 мая 2025 19:30",
+            description = "Открыли регистрацию волонтёров и собрали команду по работе с гостями.",
+            images = emptyList()
+        )
+    )
+
+    val participantsLimit = if (event.title.contains("пикник", ignoreCase = true)) 150 else null
+    val participantsCount = if (participantsLimit != null) 92 else 240
+    val isCompleted = false
+
+    event.id to EventDetails(
+        event = event,
+        city = "Новосибирск",
+        address = event.location,
+        isPrivate = event.category.contains(EventCategory.MEETINGS),
+        isCompleted = isCompleted,
+        participantsCount = participantsCount,
+        participantsLimit = participantsLimit,
+        schedule = "7 мая 2025 13:00 - 14:00",
+        description = event.content,
+        howToGet = "От метро \"Берёзовая роща\" идите к остановке и садитесь на автобус №18. Выйти нужно на остановке \"Университет\".",
+        organizer = EventOrganizer(
+            id = UUID.randomUUID(),
+            name = "Оргкомитет НГУ",
+            avatarUrl = "https://images.iptv.rt.ru/images/cvj4k3rir4sqiatdopl0.jpg"
+        ),
+        participants = baseParticipants,
+        posts = posts,
+        isParticipant = event.title.contains("Smart", ignoreCase = true),
+        wasParticipant = isCompleted && event.title.contains("дня", ignoreCase = true),
+        canManage = event.title.contains("Smart", ignoreCase = true)
+    )
+}
 
 val mockOrganizationsPool: List<Organization> = buildList {
     val cities = listOf("Новосибирск", "Москва", "Санкт-Петербург", "Казань", "Екатеринбург")
