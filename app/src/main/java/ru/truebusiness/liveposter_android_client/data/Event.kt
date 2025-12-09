@@ -12,7 +12,7 @@ data class Event(
     val endDate: LocalDateTime,   // Event end date and time
     val location: String,
     val posterUrl: String, // временное решение, должна приходить ссылочка на картинку для превью
-    
+
     // API fields
     val organizerId: UUID?,      // organizer user ID from API
     val organizationId: UUID?,   // organization ID from API
@@ -24,14 +24,27 @@ data class Event(
     val registerEndDateTime: LocalDateTime, // registration deadline from API
     val withRegister: Boolean,  // requires registration from API
     val open: Boolean,          // public/private flag from API
-    
+
     // Existing filtering fields
     val price: Double?,           // null for free events
     val duration: Int?,          // duration in minutes
     val organizer: String?,      // organizer name or null
     val isUserParticipating: Boolean,
     val eventStatus: EventStatus,
-    val isPublic: Boolean        // true for public, false for private
+    val isPublic: Boolean,        // true for public, false for private
+
+    val schedule: String = "",
+    val isClosed: Boolean = false,
+    val participantsCount: Int = 0,
+    val participantLimit: Int? = null,
+    val description: String = "",
+    val howToGet: String = "",
+    val isUserParticipant: Boolean = false,
+    val isFinished: Boolean = false,
+    val participants: List<User> = emptyList(),
+    val posts: List<EventPost> = emptyList(),
+    val canManage: Boolean = false,
+    val shareLink: String = ""
 )
 
 enum class EventStatus {

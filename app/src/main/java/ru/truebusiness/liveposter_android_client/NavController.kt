@@ -8,8 +8,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import ru.truebusiness.liveposter_android_client.view.EventDetailsPage
 import ru.truebusiness.liveposter_android_client.repository.EventRepository
+import ru.truebusiness.liveposter_android_client.view.EventDetailsPage
 import ru.truebusiness.liveposter_android_client.view.FriendsPage
 import ru.truebusiness.liveposter_android_client.view.MainPage
 import ru.truebusiness.liveposter_android_client.view.ProfilePage
@@ -28,6 +28,7 @@ import ru.truebusiness.liveposter_android_client.view.organizations.Organization
 import ru.truebusiness.liveposter_android_client.view.organizationslist.OrganizationsListPage
 import ru.truebusiness.liveposter_android_client.view.viewmodel.AuthViewModel
 import ru.truebusiness.liveposter_android_client.view.viewmodel.EventsViewModel
+import ru.truebusiness.liveposter_android_client.view.viewmodel.EventDetailsViewModel
 import ru.truebusiness.liveposter_android_client.view.viewmodel.OrganizationViewModel
 import ru.truebusiness.liveposter_android_client.view.viewmodel.OrganizationsListViewModel
 import java.util.UUID
@@ -78,15 +79,18 @@ fun AppNavigation(
         composable(
             route = "event/{eventId}",
             arguments = listOf(navArgument("eventId") { type = NavType.StringType })
-        ) {
-            val arg = it.arguments?.getString("eventId")
-            val event = repository.fetchEventMock(arg!!)
-
-            if (event != null) {
-                EventDetailsPage(event) {
-                    navController.popBackStack()
-                }
+        ) { backStackEntry ->
+            val eventId = backStackEntry.arguments?.getString("eventId") ?: return@composable
+            val eventViewModel: EventDetailsViewModel = viewModel()
+            LaunchedEffect(eventId) {
+                eventViewModel.loadEvent(eventId)
             }
+
+            EventDetailsPage(
+                viewModel = eventViewModel,
+                onBack = { navController.popBackStack() }
+            )
+
         }
 
         composable(
