@@ -9,7 +9,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import ru.truebusiness.liveposter_android_client.repository.EventRepository
-import ru.truebusiness.liveposter_android_client.view.EventDetailsPage
+import ru.truebusiness.liveposter_android_client.view.event.EventDetailsPage
 import ru.truebusiness.liveposter_android_client.view.FriendsPage
 import ru.truebusiness.liveposter_android_client.view.MainPage
 import ru.truebusiness.liveposter_android_client.view.ProfilePage
