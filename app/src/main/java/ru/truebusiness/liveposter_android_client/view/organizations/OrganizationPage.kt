@@ -1,6 +1,7 @@
 package ru.truebusiness.liveposter_android_client.view.organizations
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -41,6 +42,7 @@ import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -51,6 +53,8 @@ import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -77,6 +81,7 @@ import coil.compose.AsyncImage
 import ru.truebusiness.liveposter_android_client.data.Event
 import ru.truebusiness.liveposter_android_client.data.Organization
 import ru.truebusiness.liveposter_android_client.data.User
+import java.util.UUID
 import ru.truebusiness.liveposter_android_client.ui.theme.accentColor
 import ru.truebusiness.liveposter_android_client.ui.theme.accentColorText
 import ru.truebusiness.liveposter_android_client.ui.theme.pageGradient
@@ -88,9 +93,51 @@ import ru.truebusiness.liveposter_android_client.view.viewmodel.OrganizationView
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun OrganizationPage(orgViewMod: OrganizationViewModel, navigator: NavHostController) {
+fun OrganizationPage(
+    orgViewMod: OrganizationViewModel,
+    navigator: NavHostController,
+    organizationId: UUID
+) {
+    LaunchedEffect(organizationId) {
+        orgViewMod.loadOrRefreshOrganization(organizationId)
+    }
 
-    val org = orgViewMod.currentOrganization.collectAsState().value
+    DisposableEffect(Unit) {
+        onDispose {
+            orgViewMod.clearState()
+        }
+    }
+
+    val state by orgViewMod.organizationState.collectAsState()
+
+    when (val it = state) {
+        is OrganizationViewModel.OrganizationState.Success -> OrganizationPageContent(
+            org = it.org,
+            orgViewMod = orgViewMod,
+            navigator = navigator
+        )
+
+        is OrganizationViewModel.OrganizationState.Loading -> {
+            OrganizationPageSkeleton()
+        }
+
+        is OrganizationViewModel.OrganizationState.Error -> {
+            OrganizationPageError(message = it.message) {
+                // TODO: orgViewMod.retry()
+            }
+        }
+    }
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@Composable
+fun OrganizationPageContent(
+    org: Organization,
+    orgViewMod: OrganizationViewModel,
+    navigator: NavHostController
+) {
     val scrollState = rememberScrollState()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     var isEditing by remember { mutableStateOf(false) }
@@ -123,14 +170,14 @@ fun OrganizationPage(orgViewMod: OrganizationViewModel, navigator: NavHostContro
                 isAdmin = isAdmin,
                 onBack = { navigator.navigate("organizations") },
                 onSave = {
-                    //TODO on save callback
                     isEditing = false
-                    orgViewMod.updateOrganization(
-                        name = name,
-                        description = description,
-                        address = address,
-                        admins = admins,
-                        images = images
+                    orgViewMod.saveOrganizationChanges(
+                        onSuccess = {
+                            Log.d("OrganizationPage", "Organization saved successfully")
+                        },
+                        onError = { error ->
+                            Toast.makeText(context, "Ошибка сохранения: $error", Toast.LENGTH_LONG).show()
+                        }
                     )
                 },
                 onCancel = {
@@ -150,7 +197,7 @@ fun OrganizationPage(orgViewMod: OrganizationViewModel, navigator: NavHostContro
                 }
             )
         }
-    ) { paddingValues ->
+    ) {_ ->
 
         Box(
             modifier = Modifier
@@ -428,32 +475,38 @@ fun ContentBody(
             .fillMaxWidth()
             .padding(top = 12.dp, bottom = 30.dp)
     ) {
-        LocationBlock(address = address, onAddressChange = onAddressChange, isEditing = isEditing)
+        if (address.isNotBlank()) {
+            LocationBlock(
+                address = address,
+                onAddressChange = onAddressChange,
+                isEditing = isEditing
+            )
+        }
+
+        if (description.isNotBlank()) {
+            DescriptionBlock(
+                description = description,
+                onDescriptionChange = onDescriptionChange,
+                isEditing = isEditing
+            )
+        }
 
 
-        DescriptionBlock(
-            description = description,
-            onDescriptionChange = onDescriptionChange,
-            isEditing = isEditing
-        )
+        if (admins.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(16.dp))
+            AdminsBlock(admins, onClick = { navigator?.navigate("organizationAdmins") })
+        }
+
+        if (events.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(16.dp))
+            EventsBlock(navigator, events = events, isEditing = isEditing, onLock = onLockEvent)
+        }
 
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-
-        AdminsBlock(admins, onClick = { navigator?.navigate("organizationAdmins") })
-
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-
-        EventsBlock(navigator, events = events, isEditing = isEditing, onLock = onLockEvent)
-
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-
-        PicturesBlock(images = images, onDeleteImage = onDeleteImage, isEditing = isEditing)
+        if (images.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(16.dp))
+            PicturesBlock(images = images, onDeleteImage = onDeleteImage, isEditing = isEditing)
+        }
 
 
     }
@@ -474,7 +527,7 @@ fun PicturesBlock(
         fontWeight = FontWeight.Bold,
         fontSize = 20.sp,
         color = accentColorText,
-        modifier = Modifier.padding(horizontal = 36.dp)
+        modifier = Modifier.padding(horizontal = 24.dp)
     )
     Spacer(modifier = Modifier.height(12.dp))
 

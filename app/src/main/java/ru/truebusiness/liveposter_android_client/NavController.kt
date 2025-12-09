@@ -30,7 +30,7 @@ import ru.truebusiness.liveposter_android_client.view.viewmodel.AuthViewModel
 import ru.truebusiness.liveposter_android_client.view.viewmodel.EventsViewModel
 import ru.truebusiness.liveposter_android_client.view.viewmodel.EventDetailsViewModel
 import ru.truebusiness.liveposter_android_client.view.viewmodel.OrganizationViewModel
-import ru.truebusiness.liveposter_android_client.view.viewmodel.OrganizationsViewModel
+import ru.truebusiness.liveposter_android_client.view.viewmodel.OrganizationsListViewModel
 import java.util.UUID
 
 @Composable
@@ -41,7 +41,7 @@ fun AppNavigation(
     val orgViewModel: OrganizationViewModel = viewModel()
     val eventsViewModel: EventsViewModel = viewModel()
     eventsViewModel.initialize()
-    val organizationsListViewModel: OrganizationsViewModel = viewModel()
+    val organizationsListViewModel: OrganizationsListViewModel = viewModel()
 
     val navController = rememberNavController()
     val repository = EventRepository()
@@ -107,11 +107,10 @@ fun AppNavigation(
             val orgString = backStackEntry.arguments?.getString("orgId")
             val uuid = UUID.fromString(orgString)
 
-            orgViewModel.fetchOrganizationFromRepo(uuid)
-
             OrganizationPage(
-                orgViewModel,
-                navController
+                orgViewMod = orgViewModel,
+                navigator = navController,
+                organizationId = uuid
             )
 
         }
