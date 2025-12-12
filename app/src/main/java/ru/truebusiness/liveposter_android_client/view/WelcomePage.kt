@@ -8,7 +8,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -16,6 +18,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,6 +43,14 @@ fun WelcomePage(
     var password by remember { mutableStateOf("") }
 
     val context = LocalContext.current
+    val authState by authViewModel.state.collectAsState()
+
+    // Показываем Toast при ошибке
+    LaunchedEffect(Unit) {
+        authViewModel.errors.collect { errorMessage ->
+            Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
+        }
+    }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -75,22 +87,37 @@ fun WelcomePage(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            GradientButton("Войти") {
+            GradientButton(
+                text = if (authState.loading) "" else "Войти",
+                enabled = !authState.loading
+            ) {
                 if (email.isNotBlank() && Patterns.EMAIL_ADDRESS.matcher(email).matches() &&
                         password.isNotBlank() && password.isNotEmpty()) {
-                        /**
-                         * Добавить логику входа по email
-                         */
-                        authViewModel.login(email, password)
-                        navController.navigate("main") {
-                            popUpTo(navController.graph.startDestinationId) {
-                                inclusive = true
+                        authViewModel.login(
+                            email = email,
+                            password = password,
+                            onSuccess = {
+                                navController.navigate("main") {
+                                    popUpTo(navController.graph.startDestinationId) {
+                                        inclusive = true
+                                    }
+                                    launchSingleTop = true
+                                }
+                            },
+                            onPending = { userId ->
+                                navController.navigate("email_verification/$userId")
                             }
-                            launchSingleTop = true
-                        }
+                        )
                     } else {
                         Toast.makeText(context, "Введите корректный email", Toast.LENGTH_SHORT).show()
                     }
+            }
+
+            if (authState.loading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    strokeWidth = 2.dp
+                )
             }
 
             Row(

@@ -5,22 +5,35 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.Base64
-import kotlin.getValue
 
 object RetrofitInstance {
     private const val BASE_URL = "http://eventhub-backend.ru/dev/"
     
-    // Учетные данные для Basic Auth (для разработки)
-    private const val USERNAME = "user1@example.com"
-    private const val PASSWORD = "secure_password123"
+    // TODO: Убрать fallback креды после завершения разработки
+    private const val FALLBACK_USERNAME = "user1@example.com"
+    private const val FALLBACK_PASSWORD = "secure_password123"
+
+    // Провайдер учетных данных для Basic Auth (инициализируется в MainActivity)
+    private var credentialsProvider: CredentialsProvider? = null
+
+    /**
+     * Инициализирует RetrofitInstance с провайдером учетных данных.
+     * Должен быть вызван в MainActivity перед использованием API.
+     */
+    fun initialize(provider: CredentialsProvider) {
+        credentialsProvider = provider
+    }
 
     private val authClient by lazy {
         val logger = HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY }
-        
-        // Создаем Basic Auth header
-        val credentials = "$USERNAME:$PASSWORD"
+        // Получаем креды из DataStore или используем fallback для разработки
+        // TODO: Убрать fallback после завершения разработки
+        val (email, password) = credentialsProvider?.getCredentials()
+            ?: Pair(FALLBACK_USERNAME, FALLBACK_PASSWORD)
+
+        val credentials = "$email:$password"
         val basicAuth = "Basic " + Base64.getEncoder().encodeToString(credentials.toByteArray())
-        
+
         OkHttpClient.Builder()
             .addInterceptor(logger)
             .addInterceptor { chain ->

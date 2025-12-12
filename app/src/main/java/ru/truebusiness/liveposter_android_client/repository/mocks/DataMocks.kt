@@ -59,13 +59,28 @@ val mockEventList = listOf(
         isFinished = false,
         participants = listOf(
             User(
-                userName = "Мария",
+                id = "user-1",
+                username = "Мария",
+                shortId = null,
+                bio = null,
+                registrationDate = null,
+                confirmed = true,
                 coverUrl = "https://images.unsplash.com/photo-1524504388940-b1c1722653e1"),
             User(
-                userName = "Артём",
+                id = "user-2",
+                username = "Артём",
+                shortId = null,
+                bio = null,
+                registrationDate = null,
+                confirmed = true,
                 coverUrl = "https://images.unsplash.com/photo-1521572267360-ee0c2909d518"),
             User(
-                userName = "Ксения",
+                id = "user-3",
+                username = "Ксения",
+                shortId = null,
+                bio = null,
+                registrationDate = null,
+                confirmed = true,
                 coverUrl = "https://images.unsplash.com/photo-1544723795-3fb6469f5b39")
         ),
         posts = listOf(
@@ -355,15 +370,30 @@ val mockUserFriendsList = listOf(
 
 val mockUsersList = listOf(
     User(
-        userName = "alex",
+        id = "user-alex",
+        username = "alex",
+        shortId = "@alex",
+        bio = null,
+        registrationDate = null,
+        confirmed = true,
         coverUrl = "https://t3.ftcdn.net/jpg/02/99/04/20/360_F_299042079_vGBD7wIlSeNl7vOevWHiL93G4koMM967.jpg"
     ),
     User(
-        userName = "leo",
+        id = "user-leo",
+        username = "leo",
+        shortId = "@leo",
+        bio = null,
+        registrationDate = null,
+        confirmed = true,
         coverUrl = "https://plus.unsplash.com/premium_photo-1689977968861-9c91dbb16049?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8cHJvZmlsZSUyMHBpY3R1cmV8ZW58MHx8MHx8fDA%3D"
     ),
     User(
-        userName = "leo2",
+        id = "user-leo2",
+        username = "leo2",
+        shortId = "@leo2",
+        bio = null,
+        registrationDate = null,
+        confirmed = true,
         coverUrl = "https://plus.unsplash.com/premium_photo-1689977968861-9c91dbb16049?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8cHJvZmlsZSUyMHBpY3R1cmV8ZW58MHx8MHx8fDA%3D"
     )
 )

@@ -154,9 +154,52 @@ class AuthViewModel(
         }
     }
 
-    fun login(email: String, password: String) {
+    fun login(
+        email: String,
+        password: String,
+        onSuccess: () -> Unit = {},
+        onPending: (String) -> Unit = {}
+    ) {
         viewModelScope.launch {
-            authRepository.saveCredentials(email, password)
+            _state.emit(
+                _state.value.copy(
+                    loading = true,
+                    error = null,
+                    email = email,
+                    password = password
+                )
+            )
+            try {
+                val user = authRepository.login(email, password)
+                _state.emit(
+                    _state.value.copy(
+                        loading = false,
+                        currentUserId = user.id,
+                        isLoggedIn = true
+                    )
+                )
+                if (user.confirmed) {
+                    onSuccess()
+                } else {
+                    onPending(user.id)
+                }
+            } catch (e: HttpException) {
+                _state.emit(_state.value.copy(loading = false, error = e.message))
+                val serverMessage = e.message()
+                val msg = when (e.code()) {
+                    401 -> serverMessage.ifBlank { "Неверный email или пароль" }
+                    404 -> serverMessage.ifBlank { "Пользователь не найден" }
+                    500 -> serverMessage.ifBlank { "Внутренняя ошибка сервера" }
+                    else -> serverMessage.ifBlank { "Ошибка сервера (${e.code()})" }
+                }
+                _errors.tryEmit(msg)
+            } catch (e: IOException) {
+                _state.emit(_state.value.copy(loading = false, error = e.message))
+                _errors.tryEmit("Проблема с сетью. Проверьте подключение и попробуйте ещё раз.")
+            } catch (e: Exception) {
+                _state.emit(_state.value.copy(loading = false, error = e.message))
+                _errors.tryEmit(e.message ?: "Неизвестная ошибка")
+            }
         }
 
     }

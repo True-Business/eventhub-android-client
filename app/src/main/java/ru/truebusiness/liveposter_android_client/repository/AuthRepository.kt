@@ -7,12 +7,15 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import ru.truebusiness.liveposter_android_client.data.User
 import ru.truebusiness.liveposter_android_client.data.dto.RegistrationResponseDto
 import ru.truebusiness.liveposter_android_client.data.dto.RegistrationStatus
 import ru.truebusiness.liveposter_android_client.data.dto.UserCredentialsRegistrationDto
+import ru.truebusiness.liveposter_android_client.data.dto.UserDto
 import ru.truebusiness.liveposter_android_client.data.dto.UserInfoRegistrationDto
+import ru.truebusiness.liveposter_android_client.data.toUser
 import ru.truebusiness.liveposter_android_client.repository.api.AuthApi
-import kotlin.let
+import java.util.UUID
 
 class AuthRepository(
     private val authApi: AuthApi,
@@ -24,13 +27,27 @@ class AuthRepository(
         val USER_ID = stringPreferencesKey("user_id")
         val USERNAME = stringPreferencesKey("username")
         val SHORT_ID = stringPreferencesKey("short_id")
+        val BIO = stringPreferencesKey("bio")
         val REG_STATUS = stringPreferencesKey("reg_status")
         val REG_DATE = stringPreferencesKey("reg_date")
         val IS_LOGGED_IN = booleanPreferencesKey("is_logged_in")
+        val CONFIRMED = booleanPreferencesKey("confirmed")
     }
 
     val isLoggedIn: Flow<Boolean> = dataStore.data.map { it[IS_LOGGED_IN] ?: false }
     val email: Flow<String?> = dataStore.data.map { it[EMAIL] }
+
+    val currentUser: Flow<User?> = dataStore.data.map { prefs ->
+        val id = prefs[USER_ID] ?: return@map null
+        User(
+            id = id,
+            username = prefs[USERNAME] ?: prefs[EMAIL] ?: "",
+            shortId = prefs[SHORT_ID],
+            bio = prefs[BIO],
+            registrationDate = prefs[REG_DATE],
+            confirmed = prefs[CONFIRMED] ?: false
+        )
+    }
     suspend fun preRegister(email: String, password: String): RegistrationResponseDto {
          return authApi.preRegister(UserCredentialsRegistrationDto(email, password))
     }
@@ -76,11 +93,41 @@ class AuthRepository(
         return response
     }
 
-    suspend fun saveCredentials(email: String, password: String) {
-        dataStore.edit { preferences ->
-            preferences[EMAIL] = email
-            preferences[PASSWORD] = password
+    /**
+     * Выполняет вход пользователя.
+     *
+     * TODO: Заменить мок на реальный вызов API когда бекенд реализует endpoint:
+     * val userDto = authApi.login(UserCredentialsRegistrationDto(email, password))
+     */
+    suspend fun login(email: String, password: String): User {
+        // TODO: Раскомментировать когда бекенд реализует /api/v1/auth/login
+        // val userDto = authApi.login(UserCredentialsRegistrationDto(email, password))
+
+        // Мок: всегда возвращаем успешный ответ
+        val userDto = UserDto(
+            id = UUID.randomUUID().toString(),
+            username = email,
+            shortId = null,
+            bio = null,
+            registrationDate = null,
+            confirmed = true
+        )
+
+        val user = userDto.toUser()
+
+        dataStore.edit { prefs ->
+            prefs[USER_ID] = user.id
+            prefs[EMAIL] = email
+            prefs[PASSWORD] = password
+            prefs[USERNAME] = user.username
+            user.shortId?.let { prefs[SHORT_ID] = it }
+            user.bio?.let { prefs[BIO] = it }
+            user.registrationDate?.let { prefs[REG_DATE] = it }
+            prefs[CONFIRMED] = user.confirmed
+            prefs[IS_LOGGED_IN] = true
         }
+
+        return user
     }
 
     suspend fun logout() {
