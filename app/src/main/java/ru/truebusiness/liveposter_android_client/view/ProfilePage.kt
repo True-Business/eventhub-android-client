@@ -19,6 +19,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -34,6 +35,8 @@ import ru.truebusiness.liveposter_android_client.view.components.InfoSurface
 import ru.truebusiness.liveposter_android_client.view.viewmodel.Organization
 import ru.truebusiness.liveposter_android_client.view.viewmodel.ProfileViewModel
 
+private val orange = Color(0xFFFF6600)
+
 @Composable
 fun ProfilePage(
     navController: NavController,
@@ -44,7 +47,13 @@ fun ProfilePage(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(
+                brush = Brush.verticalGradient(
+                    0f to orange,
+                    0.44f to Color.White,
+                    1f to Color.White
+                )
+            )
     ) {
         Scaffold(
             bottomBar = {
@@ -230,12 +239,7 @@ fun ProfileIconView(
             modifier = Modifier
                 .size(100.dp)
                 .clip(CircleShape)
-                .background(Color.White)
-                .border(
-                    width = 1.dp,
-                    color = Color(0xFFFF6600),
-                    shape = CircleShape
-                ),
+                .background(Color.White),
             contentAlignment = Alignment.Center
         ) {
             AsyncImage(
