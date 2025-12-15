@@ -34,11 +34,12 @@ import ru.truebusiness.liveposter_android_client.view.registration.RegistrationP
 import ru.truebusiness.liveposter_android_client.view.WelcomePage
 import ru.truebusiness.liveposter_android_client.view.events.EventsMainScreen
 import ru.truebusiness.liveposter_android_client.view.events.EventCreationPage
-import ru.truebusiness.liveposter_android_client.view.events.EventCreationSettingsPage
 import ru.truebusiness.liveposter_android_client.view.organizations.AdminsScreen
 import ru.truebusiness.liveposter_android_client.view.organizations.OrganizationPage
 import ru.truebusiness.liveposter_android_client.view.organizationslist.OrganizationsListPage
 import ru.truebusiness.liveposter_android_client.view.viewmodel.AuthViewModel
+import ru.truebusiness.liveposter_android_client.view.viewmodel.EventCreationViewModel
+import ru.truebusiness.liveposter_android_client.view.viewmodel.EventCreationViewModelFactory
 import ru.truebusiness.liveposter_android_client.view.viewmodel.EventsViewModel
 import ru.truebusiness.liveposter_android_client.view.viewmodel.EventDetailsViewModel
 import ru.truebusiness.liveposter_android_client.view.viewmodel.OrganizationViewModel
@@ -92,6 +93,7 @@ fun AppNavigation(
     val authRepository = authViewModel.getAuthRepository()
     val profileViewModelFactory = ProfileViewModelFactory(authRepository)
     val profileSettingsViewModelFactory = ProfileSettingsViewModelFactory(authRepository)
+    val eventCreationViewModelFactory = EventCreationViewModelFactory(authRepository)
 
     val navController = rememberNavController()
 
@@ -131,11 +133,9 @@ fun AppNavigation(
         }
 
         composable("event-creation") {
-            EventCreationPage(navController)
-        }
-
-        composable("event-creation-settings") {
-            EventCreationSettingsPage(navController)
+            val eventCreationViewModel: EventCreationViewModel =
+                viewModel(factory = eventCreationViewModelFactory)
+            EventCreationPage(navController, eventCreationViewModel)
         }
 
         composable(
@@ -190,7 +190,8 @@ fun AppNavigation(
         }
 
         composable("profile-settings") {
-            val profileSettingsViewModel: ProfileSettingsViewModel = viewModel(factory = profileSettingsViewModelFactory)
+            val profileSettingsViewModel: ProfileSettingsViewModel =
+                viewModel(factory = profileSettingsViewModelFactory)
             ProfileSettingsPage(navController, profileSettingsViewModel)
         }
         composable("profile") {

@@ -24,10 +24,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedTextField
@@ -36,7 +36,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -46,22 +45,25 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import ru.truebusiness.liveposter_android_client.R
+import ru.truebusiness.liveposter_android_client.view.viewmodel.EventCreationViewModel
 
 private val orange = Color(0xFFFF6600)
 
 @Composable
 fun EventCreationSettingsPage(
-    navController: NavController?
+    navController: NavController,
+    viewModel: EventCreationViewModel
 ) {
     Column(
         modifier = Modifier
@@ -91,6 +93,7 @@ fun EventCreationSettingsPage(
                 modifier = Modifier
                     .size(24.dp)
                     .align(Alignment.CenterStart)
+                    .clickable(onClick = { navController.popBackStack() })
             )
             Text(
                 text = "Настройки мероприятия",
@@ -104,31 +107,53 @@ fun EventCreationSettingsPage(
 
         Spacer(Modifier.size(24.dp))
 
-        MainForm()
+        MainForm(viewModel)
 
         Spacer(Modifier.size(24.dp))
 
-        Buttons(navController)
+        Buttons(viewModel, navController)
     }
 }
 
 @Composable
-private fun Buttons(navController: NavController?) {
-    BackButton(navController)
+private fun Buttons(
+    viewModel: EventCreationViewModel,
+    navController: NavController
+) {
+    BackButton(viewModel::onPrevPage)
     Spacer(Modifier.size(8.dp))
-    SaveDraftButton()
+    SaveDraftButton(viewModel::onDraftSave, viewModel::isInfoValid, navController)
     Spacer(Modifier.size(8.dp))
-    PublishButton(navController)
+    PublishButton(viewModel::onPublication, viewModel::isInfoValid, navController)
 }
 
 @Composable
-private fun PublishButton(navController: NavController?) {
+private fun PublishButton(
+    onClick: () -> Unit,
+    isValid: () -> Boolean,
+    navController: NavController
+) {
+    val context = LocalContext.current
     Surface(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(8.dp))
             .background(orange)
-            .padding(16.dp),
+            .padding(16.dp)
+            .clickable(onClick = {
+                if (isValid()) {
+                    onClick()
+                    navController.popBackStack()
+                } else {
+                    android.widget.Toast
+                        .makeText(
+                            context,
+                            "Не все обязательные поля заполнены корректно, проверьте данные",
+                            android.widget.Toast.LENGTH_SHORT
+                        )
+                        .show()
+                }
+            }),
         shape = RoundedCornerShape(8.dp),
         color = orange,
         contentColor = Color.White
@@ -145,12 +170,31 @@ private fun PublishButton(navController: NavController?) {
 }
 
 @Composable
-private fun SaveDraftButton() {
+private fun SaveDraftButton(
+    onClick: () -> Unit,
+    isValid: () -> Boolean,
+    navController: NavController
+) {
+    val context = LocalContext.current
     Surface(
         modifier = Modifier
             .fillMaxWidth()
             .border(2.dp, orange, RoundedCornerShape(8.dp))
-            .padding(16.dp),
+            .padding(16.dp)
+            .clickable(onClick = {
+                if (isValid()) {
+                    onClick()
+                    navController.popBackStack()
+                } else {
+                    android.widget.Toast
+                        .makeText(
+                            context,
+                            "Не все обязательные поля заполнены корректно, проверьте данные",
+                            android.widget.Toast.LENGTH_SHORT
+                        )
+                        .show()
+                }
+            }),
         shape = RoundedCornerShape(8.dp),
         color = Color.White,
         contentColor = orange
@@ -167,13 +211,13 @@ private fun SaveDraftButton() {
 }
 
 @Composable
-private fun BackButton(navController: NavController?) {
+private fun BackButton(onClick: () -> Unit) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
             .border(2.dp, Color.LightGray, RoundedCornerShape(8.dp))
             .padding(16.dp)
-            .clickable(onClick = { navController!!.navigate("event-creation") }),
+            .clickable(onClick = { onClick() }),
         shape = RoundedCornerShape(8.dp),
         color = Color.White,
         contentColor = Color.Black
@@ -190,8 +234,8 @@ private fun BackButton(navController: NavController?) {
 }
 
 @Composable
-private fun MainForm() {
-    var isClosed by remember { mutableStateOf(true) }
+private fun MainForm(vm: EventCreationViewModel) {
+    val state = vm.settingsState
 
     Surface(
         modifier = Modifier
@@ -210,43 +254,61 @@ private fun MainForm() {
             verticalArrangement = Arrangement.spacedBy(24.dp)
 
         ) {
-            EventTypeToggle(isClosed = isClosed, onToggle = { isClosed = it })
+            EventTypeToggle(
+                isClosed = state.isClosed,
+                onToggle = { vm.setIsClosed(!state.isClosed) })
 
             AnimatedContent(
-                targetState = isClosed,
+                targetState = state.isClosed,
                 transitionSpec = {
                     fadeIn() + slideInVertically { fullHeight -> -fullHeight } togetherWith
                             fadeOut() + slideOutVertically { fullHeight -> -fullHeight }
                 },
                 contentAlignment = Alignment.Center
             ) { isClosed ->
-                if (isClosed) ClosedEventView()
-                else OpenEventView()
+                if (isClosed) ClosedEventView(vm)
+                else OpenEventView(vm)
             }
         }
     }
 }
 
 @Composable
-private fun OpenEventView() {
+private fun OpenEventView(vm: EventCreationViewModel) {
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         InputTextField(
             title = "Ограничения для посетителей",
             placeholder = "Возрастные ограничения, дресс-код и т.д.",
-            onChange = { }
+            value = vm.settingsState.limits ?: "",
+            isObligatory = false,
+            onChange = vm::updateLimits
         )
-        RegistrationRequirement()
+        InputIntField(
+            title = "Количество участников",
+            placeholder = "Максимальное количество участников",
+            value = vm.settingsState.participantsLimit,
+            isObligatory = false,
+            onChange = vm::updateParticipantsLimits
+        )
+        RegistrationRequirement(
+            vm.settingsState.requiresRegistration,
+            vm.settingsState.registrationFields,
+            vm::setRequiresRegistration,
+            vm::toggleRegistrationField
+        )
     }
 }
 
 @Composable
 fun RegistrationRequirement(
-    modifier: Modifier = Modifier
+    requiresRegistration: Boolean,
+    registrationFields: Map<String, Boolean>,
+    onRequirementChange: (Boolean) -> Unit,
+    onFieldChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    var requiresRegistration by remember { mutableStateOf(true) }
-
     val items = listOf(
         "Регистрация доступна до конца мероприятия",
         "Указать дату  и время закрытия регистрации",
@@ -255,8 +317,6 @@ fun RegistrationRequirement(
         "Бесплатное посещение",
         "Платное посещение"
     )
-
-    val selected = remember { mutableStateMapOf<String, Boolean>() }
 
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -267,12 +327,12 @@ fun RegistrationRequirement(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable {
-                    requiresRegistration = !requiresRegistration
+                    onRequirementChange(!requiresRegistration)
                 }
         ) {
             Checkbox(
                 checked = requiresRegistration,
-                onCheckedChange = { requiresRegistration = it },
+                onCheckedChange = { onRequirementChange(it) },
                 colors = CheckboxDefaults.colors(
                     checkedColor = orange,
                     checkmarkColor = Color.White,
@@ -308,14 +368,12 @@ fun RegistrationRequirement(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable {
-                                    selected[item] = !(selected[item] ?: false)
-                                }
+                                .clickable { onFieldChange(item) }
                                 .padding(vertical = 4.dp)
                         ) {
                             Checkbox(
-                                checked = selected[item] ?: false,
-                                onCheckedChange = { selected[item] = it },
+                                checked = registrationFields[item] ?: false,
+                                onCheckedChange = { onFieldChange(item) },
                                 colors = CheckboxDefaults.colors(
                                     checkedColor = orange,
                                     checkmarkColor = Color.White,
@@ -373,7 +431,7 @@ private fun IconHeader(icon: Painter, title: String) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ClosedEventView() {
+private fun ClosedEventView(vm: EventCreationViewModel) {
     var friendSearchLine by remember { mutableStateOf("") }
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -385,7 +443,7 @@ private fun ClosedEventView() {
 
         OutlinedTextField(
             value = friendSearchLine,
-            onValueChange = {friendSearchLine = it},
+            onValueChange = { friendSearchLine = it },
             placeholder = { Text("Найти друзей...") },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
@@ -466,6 +524,9 @@ private fun EventTypeToggle(
 private fun InputTextField(
     title: String,
     placeholder: String,
+    value: String,
+    comment: String? = null,
+    isObligatory: Boolean,
     onChange: (String) -> Unit
 ) {
     Column(
@@ -477,9 +538,16 @@ private fun InputTextField(
                 text = title,
                 fontSize = 16.sp
             )
+            if (isObligatory) {
+                Text(
+                    text = " *",
+                    color = orange,
+                    fontSize = 16.sp
+                )
+            }
         }
         OutlinedTextField(
-            value = "",
+            value = value,
             onValueChange = onChange,
             placeholder = { Text(placeholder) },
             modifier = Modifier.fillMaxWidth(),
@@ -487,16 +555,78 @@ private fun InputTextField(
             singleLine = false,
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 focusedBorderColor = orange,
-                unfocusedBorderColor = Color.LightGray,
+                unfocusedBorderColor = Color.Gray,
                 cursorColor = orange
             )
         )
+        comment?.let { comment ->
+            Text(
+                text = comment,
+                fontSize = 12.sp,
+                fontStyle = FontStyle.Italic,
+                color = Color.Gray.copy(alpha = 0.7f)
+            )
+        }
     }
 }
 
-
-@Preview
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun Preview() {
-    EventCreationSettingsPage(null)
+fun InputIntField(
+    title: String,
+    placeholder: String,
+    value: Int?,
+    comment: String? = null,
+    isObligatory: Boolean,
+    onChange: (Int?) -> Unit
+) {
+    var text by remember(value) {
+        mutableStateOf(value?.toString() ?: "")
+    }
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Row {
+            Text(text = title, fontSize = 16.sp)
+            if (isObligatory) {
+                Text(text = " *", color = orange, fontSize = 16.sp)
+            }
+        }
+
+        OutlinedTextField(
+            value = text,
+            onValueChange = { newValue ->
+                if (newValue.all { it.isDigit() }) {
+                    text = newValue
+
+                    onChange(
+                        newValue.toIntOrNull()
+                    )
+                }
+            },
+            placeholder = { Text(placeholder) },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number
+            ),
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                focusedBorderColor = orange,
+                unfocusedBorderColor = Color.Gray,
+                cursorColor = orange
+            )
+        )
+
+        comment?.let {
+            Text(
+                text = it,
+                fontSize = 12.sp,
+                fontStyle = FontStyle.Italic,
+                color = Color.Gray.copy(alpha = 0.7f)
+            )
+        }
+    }
 }

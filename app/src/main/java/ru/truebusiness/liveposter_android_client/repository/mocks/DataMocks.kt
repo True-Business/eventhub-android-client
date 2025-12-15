@@ -8,7 +8,6 @@ import ru.truebusiness.liveposter_android_client.data.Friend
 import ru.truebusiness.liveposter_android_client.data.Organization
 import ru.truebusiness.liveposter_android_client.data.User
 import ru.truebusiness.liveposter_android_client.data.dto.parseIsoDateTime
-import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.random.Random
 
