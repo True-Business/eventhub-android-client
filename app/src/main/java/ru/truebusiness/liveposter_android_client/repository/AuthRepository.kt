@@ -32,7 +32,7 @@ class AuthRepository(
     val isLoggedIn: Flow<Boolean> = dataStore.data.map { it[IS_LOGGED_IN] ?: false }
     val email: Flow<String?> = dataStore.data.map { it[EMAIL] }
     suspend fun preRegister(email: String, password: String): RegistrationResponseDto {
-         return authApi.preRegister(UserCredentialsRegistrationDto(email, password))
+        return authApi.preRegister(UserCredentialsRegistrationDto(email, password))
     }
 
     suspend fun sendCode(userId: String) {

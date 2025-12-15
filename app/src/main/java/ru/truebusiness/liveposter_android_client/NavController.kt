@@ -95,7 +95,6 @@ fun AppNavigation(
 
         composable(
             route = "organizations",
-
         ) {
             OrganizationsListPage(organizationsListViewModel, navController)
         }

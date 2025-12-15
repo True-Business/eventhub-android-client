@@ -17,38 +17,31 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBox
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import coil.compose.AsyncImage
 import ru.truebusiness.liveposter_android_client.R
 import ru.truebusiness.liveposter_android_client.ui.theme.MainPageBodyColor
 import ru.truebusiness.liveposter_android_client.ui.theme.MainPageTopFooterColor
-import ru.truebusiness.liveposter_android_client.ui.theme.MainPageUserUnfoFooterColor
 import ru.truebusiness.liveposter_android_client.view.components.AppNavigationBar
 import ru.truebusiness.liveposter_android_client.view.components.EventCard
 import ru.truebusiness.liveposter_android_client.view.viewmodel.EventsViewModel
@@ -59,7 +52,6 @@ import java.util.Collections.emptyList
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-@Preview
 fun MainPage(
     navController: NavController = rememberNavController(),
     eventsViewModel: EventsViewModel = viewModel()
@@ -73,7 +65,7 @@ fun MainPage(
                 title = {},
                 modifier = Modifier.fillMaxWidth(),
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MainPageUserUnfoFooterColor
+                    containerColor = Color(0xFFFF6600)
                 ),
                 actions = {
                     Row(
@@ -86,24 +78,28 @@ fun MainPage(
                     ) {
                         Box(
                             modifier = Modifier
-                                .width(65.dp)
-                                .height(55.dp)
+                                .width(55.dp)
+                                .height(45.dp)
                                 .padding(start = 10.dp)
                                 .background(color = Color.White, shape = CircleShape)
                                 .clickable(onClick = { navController.navigate("profile-settings") })
                         ) {
-                            Text(
-                                text = "ПВ",
+                            AsyncImage(
+                                model = "https://i.pinimg.com/236x/c6/00/f2/c600f276b3f7cafcd572402ac86e489b.jpg",
+                                contentDescription = "Avatar",
                                 modifier = Modifier
-                                    .padding(start = 18.dp, top = 18.dp)
+                                    .fillMaxSize()
+                                    .clip(CircleShape),
+                                contentScale = ContentScale.Crop
                             )
                         }
 
                         Text(
-                            text = "Пупкин Василий",
+                            text = "Василий Попов",
                             fontSize = 18.sp,
-                            color = Color.Black,
-                            modifier = Modifier.padding(start = 30.dp)
+                            fontWeight = FontWeight.Medium,
+                            color = Color.White,
+                            modifier = Modifier.padding(start = 18.dp)
                         )
 
                         Row(
@@ -122,7 +118,7 @@ fun MainPage(
                                     .width(40.dp),
                                 content = {
                                     Image(
-                                        painter = painterResource(id = R.drawable.bell),
+                                        painter = painterResource(id = R.drawable.icon_bell),
                                         contentDescription = "Bell",
                                         modifier = Modifier.size(24.dp)
                                     )
