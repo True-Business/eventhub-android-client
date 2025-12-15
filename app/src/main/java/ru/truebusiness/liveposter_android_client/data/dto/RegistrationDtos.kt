@@ -19,3 +19,13 @@ data class RegistrationResponseDto(
 )
 
 enum class RegistrationStatus { PENDING, SUCCESS, ERROR }
+
+data class UserDto(
+    val id: String,
+    val username: String,
+    val shortId: String?,
+    val bio: String?,
+    val registrationDate: String?,
+    val confirmed: Boolean,
+    val coverUrl: String? = null
+)

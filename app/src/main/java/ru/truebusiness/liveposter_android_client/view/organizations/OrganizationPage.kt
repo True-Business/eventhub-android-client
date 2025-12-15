@@ -647,7 +647,7 @@ fun AdminsBlock(admins: List<User>, onClick: () -> Unit = {}) {
 
 
             if (admins.isNotEmpty()) {
-                OverlappingAdminAvatars(adminAvatars = admins.map { it.coverUrl })
+                OverlappingAdminAvatars(adminAvatars = admins.map { it.coverUrl ?: ""})
             }
         }
     }
