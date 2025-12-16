@@ -8,7 +8,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -18,14 +17,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import androidx.navigation.NavController
+import ru.truebusiness.liveposter_android_client.R
 
 @Composable
 fun AppNavigationBar(
@@ -36,10 +37,10 @@ fun AppNavigationBar(
     val darkOrange = Color(0xFFE55A00)
 
     val items = listOf(
-        NavItem("main", "Главная", Icons.Default.Home),
-        NavItem("events", "События", Icons.Default.Search),
-        NavItem("friends", "Друзья", Icons.Default.AccountBox),
-        NavItem("organizations", "Организации", Icons.Default.Settings)
+        NavItem("main", "Главная", R.drawable.icon_mainpage),
+        NavItem("events", "События", R.drawable.icon_events),
+        NavItem("friends", "Друзья", R.drawable.icon_friends),
+        NavItem("organizations", "Организации", R.drawable.icon_organizations)
     )
 
     val context = LocalContext.current
@@ -76,7 +77,7 @@ fun AppNavigationBar(
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Icon(
-                                imageVector = item.icon,
+                                painter = painterResource(id = item.icon),
                                 contentDescription = item.label,
                                 tint = Color.White,
                                 modifier = Modifier.size(22.dp)
@@ -103,4 +104,4 @@ fun AppNavigationBar(
     }
 }
 
-data class NavItem(val route: String, val label: String, val icon: ImageVector)
+data class NavItem(val route: String, val label: String, val icon: Int)
