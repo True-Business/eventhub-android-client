@@ -25,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -48,7 +49,13 @@ fun ProfileSettingsPage(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(
+                brush = Brush.verticalGradient(
+                    0f to orange,
+                    0.44f to Color.White,
+                    1f to Color.White
+                )
+            )
     ) {
         Scaffold(
             bottomBar = {
@@ -74,11 +81,6 @@ fun ProfileSettingsPage(
                         .size(100.dp)
                         .clip(CircleShape)
                         .background(Color.White)
-                        .border(
-                            width = 1.dp,
-                            color = orange,
-                            shape = CircleShape
-                        )
                         .clickable { navController.navigate("profile") },
                     contentAlignment = Alignment.Center
                 ) {
@@ -134,24 +136,28 @@ fun ProfileSettingsPage(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     InfoSurface(
-                        modifier = Modifier.clickable(onClick = { profileSettingsViewModel.logout() })
+                        backgroundColor = orange,
+                        modifier = Modifier
+                            .clickable(onClick = { profileSettingsViewModel.logout() })
                     ) {
                         Text(
                             text = "Выход из аккаунта",
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Normal,
-                            color = Color(0xFFBD0000)
+                            color = Color.White
                         )
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     InfoSurface(
-                        modifier = Modifier.clickable(onClick = { profileSettingsViewModel.logout() })
+                        backgroundColor = orange,
+                        modifier = Modifier
+                            .clickable(onClick = { profileSettingsViewModel.logout() })
                     ) {
                         Text(
                             text = "Удалить аккаунт",
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Normal,
-                            color = Color(0xFFBD0000)
+                            color = Color.White
                         )
                     }
                 }

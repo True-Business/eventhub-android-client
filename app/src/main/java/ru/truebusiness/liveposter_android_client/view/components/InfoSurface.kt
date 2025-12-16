@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 fun InfoSurface(
     modifier: Modifier = Modifier,
     cornerRadius: Dp = 20.dp,
+    backgroundColor: Color = Color.White,
     content: @Composable BoxScope.() -> Unit
 ) {
     Box(
@@ -27,7 +28,7 @@ fun InfoSurface(
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
             .background(
-                color = Color.White,
+                color = backgroundColor,
                 shape = RoundedCornerShape(cornerRadius)
             )
             .border(width = 1.dp, Color(0xFFFF6600), RoundedCornerShape(cornerRadius))
