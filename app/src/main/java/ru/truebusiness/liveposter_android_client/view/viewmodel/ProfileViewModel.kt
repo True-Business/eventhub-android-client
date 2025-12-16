@@ -10,7 +10,7 @@ class ProfileViewModel : ViewModel() {
         ProfileUiState(
             name = "Василий Попов",
             username = "@vasily_P",
-            avatarUrl = "https://cdn.freelance.ru/images/att/4601343_300_200.png",
+            avatarUrl = "https://i.pinimg.com/236x/c6/00/f2/c600f276b3f7cafcd572402ac86e489b.jpg",
             about = "Я Вася Пупкин, студент 2 курса ФИТ НГУ и вот какой я классный. Приходите все на мероприятия НГУ!",
             eventsCreated = 5,
             eventsVisited = 15,

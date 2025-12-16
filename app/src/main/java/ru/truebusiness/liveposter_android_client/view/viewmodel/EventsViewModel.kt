@@ -13,7 +13,6 @@ import ru.truebusiness.liveposter_android_client.data.EventStatus
 import ru.truebusiness.liveposter_android_client.data.SortField
 import ru.truebusiness.liveposter_android_client.data.SortOrder
 import ru.truebusiness.liveposter_android_client.data.EventsCategory
-import ru.truebusiness.liveposter_android_client.data.getAvailableSortFields
 import ru.truebusiness.liveposter_android_client.data.getDefaultSortField
 import ru.truebusiness.liveposter_android_client.repository.EventRepository
 import ru.truebusiness.liveposter_android_client.repository.mocks.mockCurrentUserId
@@ -283,7 +282,6 @@ class EventsViewModel: ViewModel() {
     private fun sortEventsLocally() {
         val currentEvents = _events.value ?: return
         val filter = _filterState.value ?: return
-        
         val sortedEvents = when (filter.sortBy) {
             SortField.START_DATE -> {
                 if (filter.sortOrder == SortOrder.ASC) {
@@ -292,6 +290,7 @@ class EventsViewModel: ViewModel() {
                     currentEvents.sortedByDescending { it.startDate }
                 }
             }
+
             SortField.TITLE -> {
                 if (filter.sortOrder == SortOrder.ASC) {
                     currentEvents.sortedBy { it.title }
@@ -299,6 +298,7 @@ class EventsViewModel: ViewModel() {
                     currentEvents.sortedByDescending { it.title }
                 }
             }
+
             SortField.PRICE -> {
                 if (filter.sortOrder == SortOrder.ASC) {
                     currentEvents.sortedBy { it.price ?: Double.MAX_VALUE }
@@ -306,6 +306,7 @@ class EventsViewModel: ViewModel() {
                     currentEvents.sortedByDescending { it.price ?: 0.0 }
                 }
             }
+
             SortField.LOCATION -> {
                 if (filter.sortOrder == SortOrder.ASC) {
                     currentEvents.sortedBy { it.location }
@@ -314,7 +315,7 @@ class EventsViewModel: ViewModel() {
                 }
             }
         }
-        
+
         _events.value = sortedEvents
     }
 

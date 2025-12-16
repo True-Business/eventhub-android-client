@@ -49,7 +49,7 @@ class AuthRepository(
         )
     }
     suspend fun preRegister(email: String, password: String): RegistrationResponseDto {
-         return authApi.preRegister(UserCredentialsRegistrationDto(email, password))
+        return authApi.preRegister(UserCredentialsRegistrationDto(email, password))
     }
 
     suspend fun sendCode(userId: String) {
