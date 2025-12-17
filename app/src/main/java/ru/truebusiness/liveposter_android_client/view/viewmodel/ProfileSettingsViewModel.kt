@@ -2,23 +2,45 @@ package ru.truebusiness.liveposter_android_client.view.viewmodel
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.compose.runtime.State
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import ru.truebusiness.liveposter_android_client.repository.AuthRepository
 
-class ProfileSettingsViewModel : ViewModel() {
-    private val TAG = "PROFILE_SETTINGS_VIEW_MODEL"
+class ProfileSettingsViewModel(
+    private val authRepository: AuthRepository
+) : ViewModel() {
 
     private val _uiState = mutableStateOf(
         ProfileSettingsUiState(
-            name = "Василий Попов",
-            username = "@vasily_P",
-            avatarUrl = "https://i.pinimg.com/236x/c6/00/f2/c600f276b3f7cafcd572402ac86e489b.jpg"
+            name = "",
+            username = "",
+            avatarUrl = ""
         )
     )
     val uiState: State<ProfileSettingsUiState> = _uiState
 
+    init {
+        // Подписываемся на изменения данных пользователя из DataStore (источник правды)
+        authRepository.currentUser
+            .onEach { user ->
+                if (user != null) {
+                    _uiState.value = _uiState.value.copy(
+                        name = user.username,
+                        username = user.shortId?.let { "@$it" } ?: "",
+                        avatarUrl = user.coverUrl ?: ""
+                    )
+                }
+            }
+            .launchIn(viewModelScope)
+    }
+
     fun logout() {
-        // мок: выход из аккаунта
-        println("Logout pressed")
+        viewModelScope.launch {
+            authRepository.logout()
+        }
     }
 
     fun deleteAccount() {

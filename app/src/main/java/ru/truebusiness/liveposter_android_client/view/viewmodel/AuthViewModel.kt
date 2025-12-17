@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
+import ru.truebusiness.liveposter_android_client.data.User
 import ru.truebusiness.liveposter_android_client.data.dto.RegistrationResponseDto
 import ru.truebusiness.liveposter_android_client.repository.AuthRepository
 import java.io.IOException
@@ -37,8 +38,13 @@ class AuthViewModel(
     val errors: SharedFlow<String> = _errors
     private val _state = MutableStateFlow(AuthState())
     val state: StateFlow<AuthState> = _state.asStateFlow()
-    val isLoggedIn = authRepository.isLoggedIn.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+    val isLoggedInNullable: StateFlow<Boolean?> = authRepository.isLoggedInNullable
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
     val email = authRepository.email.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+    val currentUser: StateFlow<User?> = authRepository.currentUser.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    // Получить AuthRepository для передачи в другие ViewModels
+    fun getAuthRepository(): AuthRepository = authRepository
 
     fun preRegister(
         email: String,
@@ -206,5 +212,9 @@ class AuthViewModel(
 
     fun logout() {
         viewModelScope.launch { authRepository.logout() }
+    }
+
+    fun loginAnonymously() {
+        viewModelScope.launch { authRepository.loginAnonymously() }
     }
 }

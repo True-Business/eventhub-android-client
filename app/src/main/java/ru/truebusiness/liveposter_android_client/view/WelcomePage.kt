@@ -145,12 +145,9 @@ fun WelcomePage(
 
             TextButton(
                 onClick = {
-                    navController.navigate("main") {
-                        popUpTo(navController.graph.startDestinationId) {
-                            inclusive = true
-                        }
-                        launchSingleTop = true
-                    }
+                    authViewModel.loginAnonymously()
+                    // Навигация произойдёт автоматически через LaunchedEffect в NavController
+                    // когда isLoggedIn станет true
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {

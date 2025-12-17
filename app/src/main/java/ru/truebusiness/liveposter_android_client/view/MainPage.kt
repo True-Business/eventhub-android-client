@@ -17,7 +17,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -25,6 +28,8 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,6 +49,7 @@ import ru.truebusiness.liveposter_android_client.ui.theme.MainPageBodyColor
 import ru.truebusiness.liveposter_android_client.ui.theme.MainPageTopFooterColor
 import ru.truebusiness.liveposter_android_client.view.components.AppNavigationBar
 import ru.truebusiness.liveposter_android_client.view.components.EventCard
+import ru.truebusiness.liveposter_android_client.view.viewmodel.AuthViewModel
 import ru.truebusiness.liveposter_android_client.view.viewmodel.EventsViewModel
 import java.util.Collections.emptyList
 
@@ -54,10 +60,17 @@ import java.util.Collections.emptyList
 @Composable
 fun MainPage(
     navController: NavController = rememberNavController(),
+    authViewModel: AuthViewModel,
     eventsViewModel: EventsViewModel = viewModel()
 ) {
     val eventsState = eventsViewModel.events.observeAsState(emptyList())
     val events = eventsState.value
+
+    // Получаем данные пользователя из AuthViewModel (источник правды - AuthRepository)
+    val currentUser by authViewModel.currentUser.collectAsState()
+
+    val userName = currentUser?.username ?: ""
+    val avatarUrl = currentUser?.coverUrl
 
     Scaffold(
         topBar = {
@@ -82,20 +95,30 @@ fun MainPage(
                                 .height(45.dp)
                                 .padding(start = 10.dp)
                                 .background(color = Color.White, shape = CircleShape)
-                                .clickable(onClick = { navController.navigate("profile-settings") })
+                                .clickable(onClick = { navController.navigate("profile-settings") }),
+                            contentAlignment = Alignment.Center
                         ) {
-                            AsyncImage(
-                                model = "https://i.pinimg.com/236x/c6/00/f2/c600f276b3f7cafcd572402ac86e489b.jpg",
-                                contentDescription = "Avatar",
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .clip(CircleShape),
-                                contentScale = ContentScale.Crop
-                            )
+                            if (!avatarUrl.isNullOrEmpty()) {
+                                AsyncImage(
+                                    model = avatarUrl,
+                                    contentDescription = "Avatar",
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .clip(CircleShape),
+                                    contentScale = ContentScale.Crop
+                                )
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Default.AccountCircle,
+                                    contentDescription = "Avatar",
+                                    modifier = Modifier.fillMaxSize(),
+                                    tint = Color(0xFFFF6600)
+                                )
+                            }
                         }
 
                         Text(
-                            text = "Василий Попов",
+                            text = userName,
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Medium,
                             color = Color.White,
