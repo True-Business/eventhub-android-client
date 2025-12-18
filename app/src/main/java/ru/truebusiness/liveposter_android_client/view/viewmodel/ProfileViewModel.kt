@@ -2,68 +2,35 @@ package ru.truebusiness.liveposter_android_client.view.viewmodel
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
-import ru.truebusiness.liveposter_android_client.repository.AuthRepository
+import ru.truebusiness.liveposter_android_client.R
 
-class ProfileViewModel(
-    private val authRepository: AuthRepository
-) : ViewModel() {
-
-    // Моковые данные для организаций и статистики (пока нет API)
-    private val mockEventsCreated = 5
-    private val mockEventsVisited = 15
-    private val mockOrganizations = listOf(
-        Organization(
-            name = "НГУ",
-            membersCount = 1400,
-            description = "НГУ - классический университет в Новосибирске, известный своей тесной интеграцией с научными институтами Сибирского отделения РАН. Университет предлагает высшее образование на 6 факультетах и в 4 институтах, сочетая естественнонаучные, инженерные и гуманитарные направления.",
-            imageUrl = "https://nadvizh.ru/media/events_img/67/smart-piknik_logo.jpg"
-        ),
-        Organization(
-            name = "IT Клуб",
-            membersCount = 230,
-            description = "Клуб, объединяющий студентов и выпускников, увлечённых IT-проектами и разработкой.",
-            imageUrl = "https://nadvizh.ru/media/events_img/67/smart-piknik_logo.jpg"
-        )
-    )
-
+class ProfileViewModel : ViewModel() {
+    private val TAG = "PROFILE_VIEW_MODEL"
     private val _uiState = mutableStateOf(
         ProfileUiState(
-            name = "",
-            username = "",
-            avatarUrl = "",
-            about = "",
-            eventsCreated = mockEventsCreated,
-            eventsVisited = mockEventsVisited,
-            organizations = mockOrganizations
+            name = "Василий Попов",
+            username = "@vasily_P",
+            avatarUrl = "https://i.pinimg.com/236x/c6/00/f2/c600f276b3f7cafcd572402ac86e489b.jpg",
+            about = "Я Вася Пупкин, студент 2 курса ФИТ НГУ и вот какой я классный. Приходите все на мероприятия НГУ!",
+            eventsCreated = 5,
+            eventsVisited = 15,
+            organizations = listOf(
+                Organization(
+                    name = "НГУ",
+                    membersCount = 1400,
+                    description = "НГУ - классический университет в Новосибирске, известный своей тесной интеграцией с научными институтами Сибирского отделения РАН. Университет предлагает высшее образование на 6 факультетах и в 4 институтах, сочетая естественнонаучные, инженерные и гуманитарные направления.",
+                    imageUrl = "https://nadvizh.ru/media/events_img/67/smart-piknik_logo.jpg"
+                ),
+                Organization(
+                    name = "IT Клуб",
+                    membersCount = 230,
+                    description = "Клуб, объединяющий студентов и выпускников, увлечённых IT-проектами и разработкой.",
+                    imageUrl = "https://nadvizh.ru/media/events_img/67/smart-piknik_logo.jpg"
+                )
+            )
         )
     )
     val uiState = _uiState
-
-    init {
-        // Подписываемся на изменения данных пользователя из DataStore (источник правды)
-        authRepository.currentUser
-            .onEach { user ->
-                if (user != null) {
-                    _uiState.value = _uiState.value.copy(
-                        name = user.username,
-                        username = user.shortId?.let { "@$it" } ?: "",
-                        avatarUrl = user.coverUrl ?: "",
-                        about = user.bio ?: ""
-                    )
-                }
-            }
-            .launchIn(viewModelScope)
-    }
-
-    fun updateProfile(username: String? = null, bio: String? = null) {
-        viewModelScope.launch {
-            authRepository.updateUserProfile(username = username, bio = bio)
-        }
-    }
 
     fun nextOrganization() {
         val list = _uiState.value.organizations
