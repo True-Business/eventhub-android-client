@@ -11,9 +11,11 @@ import ru.truebusiness.liveposter_android_client.data.User
 import ru.truebusiness.liveposter_android_client.data.dto.RegistrationResponseDto
 import ru.truebusiness.liveposter_android_client.data.dto.RegistrationStatus
 import ru.truebusiness.liveposter_android_client.data.dto.UserCredentialsRegistrationDto
+import ru.truebusiness.liveposter_android_client.data.dto.UserDto
 import ru.truebusiness.liveposter_android_client.data.dto.UserInfoRegistrationDto
 import ru.truebusiness.liveposter_android_client.data.toUser
 import ru.truebusiness.liveposter_android_client.repository.api.AuthApi
+import java.util.UUID
 
 class AuthRepository(
     private val authApi: AuthApi,
@@ -32,10 +34,8 @@ class AuthRepository(
         val CONFIRMED = booleanPreferencesKey("confirmed")
     }
 
+    val isLoggedIn: Flow<Boolean> = dataStore.data.map { it[IS_LOGGED_IN] ?: false }
     val email: Flow<String?> = dataStore.data.map { it[EMAIL] }
-
-    // Flow с nullable Boolean: null = ещё не загружено, true/false = реальное значение
-    val isLoggedInNullable: Flow<Boolean?> = dataStore.data.map { it[IS_LOGGED_IN] }
 
     val currentUser: Flow<User?> = dataStore.data.map { prefs ->
         val id = prefs[USER_ID] ?: return@map null
@@ -93,8 +93,25 @@ class AuthRepository(
         return response
     }
 
+    /**
+     * Выполняет вход пользователя.
+     *
+     * TODO: Заменить мок на реальный вызов API когда бекенд реализует endpoint:
+     * val userDto = authApi.login(UserCredentialsRegistrationDto(email, password))
+     */
     suspend fun login(email: String, password: String): User {
-        val userDto = authApi.login(UserCredentialsRegistrationDto(email, password))
+        // TODO: Раскомментировать когда бекенд реализует /api/v1/auth/login
+        // val userDto = authApi.login(UserCredentialsRegistrationDto(email, password))
+
+        // Мок: всегда возвращаем успешный ответ
+        val userDto = UserDto(
+            id = UUID.randomUUID().toString(),
+            username = email,
+            shortId = null,
+            bio = null,
+            registrationDate = null,
+            confirmed = true
+        )
 
         val user = userDto.toUser()
 
@@ -116,24 +133,6 @@ class AuthRepository(
     suspend fun logout() {
         dataStore.edit { prefs ->
             prefs[IS_LOGGED_IN] = false
-        }
-    }
-
-    suspend fun loginAnonymously() {
-        dataStore.edit { prefs ->
-            prefs[USER_ID] = "anonymous-user-id"
-            prefs[USERNAME] = "Василий Попов"
-            prefs[SHORT_ID] = "vasily_P"
-            prefs[BIO] = "Я Вася Пупкин, студент 2 курса ФИТ НГУ и вот какой я классный. Приходите все на мероприятия НГУ!"
-            prefs[CONFIRMED] = true
-            prefs[IS_LOGGED_IN] = true
-        }
-    }
-
-    suspend fun updateUserProfile(username: String? = null, bio: String? = null) {
-        dataStore.edit { prefs ->
-            username?.let { prefs[USERNAME] = it }
-            bio?.let { prefs[BIO] = it }
         }
     }
 }

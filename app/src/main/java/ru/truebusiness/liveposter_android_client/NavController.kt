@@ -1,25 +1,14 @@
 package ru.truebusiness.liveposter_android_client
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import ru.truebusiness.liveposter_android_client.repository.EventRepository
 import ru.truebusiness.liveposter_android_client.view.event.EventDetailsPage
 import ru.truebusiness.liveposter_android_client.view.FriendsPage
 import ru.truebusiness.liveposter_android_client.view.MainPage
@@ -42,77 +31,41 @@ import ru.truebusiness.liveposter_android_client.view.viewmodel.EventsViewModel
 import ru.truebusiness.liveposter_android_client.view.viewmodel.EventDetailsViewModel
 import ru.truebusiness.liveposter_android_client.view.viewmodel.OrganizationViewModel
 import ru.truebusiness.liveposter_android_client.view.viewmodel.OrganizationsListViewModel
-import ru.truebusiness.liveposter_android_client.view.viewmodel.ProfileSettingsViewModel
-import ru.truebusiness.liveposter_android_client.view.viewmodel.ProfileSettingsViewModelFactory
-import ru.truebusiness.liveposter_android_client.view.viewmodel.ProfileViewModel
-import ru.truebusiness.liveposter_android_client.view.viewmodel.ProfileViewModelFactory
 import java.util.UUID
 
 @Composable
 fun AppNavigation(
     authViewModel: AuthViewModel
 ) {
-    // Получаем nullable состояние авторизации (null = ещё загружается из DataStore)
-    val isLoggedIn by authViewModel.isLoggedInNullable.collectAsState()
-
-    // Показываем загрузку пока данные не готовы
-    if (isLoggedIn == null) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator(color = Color(0xFFFF6600))
-        }
-        return
-    }
 
     val orgViewModel: OrganizationViewModel = viewModel()
     val eventsViewModel: EventsViewModel = viewModel()
     eventsViewModel.initialize()
     val organizationsListViewModel: OrganizationsListViewModel = viewModel()
 
-    // Получаем AuthRepository для передачи в ViewModels профиля
-    val authRepository = authViewModel.getAuthRepository()
-    val profileViewModelFactory = ProfileViewModelFactory(authRepository)
-    val profileSettingsViewModelFactory = ProfileSettingsViewModelFactory(authRepository)
-
     val navController = rememberNavController()
+    val repository = EventRepository()
 
-    // Определяем начальный экран на основе загруженных данных
-    val startDestination = if (isLoggedIn == true) "main" else "welcome"
-
-    // Флаг для пропуска первого LaunchedEffect (начальное значение уже учтено в startDestination)
-    var isInitialized by remember { mutableStateOf(false) }
-
-    // Отслеживаем изменения авторизации для навигации (только после инициализации)
-    LaunchedEffect(isLoggedIn) {
-        if (!isInitialized) {
-            isInitialized = true
-            return@LaunchedEffect
-        }
-
-        if (isLoggedIn == true) {
-            // При login переходим на main
-            navController.navigate("main") {
-                popUpTo(0) { inclusive = true }
-            }
-        } else if (isLoggedIn == false) {
-            // При logout возвращаемся на welcome
-            navController.navigate("welcome") {
-                popUpTo(0) { inclusive = true }
+    // Проверяем авторизацию при старте приложения
+    LaunchedEffect(Unit) {
+        authViewModel.isLoggedIn.collect { isLoggedIn ->
+            if (isLoggedIn) {
+                navController.navigate("main") {
+                    popUpTo(navController.graph.startDestinationId) {
+                        inclusive = true
+                    }
+                }
             }
         }
     }
 
-    NavHost(navController = navController, startDestination = startDestination) {
+    NavHost(navController = navController, startDestination = "welcome") {
         composable("welcome") {
             WelcomePage(navController, authViewModel)
         }
 
         composable("main") {
-            MainPage(navController, authViewModel)
+            MainPage(navController)
         }
 
         composable("event-creation") {
@@ -163,7 +116,7 @@ fun AppNavigation(
 
         composable(
             route = "organizationAdmins",
-        ) {
+        ) { backStackEntry ->
             AdminsScreen(
                 orgViewModel,
                 navController,
@@ -174,12 +127,10 @@ fun AppNavigation(
         }
 
         composable("profile-settings") {
-            val profileSettingsViewModel: ProfileSettingsViewModel = viewModel(factory = profileSettingsViewModelFactory)
-            ProfileSettingsPage(navController, profileSettingsViewModel)
+            ProfileSettingsPage(navController)
         }
         composable("profile") {
-            val profileViewModel: ProfileViewModel = viewModel(factory = profileViewModelFactory)
-            ProfilePage(navController, profileViewModel)
+            ProfilePage(navController)
         }
 
         /* Нижний блок навигации по приложению */
