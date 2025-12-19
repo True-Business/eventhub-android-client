@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -26,6 +27,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import ru.truebusiness.liveposter_android_client.view.components.GradientButton
 import ru.truebusiness.liveposter_android_client.view.viewmodel.EventActionsUiState
+import kotlin.math.max
 
 @Composable
 fun EventActionsCard(
@@ -45,8 +47,8 @@ fun EventActionsCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             state.primaryButton?.let { buttonState ->
                 GradientButton(
@@ -56,51 +58,38 @@ fun EventActionsCard(
                 )
             }
 
-            if (state.showShareButton || state.showParticipantsButton) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    if (state.showShareButton) {
-                        EventOutlinedButton(
-                            modifier = Modifier.weight(1f),
-                            icon = Icons.Filled.Share,
-                            label = "Поделиться",
-                            onClick = onShareClick
-                        )
-                    }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                EventOutlinedButton(
+                    modifier = Modifier.weight(1f),
+                    icon = Icons.Filled.Share,
+                    label = "Поделиться",
+                    onClick = onShareClick
+                )
 
-                    if (state.showParticipantsButton) {
-                        EventOutlinedButton(
-                            modifier = Modifier.weight(1f),
-                            icon = Icons.Filled.Person,
-                            label = "Участники",
-                            onClick = onShowParticipants
-                        )
-                    }
-                }
+                EventOutlinedButton(
+                    modifier = Modifier.weight(1f),
+                    icon = Icons.Filled.Person,
+                    label = "Участники",
+                    onClick = onShowParticipants
+                )
             }
 
-            if (state.showManagementButtons) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    EventOutlinedButton(
-                        modifier = Modifier.weight(1f),
-                        icon = Icons.Filled.Edit,
-                        label = "Редактировать",
-                        onClick = onEditClick
-                    )
+            EventOutlinedButton(
+                modifier = Modifier.fillMaxWidth(),
+                icon = Icons.Filled.Edit,
+                label = "Редактировать",
+                onClick = onEditClick
+            )
 
-                    EventOutlinedButton(
-                        modifier = Modifier.weight(1f),
-                        icon = Icons.Outlined.Delete,
-                        label = "Отменить",
-                        onClick = onCancelEventClick
-                    )
-                }
-            }
+            EventOutlinedButton(
+                modifier = Modifier.fillMaxWidth(),
+                icon = Icons.Outlined.Delete,
+                label = "Отменить",
+                onClick = onCancelEventClick
+            )
         }
     }
 }
@@ -114,10 +103,16 @@ private fun EventOutlinedButton(
 ) {
     OutlinedButton(
         modifier = modifier,
-        onClick = onClick
+        onClick = onClick,
     ) {
-        Icon(imageVector = icon, contentDescription = null)
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(text = label, style = MaterialTheme.typography.bodyMedium)
+        Row (
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Icon(imageVector = icon, contentDescription = null)
+            Spacer(Modifier.size(8.dp))
+            Text(text = label, style = MaterialTheme.typography.bodyMedium, maxLines = 1)
+        }
+
     }
 }

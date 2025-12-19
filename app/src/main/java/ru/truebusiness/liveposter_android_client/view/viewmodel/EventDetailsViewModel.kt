@@ -1,5 +1,7 @@
 package ru.truebusiness.liveposter_android_client.view.viewmodel
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -15,12 +17,11 @@ import ru.truebusiness.liveposter_android_client.data.EventDetailsError
 import ru.truebusiness.liveposter_android_client.data.EventPost
 import ru.truebusiness.liveposter_android_client.data.User
 import ru.truebusiness.liveposter_android_client.repository.EventDetailsRepository
-import ru.truebusiness.liveposter_android_client.repository.MockEventDetailsRepository
 import ru.truebusiness.liveposter_android_client.utils.DateUtils
 import ru.truebusiness.liveposter_android_client.utils.DateUtils.formatEventDate
 
 class EventDetailsViewModel(
-    private val repository: EventDetailsRepository = MockEventDetailsRepository()
+    private val repository: EventDetailsRepository = EventDetailsRepository()
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(EventDetailsUiState())
@@ -29,42 +30,52 @@ class EventDetailsViewModel(
     private val _events = MutableSharedFlow<EventDetailsEvent>()
     val events: SharedFlow<EventDetailsEvent> = _events.asSharedFlow()
 
+    private val _event = MutableLiveData<List<Event>>(emptyList())
+    val event: LiveData<List<Event>> = _event
+
     private var currentEventId: String? = null
 
-    fun loadEvent(eventId: String, force: Boolean = false) {
-        if (!force && currentEventId == eventId && _uiState.value.event != null) return
+    fun loadEvent(eventId: String, initialEvent: Event? = null, force: Boolean = false) {
+        if (!force && currentEventId == eventId && !_uiState.value.isLoading && _uiState.value.event != null) return
+        if (!force && currentEventId == eventId && _uiState.value.isLoading) return
 
         currentEventId = eventId
 
+        initialEvent?.let {
+            repository.cacheEvent(it)
+            updateStateWithEvent(it)
+        }
+
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+            val shouldShowLoader = _uiState.value.event == null
+            _uiState.update { it.copy(isLoading = shouldShowLoader, errorMessage = null) }
 
             repository.getEvent(eventId)
-                .onSuccess { event -> updateStateWithEvent(event) }
+                .onSuccess { event ->
+                    repository.cacheEvent(event)
+                    updateStateWithEvent(event)
+                }
                 .onFailure { throwable -> handleError(throwable, clearEvent = _uiState.value.event == null) }
         }
     }
 
     fun onPrimaryAction() {
         val state = _uiState.value
-        val eventId = currentEventId ?: return
         val primaryButton = state.actions.primaryButton ?: return
         if (!primaryButton.enabled) return
 
         viewModelScope.launch {
-            setActionInProgress(true)
 
             val result = when (primaryButton.action) {
-                EventPrimaryAction.JOIN -> repository.joinEvent(eventId)
-                EventPrimaryAction.LEAVE -> repository.leaveEvent(eventId)
-                EventPrimaryAction.NONE -> Result.success(state.event ?: return@launch setActionInProgress(false))
+                EventPrimaryAction.JOIN -> Result.failure(RuntimeException("Сервис временно недоступен"))
+                EventPrimaryAction.LEAVE -> Result.failure(RuntimeException("Сервис временно недоступен"))
+                EventPrimaryAction.NONE -> Result.success(state.event)
             }
 
             result
                 .onSuccess { event -> updateStateWithEvent(event) }
                 .onFailure { throwable -> handleError(throwable) }
 
-            setActionInProgress(false)
         }
     }
 
@@ -98,39 +109,27 @@ class EventDetailsViewModel(
         else -> throwable.message ?: "Произошла ошибка"
     }
 
-    private fun setActionInProgress(isInProgress: Boolean) {
-        val event = _uiState.value.event ?: return
-        _uiState.update { state ->
-            state.copy(actions = buildActionsState(event, isInProgress))
-        }
-    }
-
-    private fun updateStateWithEvent(event: Event) {
-        _uiState.update {
-            it.copy(
-                isLoading = false,
-                errorMessage = null,
-                event = event,
-                mainInfo = buildMainInfoState(event),
-                actions = buildActionsState(event, isActionInProgress = false),
-                additionalInfo = buildAdditionalInfoState(event),
-                posts = event.posts
-            )
+    private fun updateStateWithEvent(event: Event?) {
+        event?.let {
+            _uiState.update {
+                it.copy(
+                    isLoading = false,
+                    errorMessage = null,
+                    event = event,
+                    mainInfo = buildMainInfoState(event),
+                    actions = buildActionsState(event),
+                    additionalInfo = buildAdditionalInfoState(event)
+                )
+            }
         }
     }
 
     private fun buildMainInfoState(event: Event): EventMainInfoUiState {
-        val scheduleText = when {
-            event.schedule.isNotBlank() -> event.schedule
-            else -> {
-                val startDateText = formatEventDate(event.startDate)
-                val endDateText = formatEventDate(event.endDate)
+        val startDateText = formatEventDate(event.startDate)
+        val endDateText = formatEventDate(event.endDate)
+        val scheduleText = if (startDateText == endDateText) startDateText else "$startDateText - $endDateText"
 
-                if (startDateText == endDateText) startDateText else "$startDateText - $endDateText"
-            }
-        }
-
-        val participantsLimit = event.participantLimit ?: event.peopleLimit
+        val participantsLimit = event.peopleLimit
         val participantsText = buildString {
             append(event.participantsCount)
             participantsLimit.let { limit ->
@@ -148,7 +147,7 @@ class EventDetailsViewModel(
                 address = event.address.takeIf { it.isNotBlank() },
                 location = event.location.takeIf { it.isNotBlank() }
             ),
-            status = if (!event.open || event.isClosed) {
+            status = if (!event.open) {
                 EventStatusUiState(
                     label = "Закрытое мероприятие",
                     type = EventStatusType.CLOSED
@@ -163,10 +162,10 @@ class EventDetailsViewModel(
         )
     }
 
-    private fun buildActionsState(event: Event, isActionInProgress: Boolean): EventActionsUiState {
-        val participantsLimit = event.participantLimit ?: event.peopleLimit
-        val isFinished = event.isFinished || DateUtils.isEventInPast(event.endDate)
-        val isParticipant = event.isUserParticipant || event.isUserParticipating
+    private fun buildActionsState(event: Event): EventActionsUiState {
+        val participantsLimit = event.peopleLimit
+        val isFinished = event.isFinished
+        val isParticipant = event.isUserParticipating
 
         val participantsLimitReached = participantsLimit.let { limit ->
             event.participantsCount >= limit
@@ -183,7 +182,7 @@ class EventDetailsViewModel(
 
             isParticipant -> EventPrimaryButtonState(
                 text = "Не смогу пойти",
-                enabled = !isActionInProgress,
+                enabled = true,
                 action = EventPrimaryAction.LEAVE
             )
 
@@ -195,19 +194,13 @@ class EventDetailsViewModel(
 
             else -> EventPrimaryButtonState(
                 text = "Хочу пойти",
-                enabled = !isActionInProgress,
+                enabled = true,
                 action = EventPrimaryAction.JOIN
             )
         }
 
         return EventActionsUiState(
-            primaryButton = primaryButton,
-            shareLink = event.shareLink,
-            participants = event.participants,
-            showShareButton = event.shareLink.isNotBlank(),
-            showParticipantsButton = event.participants.isNotEmpty(),
-            showManagementButtons = event.canManage,
-            isActionInProgress = isActionInProgress
+            primaryButton = primaryButton
         )
     }
     private fun buildAdditionalInfoState(event: Event): EventAdditionalInfoUiState {
@@ -259,12 +252,7 @@ enum class EventStatusType { OPEN, CLOSED }
 
 data class EventActionsUiState(
     val primaryButton: EventPrimaryButtonState? = null,
-    val shareLink: String? = null,
     val participants: List<User> = emptyList(),
-    val showShareButton: Boolean = false,
-    val showParticipantsButton: Boolean = false,
-    val showManagementButtons: Boolean = false,
-    val isActionInProgress: Boolean = false
 )
 
 data class EventPrimaryButtonState(
