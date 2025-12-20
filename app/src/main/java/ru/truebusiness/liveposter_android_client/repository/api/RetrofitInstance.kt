@@ -5,6 +5,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.Base64
+import java.util.concurrent.TimeUnit
 
 object RetrofitInstance {
     private const val BASE_URL = "http://eventhub-backend.ru/dev/"
@@ -35,6 +36,9 @@ object RetrofitInstance {
         val basicAuth = "Basic " + Base64.getEncoder().encodeToString(credentials.toByteArray())
 
         OkHttpClient.Builder()
+            .connectTimeout(5, TimeUnit.SECONDS)
+            .readTimeout(5, TimeUnit.SECONDS)
+            .writeTimeout(5, TimeUnit.SECONDS)
             .addInterceptor(logger)
             .addInterceptor { chain ->
                 val originalRequest = chain.request()
@@ -51,6 +55,9 @@ object RetrofitInstance {
     private val publicClient by lazy {
         val logger = HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY }
         OkHttpClient.Builder()
+            .connectTimeout(5, TimeUnit.SECONDS)
+            .readTimeout(5, TimeUnit.SECONDS)
+            .writeTimeout(5, TimeUnit.SECONDS)
             .addInterceptor(logger)
             .addInterceptor { chain ->
                 val originalRequest = chain.request()

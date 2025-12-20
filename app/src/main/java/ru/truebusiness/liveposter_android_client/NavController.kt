@@ -19,6 +19,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import kotlinx.coroutines.delay
 import androidx.navigation.navArgument
 import ru.truebusiness.liveposter_android_client.view.event.EventDetailsPage
 import ru.truebusiness.liveposter_android_client.view.FriendsPage
@@ -55,8 +56,19 @@ fun AppNavigation(
     // Получаем nullable состояние авторизации (null = ещё загружается из DataStore)
     val isLoggedIn by authViewModel.isLoggedInNullable.collectAsState()
 
-    // Показываем загрузку пока данные не готовы
-    if (isLoggedIn == null) {
+    // Флаг таймаута загрузки
+    var loadingTimedOut by remember { mutableStateOf(false) }
+
+    // Таймаут 5 секунд для загрузки состояния авторизации
+    LaunchedEffect(Unit) {
+        delay(5000)
+        if (isLoggedIn == null) {
+            loadingTimedOut = true
+        }
+    }
+
+    // Показываем загрузку пока данные не готовы (с таймаутом)
+    if (isLoggedIn == null && !loadingTimedOut) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -67,6 +79,9 @@ fun AppNavigation(
         }
         return
     }
+
+    // Если таймаут истёк и данные не загружены - считаем пользователя не авторизованным
+    val effectiveIsLoggedIn = isLoggedIn ?: false
 
     val orgViewModel: OrganizationViewModel = viewModel()
     val eventsViewModel: EventsViewModel = viewModel()
@@ -80,25 +95,25 @@ fun AppNavigation(
 
     val navController = rememberNavController()
 
-    // Определяем начальный экран на основе загруженных данных
-    val startDestination = if (isLoggedIn == true) "main" else "welcome"
+    // Определяем начальный экран на основе загруженных данных (или таймаута)
+    val startDestination = if (effectiveIsLoggedIn) "main" else "welcome"
 
     // Флаг для пропуска первого LaunchedEffect (начальное значение уже учтено в startDestination)
     var isInitialized by remember { mutableStateOf(false) }
 
     // Отслеживаем изменения авторизации для навигации (только после инициализации)
-    LaunchedEffect(isLoggedIn) {
+    LaunchedEffect(effectiveIsLoggedIn) {
         if (!isInitialized) {
             isInitialized = true
             return@LaunchedEffect
         }
 
-        if (isLoggedIn == true) {
+        if (effectiveIsLoggedIn) {
             // При login переходим на main
             navController.navigate("main") {
                 popUpTo(0) { inclusive = true }
             }
-        } else if (isLoggedIn == false) {
+        } else {
             // При logout возвращаемся на welcome
             navController.navigate("welcome") {
                 popUpTo(0) { inclusive = true }
