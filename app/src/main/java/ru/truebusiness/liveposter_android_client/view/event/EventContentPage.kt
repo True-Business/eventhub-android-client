@@ -44,10 +44,6 @@ import ru.truebusiness.liveposter_android_client.view.viewmodel.EventDetailsView
 fun EventDetailsPage(
     viewModel: EventDetailsViewModel,
     onBack: () -> Unit,
-    onShareClick: (String) -> Unit = {},
-    onShowParticipants: (List<User>) -> Unit = {},
-    onEditClick: (Event) -> Unit = {},
-    onCancelEventClick: (Event) -> Unit = {},
     onOrganizerClick: (String) -> Unit = {},
     onShowError: (String) -> Unit = {}
 ) {
@@ -103,31 +99,21 @@ fun EventDetailsPage(
                 ) {
                     EventMainInfoCard(uiState.mainInfo)
 
-                    EventActionsCard(
-                        state = uiState.actions,
-                        onPrimaryAction = viewModel::onPrimaryAction,
-                        onShareClick = {
-                            uiState.actions.shareLink?.let(onShareClick)
-                        },
-                        onShowParticipants = {
-                            if (uiState.actions.participants.isNotEmpty()) {
-                                onShowParticipants(uiState.actions.participants)
-                            }
-                        },
-                        onEditClick = {
-                            uiState.event?.let(onEditClick)
-                        },
-                        onCancelEventClick = {
-                            uiState.event?.let(onCancelEventClick)
-                        }
-                    )
-
                     if (uiState.additionalInfo.isVisible) {
                         EventAdditionalInfoCard(
                             state = uiState.additionalInfo,
                             onOrganizerClick = onOrganizerClick
                         )
                     }
+
+                    EventActionsCard(
+                        state = uiState.actions,
+                        onPrimaryAction = viewModel::onPrimaryAction,
+                        onShareClick = { },
+                        onShowParticipants = { },
+                        onEditClick = { },
+                        onCancelEventClick = { }
+                    )
 
                     if (uiState.posts.isNotEmpty()) {
                         EventPostsFeed(posts = uiState.posts)

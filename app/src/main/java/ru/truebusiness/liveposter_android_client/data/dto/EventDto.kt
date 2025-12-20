@@ -1,5 +1,9 @@
 package ru.truebusiness.liveposter_android_client.data.dto
 
+import ru.truebusiness.liveposter_android_client.data.EventsCategory
+import java.time.Instant
+import java.util.UUID
+
 /**
  * DTO class that matches the exact API response format from the backend
  * Used for serialization/deserialization of API requests and responses
@@ -22,7 +26,12 @@ data class EventDto(
     val peopleLimit: Int,
     val registerEndDateTime: String,
     val withRegister: Boolean,
-    val open: Boolean
+    val open: Boolean,
+
+    // Дополнительные поля для экрана деталей
+    val participantsCount: Int? = null,
+    val isUserParticipant: Boolean? = null,
+    val participants: List<EventParticipantDto>? = null
 )
 
 /**
@@ -46,4 +55,25 @@ data class EventCreateUpdateDto(
     val registerEndDateTime: String? = null,
     val withRegister: Boolean? = null,
     val open: Boolean? = null
+)
+
+data class EventParticipantDto(
+    val name: String? = null,
+    val avatarUrl: String? = null
+)
+
+/**
+ * DTO для фильтрации событий на сервере при поиске
+ */
+data class EventSearchFilterDto(
+    val city: String? = null,
+    val minPrice: Double? = null,
+    val maxPrice: Double? = null,
+    val startDateTime: Instant? = null,
+    val minDurationMinutes: Int? = null,
+    val maxDurationMinutes: Int? = null,
+    val organizerId: UUID? = null,
+    val isParticipant: Boolean? = null,
+    val category: EventsCategory? = null,
+    val isOpen: Boolean? = null,
 )

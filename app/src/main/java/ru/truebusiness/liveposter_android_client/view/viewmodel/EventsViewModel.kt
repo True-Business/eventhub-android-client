@@ -4,6 +4,8 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import ru.truebusiness.liveposter_android_client.data.Event
 import ru.truebusiness.liveposter_android_client.data.EventCategory
 import ru.truebusiness.liveposter_android_client.data.FilterState
@@ -56,14 +58,14 @@ class EventsViewModel: ViewModel() {
         _isLoading.value = true
         Log.d(TAG, "Загрузка новых мероприятий категории $selectedCategory...")
 
-        repository.fetchEventsMock(_selectedCategory.value) { newEvents ->
+        viewModelScope.launch {
+            val newEvents = repository.searchEvents()
             _isLoading.value = false
             newEvents?.let {
                 _events.value = _events.value.orEmpty() + it
             }
+            Log.d(TAG, "Новые мероприятия загружены!")
         }
-
-        Log.d(TAG, "Новые мероприятия загружены!")
     }
 
     /**
@@ -77,9 +79,6 @@ class EventsViewModel: ViewModel() {
         loadEvents()
     }
 
-    /**
-     * 🔎 Поиск мероприятий по тексту (идёт на бэкенд)
-     */
     fun searchEvents(query: String) {
         if (_isLoading.value == true) return
 
@@ -87,10 +86,12 @@ class EventsViewModel: ViewModel() {
         Log.d(TAG, "Поиск мероприятий по запросу: $query")
 
         // TODO(e.vartazaryan): Перейти на вызов api, а не использовать моки
-        repository.searchMockEvents(query) { newEvents ->
-            _isLoading.value = false
-            newEvents?.let {
-                _events.value = it
+        viewModelScope.launch {
+            repository.fetchEventsWithFilter(FilterState(query = query)) { newEvents ->
+                _isLoading.value = false
+                newEvents?.let {
+                    _events.value = it
+                }
             }
         }
     }
@@ -328,10 +329,12 @@ class EventsViewModel: ViewModel() {
         _isLoading.value = true
         val filter = _filterState.value ?: FilterState()
 
-        repository.fetchEventsWithFilterMock(filter) { newEvents ->
-            _isLoading.value = false
-            newEvents?.let {
-                _events.value = it
+        viewModelScope.launch {
+            repository.fetchEventsWithFilter(filter) { newEvents ->
+                _isLoading.value = false
+                newEvents?.let {
+                    _events.value = it
+                }
             }
         }
     }

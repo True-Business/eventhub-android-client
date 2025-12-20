@@ -1,5 +1,6 @@
 package ru.truebusiness.liveposter_android_client.data
 
+import java.io.Serializable
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -21,7 +22,7 @@ data class Event(
     val route: String,          // route/direction from API
     val city: String,           // city from API
     val peopleLimit: Int,       // maximum participants from API
-    val registerEndDateTime: LocalDateTime, // registration deadline from API
+    val registerEndDateTime: LocalDateTime?, // registration deadline from API
     val withRegister: Boolean,  // requires registration from API
     val open: Boolean,          // public/private flag from API
 
@@ -33,18 +34,10 @@ data class Event(
     val eventStatus: EventStatus,
     val isPublic: Boolean,        // true for public, false for private
 
-    val schedule: String = "",
-    val isClosed: Boolean = false,
     val participantsCount: Int = 0,
-    val participantLimit: Int? = null,
     val description: String = "",
     val howToGet: String = "",
-    val isUserParticipant: Boolean = false,
-    val isFinished: Boolean = false,
-    val participants: List<User> = emptyList(),
-    val posts: List<EventPost> = emptyList(),
-    val canManage: Boolean = false,
-    val shareLink: String = ""
+    val isFinished: Boolean,
 )
 
 enum class EventStatus {

@@ -3,6 +3,7 @@ package ru.truebusiness.liveposter_android_client.data.dto
 import ru.truebusiness.liveposter_android_client.data.Event
 import ru.truebusiness.liveposter_android_client.data.EventCategory
 import ru.truebusiness.liveposter_android_client.data.EventStatus
+import java.time.Instant
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
@@ -16,14 +17,16 @@ import java.util.UUID
  */
 fun EventDto.toDomainEvent(): Event {
     val formatter = DateTimeFormatter.ISO_INSTANT
+    val startDateTime = parseIsoDateTime(this.startDateTime)
+    val endDateTime = parseIsoDateTime(this.endDateTime)
 
     return Event(
         id = UUID.fromString(this.id),
         category = parseCategoryString(this.category),
         title = this.name,
         content = this.description,
-        startDate = parseIsoDateTime(this.startDateTime),
-        endDate = parseIsoDateTime(this.endDateTime),
+        startDate = startDateTime,
+        endDate = endDateTime,
         location = buildLocationString(this.address, this.route, this.city),
         posterUrl = "", // TODO: Implement when API provides poster URL
 
@@ -43,9 +46,12 @@ fun EventDto.toDomainEvent(): Event {
         price = if (this.price == 0.0) null else this.price,
         duration = null, // TODO: Calculate from start/end dates if needed
         organizer = null, // TODO: Fetch from user API if needed
-        isUserParticipating = false, // TODO: Implement when user participation tracking is added
+        isUserParticipating = this.isUserParticipant ?: false,
         eventStatus = parseEventStatus(this.status),
-        isPublic = this.open
+        isPublic = this.open,
+
+        participantsCount = this.participantsCount ?: 0,
+        isFinished = endDateTime.isBefore(LocalDateTime.now())
     )
 }
 
@@ -133,7 +139,10 @@ fun List<EventDto>.toDomainEvents(): List<Event> {
 /**
  * Parses ISO 8601 datetime strings (both with and without 'Z' suffix)
  */
-fun parseIsoDateTime(dateTimeString: String): LocalDateTime {
+fun parseIsoDateTime(dateTimeString: String?): LocalDateTime {
+    if (dateTimeString == null) {
+        return LocalDateTime.now()
+    }
     return try {
         // Try parsing with 'Z' suffix first (UTC)
         if (dateTimeString.endsWith("Z")) {
