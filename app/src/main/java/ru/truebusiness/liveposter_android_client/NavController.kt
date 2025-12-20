@@ -38,6 +38,7 @@ import ru.truebusiness.liveposter_android_client.view.events.EventCreationSettin
 import ru.truebusiness.liveposter_android_client.view.organizations.AdminsScreen
 import ru.truebusiness.liveposter_android_client.view.organizations.OrganizationPage
 import ru.truebusiness.liveposter_android_client.view.organizationslist.OrganizationsListPage
+import ru.truebusiness.liveposter_android_client.view.test.StorageTestScreen
 import ru.truebusiness.liveposter_android_client.view.viewmodel.AuthViewModel
 import ru.truebusiness.liveposter_android_client.view.viewmodel.EventsViewModel
 import ru.truebusiness.liveposter_android_client.view.viewmodel.EventDetailsViewModel
@@ -95,8 +96,12 @@ fun AppNavigation(
 
     val navController = rememberNavController()
 
+    // TODO: После тестирования Storage API раскомментировать строку ниже и удалить "storage-test"
     // Определяем начальный экран на основе загруженных данных (или таймаута)
-    val startDestination = if (effectiveIsLoggedIn) "main" else "welcome"
+    // val startDestination = if (effectiveIsLoggedIn) "main" else "welcome"
+
+    // Временно для тестирования Storage API
+    val startDestination = "storage-test"
 
     // Флаг для пропуска первого LaunchedEffect (начальное значение уже учтено в startDestination)
     var isInitialized by remember { mutableStateOf(false) }
@@ -122,6 +127,11 @@ fun AppNavigation(
     }
 
     NavHost(navController = navController, startDestination = startDestination) {
+        // Тестовый экран Storage API (временно)
+        composable("storage-test") {
+            StorageTestScreen()
+        }
+
         composable("welcome") {
             WelcomePage(navController, authViewModel)
         }
