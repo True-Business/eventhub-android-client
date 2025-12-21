@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -84,14 +85,23 @@ fun ProfileSettingsPage(
                         .clickable { navController.navigate("profile") },
                     contentAlignment = Alignment.Center
                 ) {
-                    AsyncImage(
-                        model = state.avatarUrl,
-                        contentDescription = "Avatar",
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(CircleShape),
-                        contentScale = ContentScale.Crop
-                    )
+                    if (state.avatarUrl.isNotEmpty()) {
+                        AsyncImage(
+                            model = state.avatarUrl,
+                            contentDescription = "Avatar",
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.AccountCircle,
+                            contentDescription = "Avatar",
+                            modifier = Modifier.fillMaxSize(),
+                            tint = orange
+                        )
+                    }
                 }
 
 
