@@ -1,5 +1,6 @@
 package ru.truebusiness.liveposter_android_client.view.registration
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -26,6 +27,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import ru.truebusiness.liveposter_android_client.data.dto.RegistrationStatus
 import ru.truebusiness.liveposter_android_client.view.components.GradientButton
 import ru.truebusiness.liveposter_android_client.view.viewmodel.AuthViewModel
 
@@ -36,9 +38,11 @@ fun RegistrationPagePersonalInfo(
     navController: NavController,
     userId: String
 ) {
+    val TAG = "RegistrationPagePersonalInfo"
+
     var displayName by remember { mutableStateOf("") }
-    var username by remember { mutableStateOf("") }
-    var isUsernameValid by remember { mutableStateOf(true) }
+    var shortId by remember { mutableStateOf("") }
+    var isShortIdValid by remember { mutableStateOf(true) }
     val context = LocalContext.current
 
     Column(
@@ -67,13 +71,13 @@ fun RegistrationPagePersonalInfo(
         )
 
         OutlinedTextField(
-            value = username,
+            value = shortId,
             onValueChange = {
-                username = it
-                isUsernameValid = it.matches(Regex("^[a-zA-Z0-9]+$"))
+                shortId = it
+                isShortIdValid = it.matches(Regex("^[a-zA-Z0-9]+$"))
             },
             label = { Text("Короткое имя (например, @ivanov)") },
-            isError = !isUsernameValid,
+            isError = !isShortIdValid,
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
             colors = OutlinedTextFieldDefaults.colors(
@@ -88,7 +92,7 @@ fun RegistrationPagePersonalInfo(
             )
         )
 
-        if (!isUsernameValid) {
+        if (!isShortIdValid) {
             Text(
                 text = "Имя может содержать только буквы, цифры и _",
                 color = MaterialTheme.colorScheme.error,
@@ -104,12 +108,32 @@ fun RegistrationPagePersonalInfo(
                 Toast.makeText(context, "Введите ваше имя", Toast.LENGTH_SHORT).show()
                 return@GradientButton
             }
-            if (!isUsernameValid || username.isBlank()) {
+            if (!isShortIdValid || shortId.isBlank()) {
                 Toast.makeText(context, "Некорректное имя пользователя", Toast.LENGTH_SHORT).show()
                 return@GradientButton
             }
-            navController.navigate("main") {
-                popUpTo(navController.graph.startDestinationId) { inclusive = true }
+
+            /*
+            * В случае успеха здесь переход на navController.navigate("main") не делается.
+            * Это сделано по следующей причине:
+            *
+            * в методе ru.truebusiness.liveposter_android_client.view.viewmodel.AuthViewModel.postRegister
+            * мы выставляем в dataStore что пользователь залогинился (prefs[IS_LOGGED_IN] = true)
+            * На это действие тригерится LaunchedEffect в ru/truebusiness/liveposter_android_client/NavController.kt:105,
+            * который уже перебросит пользователя на главную страницу
+            * */
+            vm.postRegister(userId, displayName, shortId) { status, reason ->
+                if (status == RegistrationStatus.ERROR.name) {
+                    Log.e(TAG, "Couldn't post register user: $reason")
+                    Toast
+                        .makeText(
+                            context,
+                            "Не удалось сохранить данные: $reason",
+                            Toast.LENGTH_SHORT
+                        )
+                        .show()
+                    return@postRegister
+                }
             }
         }
     }

@@ -250,7 +250,7 @@ fun EventsMainScreen(
         ) {
             FloatingActionButton(
                 onClick = {
-                    //TODO navigate to create event
+                    navController.navigate("event-creation")
                 },
                 shape = CircleShape,
                 containerColor = ChipBackground
