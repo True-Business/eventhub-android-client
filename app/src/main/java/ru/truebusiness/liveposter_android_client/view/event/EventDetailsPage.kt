@@ -28,8 +28,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import ru.truebusiness.liveposter_android_client.data.Event
-import ru.truebusiness.liveposter_android_client.data.User
 import ru.truebusiness.liveposter_android_client.ui.theme.EventPageTopFooterColor
 import ru.truebusiness.liveposter_android_client.ui.theme.pageGradient
 import ru.truebusiness.liveposter_android_client.view.event.components.EventActionsCard
@@ -43,6 +41,7 @@ import ru.truebusiness.liveposter_android_client.view.viewmodel.EventDetailsView
 @Composable
 fun EventDetailsPage(
     viewModel: EventDetailsViewModel,
+    currentUserId: String? = null,
     onBack: () -> Unit,
     onOrganizerClick: (String) -> Unit = {},
     onShowError: (String) -> Unit = {}
@@ -56,6 +55,10 @@ fun EventDetailsPage(
                 is EventDetailsEvent.Error -> onShowError(event.message)
             }
         }
+    }
+
+    LaunchedEffect(currentUserId) {
+        viewModel.setCurrentUserId(currentUserId)
     }
 
     Scaffold(

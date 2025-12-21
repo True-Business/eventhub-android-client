@@ -77,3 +77,10 @@ data class EventSearchFilterDto(
     val category: EventsCategory? = null,
     val isOpen: Boolean? = null,
 )
+
+data class EventRegistrationDto(
+    val id: String?,
+    val userId: String?,
+    val eventId: String?,
+    val registeredAt: String?
+)

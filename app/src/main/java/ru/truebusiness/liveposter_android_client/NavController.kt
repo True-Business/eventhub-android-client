@@ -143,6 +143,7 @@ fun AppNavigation(
             arguments = listOf(navArgument("eventId") { type = NavType.StringType })
         ) { backStackEntry ->
             val eventId = backStackEntry.arguments?.getString("eventId") ?: return@composable
+            val currentUser by authViewModel.currentUser.collectAsState()
             val eventViewModel: EventDetailsViewModel = viewModel()
             LaunchedEffect(eventId) {
                 eventViewModel.loadEvent(eventId)
@@ -150,9 +151,9 @@ fun AppNavigation(
 
             EventDetailsPage(
                 viewModel = eventViewModel,
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                currentUserId = currentUser?.id
             )
-
         }
 
         composable(
