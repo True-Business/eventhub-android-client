@@ -53,8 +53,8 @@ data class EventCreateUpdateDto(
     val city: String? = null,
     val peopleLimit: Int? = null,
     val registerEndDateTime: String? = null,
-    val withRegister: Boolean? = null,
-    val open: Boolean? = null
+    val isWithRegister: Boolean? = null,
+    val isOpen: Boolean? = null
 )
 
 data class EventParticipantDto(
@@ -76,4 +76,11 @@ data class EventSearchFilterDto(
     val isParticipant: Boolean? = null,
     val category: EventsCategory? = null,
     val isOpen: Boolean? = null,
+)
+
+data class EventRegistrationDto(
+    val id: String?,
+    val userId: String?,
+    val eventId: String?,
+    val registeredAt: String?
 )

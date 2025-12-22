@@ -31,4 +31,40 @@ class EventDetailsRepository(
     fun cacheEvent(event: Event) {
         cachedEvents[event.id.toString()] = event
     }
+
+    suspend fun registerForEvent(eventId: String, userId: String): Result<Event> {
+        val currentEvent = cachedEvents[eventId] ?: getEvent(eventId).getOrNull()
+        currentEvent ?: return Result.failure(EventDetailsError.EventNotFound)
+
+        val response = eventApi.registerForEvent(eventId, userId)
+
+        if (response.isSuccessful) {
+            val updatedEvent = currentEvent.copy(
+                isUserParticipating = true,
+                participantsCount = currentEvent.participantsCount + 1
+            )
+            cacheEvent(updatedEvent)
+            return Result.success(updatedEvent)
+        }
+
+        return Result.failure(RuntimeException(response.errorBody()?.string() ?: "Не удалось зарегистрироваться"))
+    }
+
+    suspend fun unregisterFromEvent(eventId: String): Result<Event> {
+        val currentEvent = cachedEvents[eventId] ?: getEvent(eventId).getOrNull()
+        currentEvent ?: return Result.failure(EventDetailsError.EventNotFound)
+
+        val response = eventApi.unregisterFromEvent(eventId)
+
+        if (response.isSuccessful) {
+            val updatedEvent = currentEvent.copy(
+                isUserParticipating = false,
+                participantsCount = (currentEvent.participantsCount - 1).coerceAtLeast(0)
+            )
+            cacheEvent(updatedEvent)
+            return Result.success(updatedEvent)
+        }
+
+        return Result.failure(RuntimeException(response.errorBody()?.string() ?: "Не удалось отменить регистрацию"))
+    }
 }

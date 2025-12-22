@@ -11,6 +11,7 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 import ru.truebusiness.liveposter_android_client.data.dto.EventDto
 import ru.truebusiness.liveposter_android_client.data.dto.EventCreateUpdateDto
+import ru.truebusiness.liveposter_android_client.data.dto.EventRegistrationDto
 import ru.truebusiness.liveposter_android_client.data.dto.EventSearchFilterDto
 
 interface EventApi {
@@ -28,7 +29,21 @@ interface EventApi {
     fun createEvent(@Body event: EventCreateUpdateDto): Call<EventDto>
 
     @PUT("api/v1/event/{eventID}")
-    fun updateEvent(@Path("eventID") eventId: String, @Body event: EventCreateUpdateDto): Call<EventDto>
+    fun updateEvent(
+        @Path("eventID") eventId: String,
+        @Body event: EventCreateUpdateDto
+    ): Call<EventDto>
+
+    @POST("api/v1/event/{eventID}/register")
+    suspend fun registerForEvent(
+        @Path("eventID") eventId: String,
+        @Query("userID") userId: String
+    ): Response<EventRegistrationDto>
+
+    @DELETE("api/v1/event/{eventID}/register")
+    suspend fun unregisterFromEvent(
+        @Path("eventID") eventId: String
+    ): Response<Void>
 
     @DELETE("api/v1/event/{eventID}/draft")
     fun deleteEvent(@Path("eventID") eventId: String): Call<Void>

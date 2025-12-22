@@ -15,7 +15,7 @@ import javax.net.ssl.X509TrustManager
 
 object RetrofitInstance {
     private const val BASE_URL = "http://eventhub-backend.ru/dev/"
-    
+
     // TODO: Убрать fallback креды после завершения разработки
     private const val FALLBACK_USERNAME = "user1@example.com"
     private const val FALLBACK_PASSWORD = "secure_password123"
@@ -116,7 +116,7 @@ object RetrofitInstance {
             .client(authClient)
             .build()
     }
-    
+
     private val publicRetrofit by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
@@ -130,6 +130,7 @@ object RetrofitInstance {
     val organizationApi: OrganizationApi by lazy { authRetrofit.create(OrganizationApi::class.java) }
     val userApi: UserApi by lazy { authRetrofit.create(UserApi::class.java) }
     val storageApi: StorageApi by lazy { authRetrofit.create(StorageApi::class.java) }
+
 
     // API без аутентификации
     val authApi: AuthApi by lazy { publicRetrofit.create(AuthApi::class.java) }

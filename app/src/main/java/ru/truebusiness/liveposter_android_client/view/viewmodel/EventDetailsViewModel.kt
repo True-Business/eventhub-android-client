@@ -34,6 +34,7 @@ class EventDetailsViewModel(
     val event: LiveData<List<Event>> = _event
 
     private var currentEventId: String? = null
+    private var currentUserId: String? = null
 
     fun loadEvent(eventId: String, initialEvent: Event? = null, force: Boolean = false) {
         if (!force && currentEventId == eventId && !_uiState.value.isLoading && _uiState.value.event != null) return
@@ -64,19 +65,31 @@ class EventDetailsViewModel(
         val primaryButton = state.actions.primaryButton ?: return
         if (!primaryButton.enabled) return
 
-        viewModelScope.launch {
+        val eventId = currentEventId ?: return
+        val userId = currentUserId
 
+        viewModelScope.launch {
             val result = when (primaryButton.action) {
-                EventPrimaryAction.JOIN -> Result.failure(RuntimeException("Сервис временно недоступен"))
-                EventPrimaryAction.LEAVE -> Result.failure(RuntimeException("Сервис временно недоступен"))
+                EventPrimaryAction.JOIN -> {
+                    if (userId == null) {
+                        Result.failure(RuntimeException("Не удалось определить пользователя"))
+                    } else {
+                        repository.registerForEvent(eventId, userId)
+                    }
+                }
+
+                EventPrimaryAction.LEAVE -> repository.unregisterFromEvent(eventId)
                 EventPrimaryAction.NONE -> Result.success(state.event)
             }
 
             result
                 .onSuccess { event -> updateStateWithEvent(event) }
                 .onFailure { throwable -> handleError(throwable) }
-
         }
+    }
+
+    fun setCurrentUserId(userId: String?) {
+        currentUserId = userId
     }
 
     private fun handleError(throwable: Throwable, clearEvent: Boolean = false) {

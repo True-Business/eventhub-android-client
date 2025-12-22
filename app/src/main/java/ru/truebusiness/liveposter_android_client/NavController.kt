@@ -21,6 +21,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.delay
 import androidx.navigation.navArgument
+import ru.truebusiness.liveposter_android_client.repository.EventRepository
 import ru.truebusiness.liveposter_android_client.view.event.EventDetailsPage
 import ru.truebusiness.liveposter_android_client.view.FriendsPage
 import ru.truebusiness.liveposter_android_client.view.MainPage
@@ -40,6 +41,8 @@ import ru.truebusiness.liveposter_android_client.view.organizations.Organization
 import ru.truebusiness.liveposter_android_client.view.organizationslist.OrganizationsListPage
 import ru.truebusiness.liveposter_android_client.view.test.StorageTestScreen
 import ru.truebusiness.liveposter_android_client.view.viewmodel.AuthViewModel
+import ru.truebusiness.liveposter_android_client.view.viewmodel.EventCreationViewModel
+import ru.truebusiness.liveposter_android_client.view.viewmodel.EventCreationViewModelFactory
 import ru.truebusiness.liveposter_android_client.view.viewmodel.EventsViewModel
 import ru.truebusiness.liveposter_android_client.view.viewmodel.EventDetailsViewModel
 import ru.truebusiness.liveposter_android_client.view.viewmodel.OrganizationViewModel
@@ -141,11 +144,9 @@ fun AppNavigation(
         }
 
         composable("event-creation") {
-            EventCreationPage(navController)
-        }
-
-        composable("event-creation-settings") {
-            EventCreationSettingsPage(navController)
+            val eventCreationViewModel: EventCreationViewModel =
+                viewModel(factory = eventCreationViewModelFactory)
+            EventCreationPage(navController, eventCreationViewModel)
         }
 
         composable(
@@ -153,6 +154,7 @@ fun AppNavigation(
             arguments = listOf(navArgument("eventId") { type = NavType.StringType })
         ) { backStackEntry ->
             val eventId = backStackEntry.arguments?.getString("eventId") ?: return@composable
+            val currentUser by authViewModel.currentUser.collectAsState()
             val eventViewModel: EventDetailsViewModel = viewModel()
             LaunchedEffect(eventId) {
                 eventViewModel.loadEvent(eventId)
@@ -160,9 +162,9 @@ fun AppNavigation(
 
             EventDetailsPage(
                 viewModel = eventViewModel,
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                currentUserId = currentUser?.id
             )
-
         }
 
         composable(
@@ -199,8 +201,7 @@ fun AppNavigation(
         }
 
         composable("profile-settings") {
-            val profileSettingsViewModel: ProfileSettingsViewModel = viewModel(factory = profileSettingsViewModelFactory)
-            ProfileSettingsPage(navController, profileSettingsViewModel)
+            ProfileSettingsPage(navController)
         }
         composable("profile") {
             val profileViewModel: ProfileViewModel = viewModel(factory = profileViewModelFactory)
