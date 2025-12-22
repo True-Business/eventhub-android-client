@@ -96,6 +96,7 @@ fun AppNavigation(
     val authRepository = authViewModel.getAuthRepository()
     val profileViewModelFactory = ProfileViewModelFactory(authRepository)
     val profileSettingsViewModelFactory = ProfileSettingsViewModelFactory(authRepository)
+    val eventCreationViewModelFactory = EventCreationViewModelFactory(authRepository)
 
     val navController = rememberNavController()
 
@@ -201,7 +202,9 @@ fun AppNavigation(
         }
 
         composable("profile-settings") {
-            ProfileSettingsPage(navController)
+            val profileSettingsViewModel: ProfileSettingsViewModel =
+                viewModel(factory = profileSettingsViewModelFactory)
+            ProfileSettingsPage(navController, profileSettingsViewModel)
         }
         composable("profile") {
             val profileViewModel: ProfileViewModel = viewModel(factory = profileViewModelFactory)
