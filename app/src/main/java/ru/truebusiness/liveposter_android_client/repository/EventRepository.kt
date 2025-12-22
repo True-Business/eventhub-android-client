@@ -63,7 +63,7 @@ class EventRepository {
                         dtos.map { dto ->
                             async {
                                 val baseEvent = dto.toDomainEvent()
-                                fetchEventCover(dto.organizerId, dto.id, baseEvent)
+                                fetchEventCover(dto.id, baseEvent)
                             }
                         }.awaitAll()
                     }
@@ -271,7 +271,6 @@ class EventRepository {
     }
 
     private suspend fun fetchEventCover(
-        organizerId: String,
         eventId: String,
         baseEvent: Event
     ): Event {
@@ -279,7 +278,6 @@ class EventRepository {
             val stop = 1
         }
         val coverResult = storageRepository.getCoverImageUrl(
-            userId = organizerId,
             owner = ImageOwner.Event(eventId)
         )
         val imageId = coverResult.getOrNull()

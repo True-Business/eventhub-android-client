@@ -31,7 +31,7 @@ class OrgRepository {
         return try {
             val dto = RetrofitInstance.organizationApi.getOrganizationById(orgId.toString())
             val baseOrganization = OrganizationMapping.toDomain(dto)
-            fetchOrganizationImages(dto.creatorId, orgId, baseOrganization)
+            fetchOrganizationImages(orgId, baseOrganization)
         } catch (e: Exception) {
             null
         }
@@ -62,7 +62,7 @@ class OrgRepository {
                 dtos.map { dto ->
                     async {
                         val baseOrganization = OrganizationMapping.toDomain(dto)
-                        fetchOrganizationImages(dto.creatorId, dto.id, baseOrganization)
+                        fetchOrganizationImages( dto.id, baseOrganization)
                     }
                 }.awaitAll()
             }
@@ -159,12 +159,10 @@ class OrgRepository {
     }
 
     private suspend fun fetchOrganizationImages(
-        creatorId: UUID,
         organizationId: UUID,
         baseOrganization: Organization
     ): Organization {
         val imagesResult = storageRepository.getImageUrlsWithCover(
-            userId = creatorId.toString(),
             owner = ImageOwner.Organization(organizationId)
         )
 
