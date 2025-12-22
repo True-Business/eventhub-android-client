@@ -98,10 +98,10 @@ fun AppNavigation(
 
     // TODO: После тестирования Storage API раскомментировать строку ниже и удалить "storage-test"
     // Определяем начальный экран на основе загруженных данных (или таймаута)
-    // val startDestination = if (effectiveIsLoggedIn) "main" else "welcome"
+     val startDestination = if (effectiveIsLoggedIn) "main" else "welcome"
 
     // Временно для тестирования Storage API
-    val startDestination = "storage-test"
+//    val startDestination = "storage-test"
 
     // Флаг для пропуска первого LaunchedEffect (начальное значение уже учтено в startDestination)
     var isInitialized by remember { mutableStateOf(false) }
