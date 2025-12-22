@@ -29,7 +29,10 @@ interface EventApi {
     fun createEvent(@Body event: EventCreateUpdateDto): Call<EventDto>
 
     @PUT("api/v1/event/{eventID}")
-    fun updateEvent(@Path("eventID") eventId: String, @Body event: EventCreateUpdateDto): Call<EventDto>
+    fun updateEvent(
+        @Path("eventID") eventId: String,
+        @Body event: EventCreateUpdateDto
+    ): Call<EventDto>
 
     @POST("api/v1/event/{eventID}/register")
     suspend fun registerForEvent(

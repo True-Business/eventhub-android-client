@@ -24,7 +24,7 @@ import ru.truebusiness.liveposter_android_client.utils.DateUtils
  * Данный класс отвечает за управлением бизнесс логикой меоприятий. Он хранит и
  * управляет состоянием мероприятий, которые отображаются на экране.
  */
-class EventsViewModel: ViewModel() {
+class EventsViewModel : ViewModel() {
 
     private val TAG = "EVENT_VIEW_MODEL"
 

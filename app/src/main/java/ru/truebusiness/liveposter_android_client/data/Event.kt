@@ -1,11 +1,10 @@
 package ru.truebusiness.liveposter_android_client.data
 
-import java.io.Serializable
 import java.time.LocalDateTime
 import java.util.UUID
 
 data class Event(
-    val id: UUID,
+    val id: UUID? = null,
     val category: List<EventCategory>,
     val title: String,
     val content: String,

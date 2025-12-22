@@ -85,6 +85,7 @@ fun EventsMainScreen(
                 VisitsCategory.WILLGO -> 0
                 VisitsCategory.VISITED -> 1
             }
+
             MainTab.EVENTS -> when (currentEventsCategory) {
                 EventsCategory.DRAFTS -> 0
                 EventsCategory.PLANNED -> 1
@@ -195,6 +196,7 @@ fun EventsMainScreen(
                                     }
                                     eventsViewModel.setVisitsCategory(category)
                                 }
+
                                 MainTab.EVENTS -> {
                                     val category = when (index) {
                                         0 -> EventsCategory.DRAFTS
@@ -241,7 +243,9 @@ fun EventsMainScreen(
 
 
         AnimatedVisibility(
-            visible = currentMainTab == MainTab.EVENTS && subcategoryLabels.getOrNull(selectedSubcategory) == EventsCategory.DRAFTS.displayName,
+            visible = currentMainTab == MainTab.EVENTS && subcategoryLabels.getOrNull(
+                selectedSubcategory
+            ) == EventsCategory.DRAFTS.displayName,
             enter = scaleIn(),
             exit = scaleOut(),
             modifier = Modifier
@@ -249,9 +253,7 @@ fun EventsMainScreen(
                 .padding(horizontal = 24.dp, vertical = 24.dp),
         ) {
             FloatingActionButton(
-                onClick = {
-                    navController.navigate("event-creation")
-                },
+                onClick = { navController.navigate("event-creation") },
                 shape = CircleShape,
                 containerColor = ChipBackground
             ) {

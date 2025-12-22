@@ -39,21 +39,35 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import ru.truebusiness.liveposter_android_client.R
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
+import ru.truebusiness.liveposter_android_client.view.viewmodel.EventCreationViewModel
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
 
 private val orange = Color(0xFFFF6600)
 
 @Composable
 fun EventCreationPage(
-    navController: NavController?
+    navController: NavController,
+    viewModel: EventCreationViewModel
+) {
+    val isFirstPage = viewModel.isFirstPage
+    if (isFirstPage)
+        EventCreationFirstPage(navController, viewModel)
+    else
+        EventCreationSettingsPage(navController, viewModel)
+}
+
+@Composable
+private fun EventCreationFirstPage(
+    navController: NavController,
+    viewModel: EventCreationViewModel
 ) {
     Column(
         modifier = Modifier
@@ -85,27 +99,27 @@ fun EventCreationPage(
 
         Spacer(Modifier.size(16.dp))
 
-        InputForm()
+        InputForm(viewModel)
 
         Spacer(Modifier.size(24.dp))
 
         BackButton(navController)
         Spacer(Modifier.size(8.dp))
-        SaveDraftButton()
+        SaveDraftButton(navController, viewModel::isInfoValid, viewModel::onDraftSave)
         Spacer(Modifier.size(8.dp))
-        ContinueButton(navController)
+        ContinueButton(viewModel::onNextPage)
     }
 }
 
 @Composable
-private fun ContinueButton(navController: NavController?) {
+private fun ContinueButton(onClick: () -> Unit) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(8.dp))
             .background(orange)
             .padding(16.dp)
-            .clickable(onClick = { navController!!.navigate("event-creation-settings") }),
+            .clickable(onClick = onClick),
         shape = RoundedCornerShape(8.dp),
         color = orange,
         contentColor = Color.White
@@ -122,12 +136,31 @@ private fun ContinueButton(navController: NavController?) {
 }
 
 @Composable
-private fun SaveDraftButton() {
+private fun SaveDraftButton(
+    navController: NavController,
+    isValid: () -> Boolean,
+    onClick: () -> Unit
+) {
+    val context = LocalContext.current
     Surface(
         modifier = Modifier
             .fillMaxWidth()
             .border(2.dp, orange, RoundedCornerShape(8.dp))
-            .padding(16.dp),
+            .padding(16.dp)
+            .clickable(onClick = {
+                if (isValid()) {
+                    onClick()
+                    navController.popBackStack()
+                } else {
+                    android.widget.Toast
+                        .makeText(
+                            context,
+                            "Не все обязательные поля заполнены корректно, проверьте данные",
+                            android.widget.Toast.LENGTH_SHORT
+                        )
+                        .show()
+                }
+            }),
         shape = RoundedCornerShape(8.dp),
         color = Color.White,
         contentColor = orange
@@ -144,12 +177,13 @@ private fun SaveDraftButton() {
 }
 
 @Composable
-private fun BackButton(navController: NavController?) {
+private fun BackButton(navController: NavController) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
             .border(2.dp, Color.LightGray, RoundedCornerShape(8.dp))
-            .padding(16.dp),
+            .padding(16.dp)
+            .clickable(onClick = { navController.popBackStack() }),
         shape = RoundedCornerShape(8.dp),
         color = Color.White,
         contentColor = Color.Black
@@ -166,7 +200,8 @@ private fun BackButton(navController: NavController?) {
 }
 
 @Composable
-private fun InputForm() {
+private fun InputForm(viewModel: EventCreationViewModel) {
+    val state = viewModel.infoState
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -187,49 +222,63 @@ private fun InputForm() {
             InputTextField(
                 title = "Название мероприятия",
                 placeholder = "Введите название",
+                value = state.title,
                 comment = "От 3 до 128 символов",
                 isObligatory = true,
-                onChange = { }
+                onChange = viewModel::updateTitle
             )
             InputTextField(
                 title = "Описание мероприятия",
                 placeholder = "Опишите мероприятие",
+                value = state.description,
                 comment = "От 3 до 1024 символов",
                 isObligatory = true,
-                onChange = { }
+                onChange = viewModel::updateDescription
             )
             InputTextField(
                 title = "Город",
                 placeholder = "Укажите город",
+                value = state.city,
                 isObligatory = true,
-                onChange = { }
+                onChange = viewModel::updateCity
             )
             InputTextField(
                 title = "Адрес",
                 placeholder = "Улица, дом, корпус",
+                value = state.address,
                 isObligatory = true,
-                onChange = { }
+                onChange = viewModel::updateAddress
             )
             InputTextField(
                 title = "Как добраться",
                 placeholder = "Инструкции для участников",
+                value = state.howToGet,
                 isObligatory = true,
-                onChange = { }
+                onChange = viewModel::updateHowToGet
             )
             DateInputField(
                 title = "Дата начала",
                 isObligatory = true,
-                onDateSelected = { }
+                value = state.startDate,
+                onDateSelected = viewModel::updateStartDate
             )
             TimeInputField(
                 title = "Время начала",
                 isObligatory = true,
-                onTimeSelected = { }
+                value = state.startTime,
+                onTimeSelected = viewModel::updateStartTime
+            )
+            DateInputField(
+                title = "Дата окончания",
+                isObligatory = true,
+                value = state.endDate,
+                onDateSelected = viewModel::updateEndDate
             )
             TimeInputField(
                 title = "Время окончания",
                 isObligatory = false,
-                onTimeSelected = { }
+                value = state.endTime,
+                onTimeSelected = viewModel::updateEndTime
             )
         }
     }
@@ -240,6 +289,7 @@ private fun InputForm() {
 private fun InputTextField(
     title: String,
     placeholder: String,
+    value: String,
     comment: String? = null,
     isObligatory: Boolean,
     onChange: (String) -> Unit
@@ -262,7 +312,7 @@ private fun InputTextField(
             }
         }
         OutlinedTextField(
-            value = "",
+            value = value,
             onValueChange = onChange,
             placeholder = { Text(placeholder) },
             modifier = Modifier.fillMaxWidth(),
@@ -290,52 +340,58 @@ private fun InputTextField(
 fun DateInputField(
     title: String,
     isObligatory: Boolean,
-    onDateSelected: (String) -> Unit
+    value: LocalDate?,
+    onDateSelected: (LocalDate) -> Unit
 ) {
     val context = LocalContext.current
-    val calendar = Calendar.getInstance()
-    val dateFormatter = remember { SimpleDateFormat("dd.mm.yyyy", Locale.getDefault()) }
-    var dateText by remember { mutableStateOf("dd.mm.yyyy") }
+    val formatter = remember { DateTimeFormatter.ofPattern("dd.MM.yyyy") }
+    var text by remember { mutableStateOf(value?.format(formatter) ?: "") }
 
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Row {
-            Text(
-                text = title,
-                fontSize = 16.sp
-            )
-            if (isObligatory) {
-                Text(
-                    text = " *",
-                    color = orange,
-                    fontSize = 16.sp
-                )
-            }
+            Text(text = title, fontSize = 16.sp)
+            if (isObligatory) Text(" *", color = orange, fontSize = 16.sp)
         }
 
         OutlinedTextField(
-            value = dateText,
-            onValueChange = {},
-            readOnly = true,
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable {
-                    DatePickerDialog(
-                        context,
-                        { _, year, month, dayOfMonth ->
-                            calendar.set(year, month, dayOfMonth)
-                            val formattedDate = dateFormatter.format(calendar.time)
-                            dateText = formattedDate
-                            onDateSelected(formattedDate)
-                        },
-                        calendar.get(Calendar.YEAR),
-                        calendar.get(Calendar.MONTH),
-                        calendar.get(Calendar.DAY_OF_MONTH)
-                    ).show()
-                },
+            value = text,
+            onValueChange = { newValue ->
+                if (newValue.length <= 10 && newValue.all { it.isDigit() || it == '.' }) {
+                    text = newValue
+                    runCatching {
+                        val parsed = LocalDate.parse(newValue, formatter)
+                        onDateSelected(parsed)
+                    }
+                }
+            },
+            trailingIcon = {
+                androidx.compose.material3.Icon(
+                    painter = painterResource(id = R.drawable.ic_calendar),
+                    contentDescription = "Выбрать дату",
+                    modifier = Modifier.clickable {
+                        val now = value ?: LocalDate.now()
+                        DatePickerDialog(
+                            context,
+                            { _, y, m, d ->
+                                val selected = LocalDate.of(y, m + 1, d)
+                                text = selected.format(formatter)
+                                onDateSelected(selected)
+                            },
+                            now.year,
+                            now.monthValue - 1,
+                            now.dayOfMonth
+                        ).show()
+                    },
+                    tint = orange
+                )
+            },
+            placeholder = { Text("дд.мм.гггг") },
             shape = RoundedCornerShape(16.dp),
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 focusedBorderColor = orange,
                 unfocusedBorderColor = Color.Gray,
@@ -350,53 +406,58 @@ fun DateInputField(
 fun TimeInputField(
     title: String,
     isObligatory: Boolean,
-    onTimeSelected: (String) -> Unit
+    value: LocalTime?,
+    onTimeSelected: (LocalTime) -> Unit
 ) {
     val context = LocalContext.current
-    val calendar = Calendar.getInstance()
-    val timeFormatter = remember { SimpleDateFormat("hh:mm", Locale.getDefault()) }
-    var timeText by remember { mutableStateOf("hh:mm") }
+    val formatter = remember { DateTimeFormatter.ofPattern("HH:mm") }
+    var text by remember { mutableStateOf(value?.format(formatter) ?: "") }
 
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Row {
-            Text(
-                text = title,
-                fontSize = 16.sp
-            )
-            if (isObligatory) {
-                Text(
-                    text = " *",
-                    color = orange,
-                    fontSize = 16.sp
-                )
-            }
+            Text(text = title, fontSize = 16.sp)
+            if (isObligatory) Text(" *", color = orange, fontSize = 16.sp)
         }
 
         OutlinedTextField(
-            value = timeText,
-            onValueChange = {},
-            readOnly = true,
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable {
-                    TimePickerDialog(
-                        context,
-                        { _, hourOfDay, minute ->
-                            calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
-                            calendar.set(Calendar.MINUTE, minute)
-                            val formattedTime = timeFormatter.format(calendar.time)
-                            timeText = formattedTime
-                            onTimeSelected(formattedTime)
-                        },
-                        calendar.get(Calendar.HOUR_OF_DAY),
-                        calendar.get(Calendar.MINUTE),
-                        true
-                    ).show()
-                },
+            value = text,
+            onValueChange = { newValue ->
+                if (newValue.length <= 5 && newValue.all { it.isDigit() || it == ':' }) {
+                    text = newValue
+                    runCatching {
+                        val parsed = LocalTime.parse(newValue, formatter)
+                        onTimeSelected(parsed)
+                    }
+                }
+            },
+            trailingIcon = {
+                androidx.compose.material3.Icon(
+                    painter = painterResource(id = R.drawable.ic_clock),
+                    contentDescription = "Выбрать время",
+                    modifier = Modifier.clickable {
+                        val now = value ?: LocalTime.now()
+                        TimePickerDialog(
+                            context,
+                            { _, hour, minute ->
+                                val selected = LocalTime.of(hour, minute)
+                                text = selected.format(formatter)
+                                onTimeSelected(selected)
+                            },
+                            now.hour,
+                            now.minute,
+                            true
+                        ).show()
+                    },
+                    tint = orange
+                )
+            },
+            placeholder = { Text("чч:мм") },
             shape = RoundedCornerShape(16.dp),
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 focusedBorderColor = orange,
                 unfocusedBorderColor = Color.Gray,
@@ -406,9 +467,14 @@ fun TimeInputField(
     }
 }
 
-
-@Preview
 @Composable
-private fun Preview() {
-    EventCreationPage(null)
+private fun showValidationErrorToast() {
+    val context = LocalContext.current
+    android.widget.Toast
+        .makeText(
+            context,
+            "Не все обязательные поля заполнены корректно, проверьте данные",
+            android.widget.Toast.LENGTH_SHORT
+        )
+        .show()
 }
