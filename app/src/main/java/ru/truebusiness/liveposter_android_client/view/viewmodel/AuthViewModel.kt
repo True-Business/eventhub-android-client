@@ -1,5 +1,6 @@
 package ru.truebusiness.liveposter_android_client.view.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -125,7 +126,7 @@ class AuthViewModel(
         id: String,
         username: String,
         shortId: String,
-        onSuccess: () -> Unit = {}
+        onSuccess: (String, String?) -> Unit
     ) {
         viewModelScope.launch {
             _state.emit(
@@ -153,7 +154,7 @@ class AuthViewModel(
                         isLoggedIn = true
                     )
                 )
-                onSuccess()
+                onSuccess(res.status, res.reason)
             } catch (e: Exception) {
                 _state.emit(_state.value.copy(loading = false, error = e.message))
             }
@@ -177,6 +178,7 @@ class AuthViewModel(
             )
             try {
                 val user = authRepository.login(email, password)
+                Log.d("LOGIN", "Log in as $user")
                 _state.emit(
                     _state.value.copy(
                         loading = false,

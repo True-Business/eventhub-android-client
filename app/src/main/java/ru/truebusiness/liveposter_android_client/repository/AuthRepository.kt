@@ -61,10 +61,6 @@ class AuthRepository(
         dataStore.edit { prefs ->
             response.id?.let { prefs[USER_ID] = it }
             prefs[REG_STATUS] = response.status
-            response.registrationDate?.let { prefs[REG_DATE] = it }
-            if (response.status.equals(RegistrationStatus.SUCCESS.name, ignoreCase = true)) {
-                prefs[IS_LOGGED_IN] = true
-            }
         }
         return response
     }

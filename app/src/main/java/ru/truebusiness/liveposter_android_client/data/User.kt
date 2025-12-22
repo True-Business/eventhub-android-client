@@ -13,6 +13,12 @@ data class User(
 ) {
     // Алиас для совместимости со старым кодом
     val userName: String get() = username
+
+    override fun toString(): String = """
+        id = $id,
+        username = $username,
+        shortId = $shortId
+    """.trimIndent()
 }
 
 fun UserDto.toUser(): User = User(
