@@ -1,5 +1,9 @@
 package ru.truebusiness.liveposter_android_client.repository
 
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import ru.truebusiness.liveposter_android_client.data.ImageOwner
 import ru.truebusiness.liveposter_android_client.data.Organization
 import ru.truebusiness.liveposter_android_client.data.dto.SearchOrganizationRequestDto
 import ru.truebusiness.liveposter_android_client.data.dto.OrganizationMapping
@@ -16,6 +20,7 @@ import java.util.UUID
  * Поддерживает как реальные API вызовы, так и mock данные для разработки
  */
 class OrgRepository {
+    private val storageRepository = StorageRepository()
 
     // ========== API Методы ==========
 
@@ -25,7 +30,8 @@ class OrgRepository {
     suspend fun fetchOrganization(orgId: UUID): Organization? {
         return try {
             val dto = RetrofitInstance.organizationApi.getOrganizationById(orgId.toString())
-            OrganizationMapping.toDomain(dto)
+            val baseOrganization = OrganizationMapping.toDomain(dto)
+            fetchOrganizationImages(orgId, baseOrganization)
         } catch (e: Exception) {
             null
         }
@@ -52,12 +58,18 @@ class OrgRepository {
         )
         return try {
             val dtos = RetrofitInstance.organizationApi.searchOrganizations(request)
-            OrganizationMapping.toDomainList(dtos)
+            coroutineScope {
+                dtos.map { dto ->
+                    async {
+                        val baseOrganization = OrganizationMapping.toDomain(dto)
+                        fetchOrganizationImages( dto.id, baseOrganization)
+                    }
+                }.awaitAll()
+            }
         } catch (e: Exception) {
             null
         }
     }
-
     /**
      * Создание новой организации через API
      */
@@ -144,5 +156,21 @@ class OrgRepository {
             it.address.contains(query, ignoreCase = true)
         }
         onResult(filtered)
+    }
+
+    private suspend fun fetchOrganizationImages(
+        organizationId: UUID,
+        baseOrganization: Organization
+    ): Organization {
+        val imagesResult = storageRepository.getImageUrlsWithCover(
+            owner = ImageOwner.Organization(organizationId)
+        )
+
+        return imagesResult.getOrNull()?.let { urls ->
+            baseOrganization.copy(
+                coverUrl = urls.coverUrl ?: baseOrganization.coverUrl,
+                images = urls.imageUrls
+            )
+        } ?: baseOrganization
     }
 }

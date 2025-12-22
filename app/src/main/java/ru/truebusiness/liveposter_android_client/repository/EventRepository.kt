@@ -1,11 +1,15 @@
 package ru.truebusiness.liveposter_android_client.repository
 
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import ru.truebusiness.liveposter_android_client.data.Event
 import ru.truebusiness.liveposter_android_client.data.EventsCategory
 import ru.truebusiness.liveposter_android_client.data.FilterState
+import ru.truebusiness.liveposter_android_client.data.ImageOwner
 import ru.truebusiness.liveposter_android_client.data.SortField
 import ru.truebusiness.liveposter_android_client.data.SortOrder
 import ru.truebusiness.liveposter_android_client.data.dto.EventDto
@@ -22,6 +26,8 @@ import java.util.UUID
  * Данный класс отвечает за логику загрузки мероприятий с бекенда
  */
 class EventRepository {
+    private val storageRepository = StorageRepository()
+
     /**
      * Метод делает поиск мероприятий
      */
@@ -49,10 +55,23 @@ class EventRepository {
             category = status,
             isOpen = isOpen
         )
-        val response = RetrofitInstance.eventApi.searchEvents(request)
-        return if (response.isSuccessful) {
-            response.body()?.toDomainEvents()
-        } else {
+        return try {
+            val response = RetrofitInstance.eventApi.searchEvents(request)
+            if (response.isSuccessful) {
+                response.body()?.let { dtos ->
+                    coroutineScope {
+                        dtos.map { dto ->
+                            async {
+                                val baseEvent = dto.toDomainEvent()
+                                fetchEventCover(dto.id, baseEvent)
+                            }
+                        }.awaitAll()
+                    }
+                }
+            } else {
+                null
+            }
+        } catch (e: Exception) {
             null
         }
     }
@@ -249,5 +268,27 @@ class EventRepository {
                     onResult(false)
                 }
             })
+    }
+
+    private suspend fun fetchEventCover(
+        eventId: String,
+        baseEvent: Event
+    ): Event {
+        if (eventId == "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb") {
+            val stop = 1
+        }
+        val coverResult = storageRepository.getCoverImageUrl(
+            owner = ImageOwner.Event(eventId)
+        )
+        val imageId = coverResult.getOrNull()
+        if (imageId != null) {
+            return baseEvent.copy(posterUrl = imageId)
+        }
+        else {
+            return baseEvent
+        }
+//        return coverResult.getOrNull()?.let { coverUrl ->
+//            baseEvent.copy(posterUrl = coverUrl)
+//        } ?: baseEvent
     }
 }
