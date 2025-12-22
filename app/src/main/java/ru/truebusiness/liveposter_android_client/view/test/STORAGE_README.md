@@ -23,17 +23,17 @@ repository/
 │   └── RetrofitInstance.kt # HTTP клиенты (включая insecure для SSL)
 ```
 
-## Формат Origin
+## Формат API запросов
 
-Origin используется для идентификации владельца изображения:
+API использует следующие параметры:
 
-| Тип | Обычное изображение | Cover-изображение |
-|-----|---------------------|-------------------|
-| User | `user_{uuid}` | `cover_user_{uuid}` |
-| Event | `event_{uuid}` | `cover_event_{uuid}` |
-| Organization | `organization_{uuid}` | `cover_organization_{uuid}` |
+| Параметр | Описание | Пример |
+|----------|----------|--------|
+| `ownerType` | Тип сущности | `"user"`, `"event"`, `"organization"` |
+| `ownerId` | UUID сущности | `"045ea62e-259e-41c7-9da7-de8d44c65158"` |
+| `origin` | Тип изображения с уникальным ID | `"photo_{uuid}"` (обычное), `"cover_{uuid}"` (обложка) |
 
-**Важно:** Используется `_` как разделитель, НЕ `/`.
+Origin содержит случайный UUID для уникальности имени файла, что позволяет загружать несколько cover и фото без конфликтов.
 
 ## Использование StorageRepository
 
@@ -50,8 +50,7 @@ private val storageRepository = StorageRepository()
 ```kotlin
 viewModelScope.launch {
     val result = storageRepository.uploadImagesWithCover(
-        userId = currentUserId,
-        owner = ImageOwner.Event(eventId),  // или User(id), Organization(id)
+        owner = ImageOwner.Event(eventId),  // или User(userId), Organization(orgId)
         files = listOf(coverFile, photo1, photo2)
     )
     
@@ -68,7 +67,6 @@ viewModelScope.launch {
 ```kotlin
 viewModelScope.launch {
     val result = storageRepository.uploadCoverImage(
-        userId = currentUserId,
         owner = ImageOwner.Event(eventId),
         file = coverFile
     )
@@ -84,7 +82,6 @@ viewModelScope.launch {
 ```kotlin
 viewModelScope.launch {
     val result = storageRepository.uploadImages(
-        userId = currentUserId,
         owner = ImageOwner.Event(eventId),
         files = imageFiles
     )
@@ -96,7 +93,6 @@ viewModelScope.launch {
 ```kotlin
 viewModelScope.launch {
     val result = storageRepository.getImageUrlsWithCover(
-        userId = currentUserId,
         owner = ImageOwner.Event(eventId)
     )
     
@@ -115,7 +111,6 @@ viewModelScope.launch {
 ```kotlin
 viewModelScope.launch {
     val result = storageRepository.getCoverImageUrl(
-        userId = currentUserId,
         owner = ImageOwner.Event(eventId)
     )
     
@@ -168,7 +163,7 @@ fun MyScreen() {
 
 ```kotlin
 @Composable
-fun EventImagesScreen(eventId: String, userId: String) {
+fun EventImagesScreen(eventId: String) {
     val context = LocalContext.current
     val storageRepository = remember { StorageRepository() }
     
@@ -187,7 +182,6 @@ fun EventImagesScreen(eventId: String, userId: String) {
     LaunchedEffect(eventId) {
         isLoading = true
         val result = storageRepository.getImageUrlsWithCover(
-            userId = userId,
             owner = ImageOwner.Event(eventId)
         )
         result.onSuccess { urls ->
@@ -277,10 +271,10 @@ val eventOwner = ImageOwner.Event("event-uuid")
 val orgOwner = ImageOwner.Organization("org-uuid")
 
 // Методы
-owner.toOrigin()         // "event_uuid"
-owner.toCoverOrigin()    // "cover_event_uuid"
-owner.getTypePrefix()    // "event_"
-owner.getCoverTypePrefix() // "cover_event_"
+owner.getOwnerType()        // "event", "user", "organization"
+owner.getOwnerId()          // UUID сущности
+owner.generatePhotoOrigin() // "photo_550e8400-e29b-41d4-a716-446655440000" (уникальный)
+owner.generateCoverOrigin() // "cover_550e8400-e29b-41d4-a716-446655440000" (уникальный)
 ```
 
 ## Тестовый экран

@@ -23,6 +23,12 @@ import java.time.Instant
  * Репозиторий для работы с хранилищем изображений.
  * Инкапсулирует логику загрузки и получения изображений через presigned URLs.
  *
+ * API использует:
+ * - ownerType: тип сущности ("user", "event", "organization")
+ * - ownerId: UUID сущности
+ * - origin: "photo_{uuid}" (обычные изображения) или "cover_{uuid}" (обложка)
+ *
+ * Origin содержит случайный UUID для уникальности имени файла.
  * API обрабатывает по одному файлу за запрос. Для загрузки нескольких файлов
  * используется конкурентный запуск отдельных запросов.
  *
@@ -35,26 +41,26 @@ class StorageRepository {
 
     /**
      * Загружает один файл для указанного владельца.
-     * Это базовый метод, который выполняет полный цикл загрузки:
+     * Это базовый приватный метод, который выполняет полный цикл загрузки:
      * 1. Получает presigned URL
      * 2. Загружает файл через PUT
      * 3. Подтверждает загрузку
      *
-     * @param userId ID пользователя (для ownerType="user")
-     * @param origin origin строка (например "user_uuid" или "cover_event_uuid")
+     * @param owner владелец изображения (User/Event/Organization)
+     * @param origin origin строка (например "photo_{uuid}" или "cover_{uuid}")
      * @param file файл для загрузки
      * @return Result с ID загруженного изображения или ошибкой
      */
-    suspend fun uploadSingleImage(
-        userId: String,
+    private suspend fun uploadSingleImage(
+        owner: ImageOwner,
         origin: String,
         file: File
     ): Result<String> = withContext(Dispatchers.IO) {
         try {
             // 1. Получаем presigned URL для одного файла
             val urlsRequest = UploadUrlsRequest(
-                ownerId = userId,
-                ownerType = "user",
+                ownerId = owner.getOwnerId(),
+                ownerType = owner.getOwnerType(),
                 originNames = listOf(origin)
             )
 
@@ -81,8 +87,8 @@ class StorageRepository {
 
             // 3. Подтверждаем загрузку
             val confirmRequest = ConfirmUploadRequest(
-                ownerId = userId,
-                ownerType = "user",
+                ownerId = owner.getOwnerId(),
+                ownerType = owner.getOwnerType(),
                 ids = listOf(uploadUrl.id)
             )
 
@@ -110,14 +116,13 @@ class StorageRepository {
     /**
      * Загружает несколько изображений для указанного владельца.
      * Каждый файл загружается отдельным запросом, все запросы выполняются конкурентно.
+     * Все изображения загружаются как обычные (origin = "photo_{uuid}").
      *
-     * @param userId ID пользователя (для ownerType="user")
-     * @param owner владелец изображения (User/Event/Organization) - определяет origin
+     * @param owner владелец изображений (User/Event/Organization)
      * @param files список файлов для загрузки
      * @return Result с списком ID загруженных изображений или ошибкой
      */
     suspend fun uploadImages(
-        userId: String,
         owner: ImageOwner,
         files: List<File>
     ): Result<List<String>> = withContext(Dispatchers.IO) {
@@ -126,13 +131,11 @@ class StorageRepository {
                 return@withContext Result.success(emptyList())
             }
 
-            val origin = owner.toOrigin()
-
-            // Конкурентно загружаем все файлы
+            // Конкурентно загружаем все файлы, генерируя уникальный origin для каждого
             val results = coroutineScope {
                 files.map { file ->
                     async {
-                        uploadSingleImage(userId, origin, file)
+                        uploadSingleImage(owner, owner.generatePhotoOrigin(), file)
                     }
                 }.awaitAll()
             }
@@ -163,26 +166,19 @@ class StorageRepository {
     }
 
     /**
-     * Получает URLs для скачивания изображений указанного владельца.
+     * Получает URLs для скачивания обычных изображений (origin начинается с "photo_") указанного владельца.
      *
-     * Процесс:
-     * 1. Получает список всех подтвержденных объектов
-     * 2. Фильтрует по origin (type_uuid)
-     * 3. Запрашивает download URLs
-     *
-     * @param userId ID пользователя (для ownerType="user")
-     * @param owner владелец изображений для фильтрации
+     * @param owner владелец изображений
      * @return Result со списком URLs для скачивания (можно использовать в Coil/ImageView)
      */
     suspend fun getImageUrls(
-        userId: String,
         owner: ImageOwner
     ): Result<List<String>> = withContext(Dispatchers.IO) {
         try {
-            // 1. Получаем список всех подтвержденных объектов
+            // 1. Получаем список всех подтвержденных объектов владельца
             val listRequest = ListConfirmedRequest(
-                ownerId = userId,
-                ownerType = "user",
+                ownerId = owner.getOwnerId(),
+                ownerType = owner.getOwnerType(),
                 page = PageRequest(size = 100, current = 0)
             )
 
@@ -195,16 +191,15 @@ class StorageRepository {
 
             val objects = listResponse.body()?.objects ?: emptyList()
 
-            // 2. Фильтруем по origin владельца
-            val ownerOrigin = owner.toOrigin()
-            val filteredObjects = objects.filter { it.origin == ownerOrigin }
+            // 2. Фильтруем только обычные изображения (origin начинается с "photo_")
+            val photoObjects = objects.filter { it.origin.startsWith(ImageOwner.ORIGIN_PHOTO_PREFIX) }
 
-            if (filteredObjects.isEmpty()) {
+            if (photoObjects.isEmpty()) {
                 return@withContext Result.success(emptyList())
             }
 
             // 3. Запрашиваем download URLs
-            val ids = filteredObjects.map { it.id }
+            val ids = photoObjects.map { it.id }
             val downloadRequest = DownloadUrlsRequest(ids = ids)
 
             val downloadResponse = storageApi.getDownloadUrls(downloadRequest)
@@ -217,65 +212,6 @@ class StorageRepository {
             val downloadUrls = downloadResponse.body()?.urls?.map { it.meta.downloadUrl } ?: emptyList()
 
             Result.success(downloadUrls)
-
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    /**
-     * Получает все изображения пользователя с фильтрацией по типу владельца.
-     *
-     * @param userId ID пользователя
-     * @param ownerTypePrefix префикс типа ("user_", "event_", "organization_") или null для всех
-     * @return Result со списком пар (id, downloadUrl)
-     */
-    suspend fun getAllImageUrls(
-        userId: String,
-        ownerTypePrefix: String? = null
-    ): Result<List<Pair<String, String>>> = withContext(Dispatchers.IO) {
-        try {
-            val listRequest = ListConfirmedRequest(
-                ownerId = userId,
-                ownerType = "user",
-                page = PageRequest(size = 100, current = 0)
-            )
-
-            val listResponse = storageApi.listConfirmed(listRequest)
-            if (!listResponse.isSuccessful) {
-                return@withContext Result.failure(
-                    Exception("Failed to list confirmed objects: ${listResponse.code()} ${listResponse.message()}")
-                )
-            }
-
-            val objects = listResponse.body()?.objects ?: emptyList()
-
-            // Фильтруем по префиксу типа если указан
-            val filteredObjects = if (ownerTypePrefix != null) {
-                objects.filter { it.origin.startsWith(ownerTypePrefix) }
-            } else {
-                objects
-            }
-
-            if (filteredObjects.isEmpty()) {
-                return@withContext Result.success(emptyList())
-            }
-
-            val ids = filteredObjects.map { it.id }
-            val downloadRequest = DownloadUrlsRequest(ids = ids)
-
-            val downloadResponse = storageApi.getDownloadUrls(downloadRequest)
-            if (!downloadResponse.isSuccessful) {
-                return@withContext Result.failure(
-                    Exception("Failed to get download URLs: ${downloadResponse.code()} ${downloadResponse.message()}")
-                )
-            }
-
-            val result = downloadResponse.body()?.urls?.map {
-                it.id to it.meta.downloadUrl
-            } ?: emptyList()
-
-            Result.success(result)
 
         } catch (e: Exception) {
             Result.failure(e)
@@ -331,17 +267,15 @@ class StorageRepository {
 
     /**
      * Загружает изображения с cover.
-     * Первый файл в списке становится cover-изображением (origin = "cover_type_uuid"),
-     * остальные — обычными изображениями (origin = "type_uuid").
+     * Первый файл в списке становится cover-изображением (origin = "cover_{uuid}"),
+     * остальные — обычными изображениями (origin = "photo_{uuid}").
      * Каждый файл загружается отдельным запросом, все запросы выполняются конкурентно.
      *
-     * @param userId ID пользователя (для ownerType="user")
      * @param owner владелец изображений (User/Event/Organization)
      * @param files список файлов для загрузки (первый = cover)
      * @return Result с списком ID загруженных изображений или ошибкой
      */
     suspend fun uploadImagesWithCover(
-        userId: String,
         owner: ImageOwner,
         files: List<File>
     ): Result<List<String>> = withContext(Dispatchers.IO) {
@@ -353,9 +287,9 @@ class StorageRepository {
             // Конкурентно загружаем все файлы (первый как cover, остальные как обычные)
             val results = coroutineScope {
                 files.mapIndexed { index, file ->
-                    val origin = if (index == 0) owner.toCoverOrigin() else owner.toOrigin()
+                    val origin = if (index == 0) owner.generateCoverOrigin() else owner.generatePhotoOrigin()
                     async {
-                        uploadSingleImage(userId, origin, file)
+                        uploadSingleImage(owner, origin, file)
                     }
                 }.awaitAll()
             }
@@ -387,39 +321,34 @@ class StorageRepository {
 
     /**
      * Загружает только cover-изображение.
-     * Использует базовый метод uploadSingleImage.
      * Если cover уже существует, новый становится текущим (определяется по дате).
      *
-     * @param userId ID пользователя (для ownerType="user")
      * @param owner владелец изображения (User/Event/Organization)
      * @param file файл cover-изображения
      * @return Result с ID загруженного cover или ошибкой
      */
     suspend fun uploadCoverImage(
-        userId: String,
         owner: ImageOwner,
         file: File
     ): Result<String> {
-        return uploadSingleImage(userId, owner.toCoverOrigin(), file)
+        return uploadSingleImage(owner, owner.generateCoverOrigin(), file)
     }
 
     /**
      * Получает URL текущего cover-изображения.
      * Cover определяется по дате загрузки — самый новый cover является текущим.
      *
-     * @param userId ID пользователя (для ownerType="user")
      * @param owner владелец cover (User/Event/Organization)
      * @return Result с URL cover или null если cover нет
      */
     suspend fun getCoverImageUrl(
-        userId: String,
         owner: ImageOwner
     ): Result<String?> = withContext(Dispatchers.IO) {
         try {
-            // Получаем список всех объектов
+            // Получаем список всех объектов владельца
             val listRequest = ListConfirmedRequest(
-                ownerId = userId,
-                ownerType = "user",
+                ownerId = owner.getOwnerId(),
+                ownerType = owner.getOwnerType(),
                 page = PageRequest(size = 100, current = 0)
             )
 
@@ -432,9 +361,8 @@ class StorageRepository {
 
             val objects = listResponse.body()?.objects ?: emptyList()
 
-            // Фильтруем cover-объекты для данного владельца
-            val coverOrigin = owner.toCoverOrigin()
-            val coverObjects = objects.filter { it.origin == coverOrigin }
+            // Фильтруем cover-объекты (origin начинается с "cover_")
+            val coverObjects = objects.filter { it.origin.startsWith(ImageOwner.ORIGIN_COVER_PREFIX) }
 
             if (coverObjects.isEmpty()) {
                 return@withContext Result.success(null)
@@ -467,19 +395,17 @@ class StorageRepository {
      * Получает все изображения с cover первым.
      * Cover определяется по дате загрузки — самый новый cover является текущим.
      *
-     * @param userId ID пользователя (для ownerType="user")
      * @param owner владелец изображений (User/Event/Organization)
      * @return Result с ImageUrls (coverUrl + imageUrls)
      */
     suspend fun getImageUrlsWithCover(
-        userId: String,
         owner: ImageOwner
     ): Result<ImageUrls> = withContext(Dispatchers.IO) {
         try {
-            // Получаем список всех объектов
+            // Получаем список всех объектов владельца
             val listRequest = ListConfirmedRequest(
-                ownerId = userId,
-                ownerType = "user",
+                ownerId = owner.getOwnerId(),
+                ownerType = owner.getOwnerType(),
                 page = PageRequest(size = 100, current = 0)
             )
 
@@ -492,12 +418,9 @@ class StorageRepository {
 
             val objects = listResponse.body()?.objects ?: emptyList()
 
-            // Разделяем на cover и обычные изображения
-            val coverOrigin = owner.toCoverOrigin()
-            val regularOrigin = owner.toOrigin()
-
-            val coverObjects = objects.filter { it.origin == coverOrigin }
-            val regularObjects = objects.filter { it.origin == regularOrigin }
+            // Разделяем на cover и обычные изображения по префиксам
+            val coverObjects = objects.filter { it.origin.startsWith(ImageOwner.ORIGIN_COVER_PREFIX) }
+            val regularObjects = objects.filter { it.origin.startsWith(ImageOwner.ORIGIN_PHOTO_PREFIX) }
 
             if (coverObjects.isEmpty() && regularObjects.isEmpty()) {
                 return@withContext Result.success(ImageUrls(null, emptyList()))
@@ -547,4 +470,3 @@ class StorageRepository {
         }
     }
 }
-

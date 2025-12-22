@@ -111,7 +111,7 @@ fun StorageTestScreen() {
                             fontSize = 14.sp
                         )
                         Text(
-                            text = StorageTestViewModel.TEST_USER_ID,
+                            text = "test",
                             fontSize = 12.sp,
                             color = Color.Gray
                         )

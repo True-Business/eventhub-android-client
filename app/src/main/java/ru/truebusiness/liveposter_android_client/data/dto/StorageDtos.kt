@@ -2,16 +2,25 @@ package ru.truebusiness.liveposter_android_client.data.dto
 
 /**
  * DTO модели для работы со Storage API (загрузка и получение изображений)
+ *
+ * API использует:
+ * - ownerType: тип сущности ("user", "event", "organization")
+ * - ownerId: UUID сущности
+ * - origin: "photo" (обычные изображения) или "cover" (обложка)
  */
 
 // ============ Upload URLs ============
 
 /**
  * Запрос на получение presigned URLs для загрузки файлов
+ *
+ * @param ownerId UUID сущности (пользователя/события/организации)
+ * @param ownerType тип сущности ("user", "event", "organization")
+ * @param originNames список origin-имён ("photo" или "cover")
  */
 data class UploadUrlsRequest(
     val ownerId: String,
-    val ownerType: String = "user",
+    val ownerType: String,
     val originNames: List<String>
 )
 
@@ -35,10 +44,14 @@ data class UploadUrlsResponse(
 
 /**
  * Запрос на подтверждение загрузки файлов
+ *
+ * @param ownerId UUID сущности (пользователя/события/организации)
+ * @param ownerType тип сущности ("user", "event", "organization")
+ * @param ids список ID файлов, полученных при получении presigned URLs
  */
 data class ConfirmUploadRequest(
     val ownerId: String,
-    val ownerType: String = "user",
+    val ownerType: String,
     val ids: List<String>
 )
 
@@ -69,10 +82,14 @@ data class PageRequest(
 
 /**
  * Запрос на получение списка подтвержденных объектов
+ *
+ * @param ownerId UUID сущности (пользователя/события/организации)
+ * @param ownerType тип сущности ("user", "event", "organization")
+ * @param page параметры пагинации
  */
 data class ListConfirmedRequest(
     val ownerId: String,
-    val ownerType: String = "user",
+    val ownerType: String,
     val page: PageRequest = PageRequest()
 )
 

@@ -4,35 +4,38 @@ import java.util.UUID
 
 /**
  * Sealed class представляющий владельца изображения.
- * Используется для формирования origin в формате "type_uuid" или "cover_type_uuid" при загрузке изображений.
  *
- * Формат origin:
- * - Обычные изображения: "user_{uuid}", "event_{uuid}", "organization_{uuid}"
- * - Cover-изображения: "cover_user_{uuid}", "cover_event_{uuid}", "cover_organization_{uuid}"
+ * Используется для формирования запросов к Storage API:
+ * - ownerType: "user", "event", "organization"
+ * - ownerId: UUID сущности
+ * - origin: "photo_{uuid}" (обычные изображения) или "cover_{uuid}" (обложка)
  *
+ * Origin содержит случайный UUID для уникальности имени файла.
  * Cover определяется по дате загрузки — самый новый cover является текущим.
  */
 sealed class ImageOwner {
 
     /**
-     * Возвращает origin строку в формате "type_uuid"
+     * Возвращает тип владельца для API ("user", "event", "organization")
      */
-    abstract fun toOrigin(): String
+    abstract fun getOwnerType(): String
 
     /**
-     * Возвращает origin строку для cover-изображения в формате "cover_type_uuid"
+     * Возвращает ID владельца (UUID сущности)
      */
-    abstract fun toCoverOrigin(): String
+    abstract fun getOwnerId(): String
 
     /**
-     * Возвращает префикс типа для фильтрации (например "user_", "event_", "organization_")
+     * Генерирует уникальный origin для обычных изображений.
+     * Формат: "photo_{random_uuid}"
      */
-    abstract fun getTypePrefix(): String
+    fun generatePhotoOrigin(): String = "${ORIGIN_PHOTO_PREFIX}${UUID.randomUUID()}"
 
     /**
-     * Возвращает префикс для cover-изображений (например "cover_user_", "cover_event_")
+     * Генерирует уникальный origin для cover-изображения.
+     * Формат: "cover_{random_uuid}"
      */
-    abstract fun getCoverTypePrefix(): String
+    fun generateCoverOrigin(): String = "${ORIGIN_COVER_PREFIX}${UUID.randomUUID()}"
 
     /**
      * Изображение принадлежит пользователю
@@ -40,10 +43,8 @@ sealed class ImageOwner {
     data class User(val id: String) : ImageOwner() {
         constructor(uuid: UUID) : this(uuid.toString())
 
-        override fun toOrigin(): String = "user_$id"
-        override fun toCoverOrigin(): String = "cover_user_$id"
-        override fun getTypePrefix(): String = "user_"
-        override fun getCoverTypePrefix(): String = "cover_user_"
+        override fun getOwnerType(): String = "user"
+        override fun getOwnerId(): String = id
     }
 
     /**
@@ -52,10 +53,8 @@ sealed class ImageOwner {
     data class Event(val id: String) : ImageOwner() {
         constructor(uuid: UUID) : this(uuid.toString())
 
-        override fun toOrigin(): String = "event_$id"
-        override fun toCoverOrigin(): String = "cover_event_$id"
-        override fun getTypePrefix(): String = "event_"
-        override fun getCoverTypePrefix(): String = "cover_event_"
+        override fun getOwnerType(): String = "event"
+        override fun getOwnerId(): String = id
     }
 
     /**
@@ -64,14 +63,14 @@ sealed class ImageOwner {
     data class Organization(val id: String) : ImageOwner() {
         constructor(uuid: UUID) : this(uuid.toString())
 
-        override fun toOrigin(): String = "organization_$id"
-        override fun toCoverOrigin(): String = "cover_organization_$id"
-        override fun getTypePrefix(): String = "organization_"
-        override fun getCoverTypePrefix(): String = "cover_organization_"
+        override fun getOwnerType(): String = "organization"
+        override fun getOwnerId(): String = id
     }
 
     companion object {
-        /** Префикс для cover-изображений */
-        const val COVER_PREFIX = "cover_"
+        /** Префикс origin для обычных изображений */
+        const val ORIGIN_PHOTO_PREFIX = "photo_"
+        /** Префикс origin для cover-изображений */
+        const val ORIGIN_COVER_PREFIX = "cover_"
     }
 }

@@ -15,8 +15,7 @@ import java.io.FileOutputStream
 
 class StorageTestViewModel : ViewModel() {
     companion object {
-        const val TEST_USER_ID = "045ea62e-259e-41c7-9da7-de8d44c65158"
-        const val TEST_ENTITY_ID = "test-entity-12345"
+        const val TEST_ENTITY_ID = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"
     }
 
     private val repository = StorageRepository()
@@ -59,7 +58,7 @@ class StorageTestViewModel : ViewModel() {
                 }
 
                 val owner = getOwner(ownerType, entityId)
-                val result = repository.uploadImagesWithCover(TEST_USER_ID, owner, files)
+                val result = repository.uploadImagesWithCover(owner, files)
 
                 result.onSuccess { ids ->
                     _uploadedIds.value = ids
@@ -91,7 +90,7 @@ class StorageTestViewModel : ViewModel() {
                 }
 
                 val owner = getOwner(ownerType, entityId)
-                val result = repository.uploadCoverImage(TEST_USER_ID, owner, file)
+                val result = repository.uploadCoverImage(owner, file)
 
                 result.onSuccess { id ->
                     _uploadedIds.value = listOf(id)
@@ -117,7 +116,7 @@ class StorageTestViewModel : ViewModel() {
 
             try {
                 val owner = getOwner(ownerType, entityId)
-                val result = repository.getImageUrlsWithCover(TEST_USER_ID, owner)
+                val result = repository.getImageUrlsWithCover(owner)
 
                 result.onSuccess { urls ->
                     _imageUrls.value = urls
@@ -141,7 +140,7 @@ class StorageTestViewModel : ViewModel() {
 
             try {
                 val owner = getOwner(ownerType, entityId)
-                val result = repository.getCoverImageUrl(TEST_USER_ID, owner)
+                val result = repository.getCoverImageUrl(owner)
 
                 result.onSuccess { url ->
                     _imageUrls.value = ImageUrls(coverUrl = url, imageUrls = emptyList())
