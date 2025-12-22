@@ -3,7 +3,6 @@ package ru.truebusiness.liveposter_android_client.data.dto
 import ru.truebusiness.liveposter_android_client.data.Event
 import ru.truebusiness.liveposter_android_client.data.EventCategory
 import ru.truebusiness.liveposter_android_client.data.EventStatus
-import java.time.Instant
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
@@ -74,8 +73,8 @@ fun Event.toCreateUpdateDto(): EventCreateUpdateDto {
         city = this.city,
         peopleLimit = this.peopleLimit,
         registerEndDateTime = this.registerEndDateTime.toString(),
-        withRegister = this.withRegister,
-        open = this.isPublic
+        isWithRegister = this.withRegister,
+        isOpen = this.isPublic
     )
 }
 

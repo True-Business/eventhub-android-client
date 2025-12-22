@@ -7,5 +7,6 @@ enum class EventCategory(val displayName: String) {
     RESTAURANTS("Рестораны"),
     FESTIVALS("Фестивали"),
     MEETINGS("Встречи"),
-    SHOWS("Шоу")
+    SHOWS("Шоу"),
+    PLACEHOLDER("PLACEHOLDER")
 }
