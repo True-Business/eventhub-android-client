@@ -70,9 +70,52 @@ class ProfileSettingsViewModel(
         }
     }
 
+    /**
+     * Показывает диалог подтверждения удаления аккаунта.
+     */
+    fun showDeleteConfirmation() {
+        _uiState.value = _uiState.value.copy(showDeleteConfirmDialog = true)
+    }
+
+    /**
+     * Скрывает диалог подтверждения удаления аккаунта.
+     */
+    fun hideDeleteConfirmation() {
+        _uiState.value = _uiState.value.copy(showDeleteConfirmDialog = false)
+    }
+
+    /**
+     * Сбрасывает ошибку удаления аккаунта.
+     */
+    fun clearDeleteError() {
+        _uiState.value = _uiState.value.copy(deleteError = null)
+    }
+
+    /**
+     * Удаляет аккаунт пользователя.
+     * После успешного удаления DataStore очищается и происходит автоматический logout.
+     */
     fun deleteAccount() {
-        // мок: удаление аккаунта
-        println("Delete account pressed")
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(
+                isDeleting = true,
+                showDeleteConfirmDialog = false,
+                deleteError = null
+            )
+
+            val result = authRepository.deleteAccount()
+
+            result.onSuccess {
+                // После успешного удаления logout произойдёт автоматически
+                // (DataStore очищен, isLoggedIn станет null/false)
+                _uiState.value = _uiState.value.copy(isDeleting = false)
+            }.onFailure { e ->
+                _uiState.value = _uiState.value.copy(
+                    isDeleting = false,
+                    deleteError = e.message ?: "Ошибка удаления аккаунта"
+                )
+            }
+        }
     }
 }
 
@@ -80,4 +123,7 @@ data class ProfileSettingsUiState(
     val name: String,
     val username: String,
     val avatarUrl: String,
+    val showDeleteConfirmDialog: Boolean = false,
+    val isDeleting: Boolean = false,
+    val deleteError: String? = null
 )

@@ -11,14 +11,23 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -40,6 +49,38 @@ fun ProfileSettingsPage(
 ) {
     val state by profileSettingsViewModel.uiState
     val orange = Color(0xFFFF6600)
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Показываем ошибку удаления в Snackbar
+    LaunchedEffect(state.deleteError) {
+        state.deleteError?.let { error ->
+            snackbarHostState.showSnackbar(error)
+            profileSettingsViewModel.clearDeleteError()
+        }
+    }
+
+    // Диалог подтверждения удаления аккаунта
+    if (state.showDeleteConfirmDialog) {
+        AlertDialog(
+            onDismissRequest = { profileSettingsViewModel.hideDeleteConfirmation() },
+            title = { Text("Удаление аккаунта") },
+            text = { Text("Вы уверены, что хотите удалить аккаунт? Это действие нельзя отменить.") },
+            confirmButton = {
+                TextButton(
+                    onClick = { profileSettingsViewModel.deleteAccount() }
+                ) {
+                    Text("Удалить", color = Color.Red)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { profileSettingsViewModel.hideDeleteConfirmation() }
+                ) {
+                    Text("Отмена")
+                }
+            }
+        )
+    }
 
     Box(
         modifier = Modifier
@@ -58,6 +99,15 @@ fun ProfileSettingsPage(
                     navController,
                     selectedRoute = "profile-settings"
                 )
+            },
+            snackbarHost = {
+                SnackbarHost(hostState = snackbarHostState) { data ->
+                    Snackbar(
+                        snackbarData = data,
+                        containerColor = Color.Red,
+                        contentColor = Color.White
+                    )
+                }
             },
             containerColor = Color.Transparent
         ) { padding ->
@@ -134,14 +184,24 @@ fun ProfileSettingsPage(
                     InfoSurface(
                         backgroundColor = orange,
                         modifier = Modifier
-                            .clickable(onClick = { profileSettingsViewModel.logout() })
+                            .clickable(
+                                enabled = !state.isDeleting,
+                                onClick = { profileSettingsViewModel.showDeleteConfirmation() }
+                            )
                     ) {
-                        Text(
-                            text = "Удалить аккаунт",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Normal,
-                            color = Color.White
-                        )
+                        if (state.isDeleting) {
+                            CircularProgressIndicator(
+                                color = Color.White,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        } else {
+                            Text(
+                                text = "Удалить аккаунт",
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Normal,
+                                color = Color.White
+                            )
+                        }
                     }
                 }
             }

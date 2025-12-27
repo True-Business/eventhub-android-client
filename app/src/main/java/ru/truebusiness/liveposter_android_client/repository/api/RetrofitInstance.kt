@@ -45,8 +45,9 @@ object RetrofitInstance {
                     ?: Pair(FALLBACK_USERNAME, FALLBACK_PASSWORD)
 
 
-                //val credentials = "$email:$password"
-                val credentials = "user1@example.com:secure_password123"
+                val credentials = "$email:$password"
+                Log.println(Log.INFO, "RetrofitInstance", "Credentials: $credentials")
+                //val credentials = "user1@example.com:secure_password123"
                 val basicAuth = "Basic " + Base64.getEncoder().encodeToString(credentials.toByteArray())
 
                 val originalRequest = chain.request()

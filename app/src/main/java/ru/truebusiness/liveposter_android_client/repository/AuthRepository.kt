@@ -151,4 +151,30 @@ class AuthRepository(
             bio?.let { prefs[BIO] = it }
         }
     }
+
+    /**
+     * Удаляет аккаунт пользователя.
+     * Делает DELETE запрос на сервер и очищает локальные данные независимо от ответа.
+     */
+    suspend fun deleteAccount(): Result<Unit> {
+        return try {
+            val response = authApi.deleteAccount()
+            // Очищаем все данные пользователя из DataStore независимо от ответа сервера
+            dataStore.edit { prefs ->
+                prefs.clear()
+            }
+            if (response.isSuccessful) {
+                Result.success(Unit)
+            } else {
+                // Даже при ошибке logout уже произошёл
+                Result.success(Unit)
+            }
+        } catch (e: Exception) {
+            // При ошибке сети тоже делаем logout
+            dataStore.edit { prefs ->
+                prefs.clear()
+            }
+            Result.success(Unit)
+        }
+    }
 }
