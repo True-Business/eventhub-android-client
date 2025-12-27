@@ -51,6 +51,7 @@ import ru.truebusiness.liveposter_android_client.view.viewmodel.ProfileSettingsV
 import ru.truebusiness.liveposter_android_client.view.viewmodel.ProfileSettingsViewModelFactory
 import ru.truebusiness.liveposter_android_client.view.viewmodel.ProfileViewModel
 import ru.truebusiness.liveposter_android_client.view.viewmodel.ProfileViewModelFactory
+import ru.truebusiness.liveposter_android_client.repository.StorageRepository
 import java.util.UUID
 
 @Composable
@@ -94,8 +95,9 @@ fun AppNavigation(
 
     // Получаем AuthRepository для передачи в ViewModels профиля
     val authRepository = authViewModel.getAuthRepository()
-    val profileViewModelFactory = ProfileViewModelFactory(authRepository)
-    val profileSettingsViewModelFactory = ProfileSettingsViewModelFactory(authRepository)
+    val storageRepository = StorageRepository()
+    val profileViewModelFactory = ProfileViewModelFactory(authRepository, storageRepository)
+    val profileSettingsViewModelFactory = ProfileSettingsViewModelFactory(authRepository, storageRepository)
     val eventCreationViewModelFactory = EventCreationViewModelFactory(authRepository)
 
     val navController = rememberNavController()

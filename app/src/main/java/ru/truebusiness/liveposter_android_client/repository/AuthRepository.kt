@@ -30,6 +30,7 @@ class AuthRepository(
         val REG_DATE = stringPreferencesKey("reg_date")
         val IS_LOGGED_IN = booleanPreferencesKey("is_logged_in")
         val CONFIRMED = booleanPreferencesKey("confirmed")
+        val PHOTO_URL = stringPreferencesKey("photo_url")
     }
 
     val email: Flow<String?> = dataStore.data.map { it[EMAIL] }
@@ -45,9 +46,25 @@ class AuthRepository(
             shortId = prefs[SHORT_ID],
             bio = prefs[BIO],
             registrationDate = prefs[REG_DATE],
-            confirmed = prefs[CONFIRMED] ?: false
+            confirmed = prefs[CONFIRMED] ?: false,
+            photoUrl = prefs[PHOTO_URL]
         )
     }
+
+    /**
+     * Обновляет URL фото пользователя в локальном хранилище.
+     * Вызывается после загрузки фото из Storage API.
+     */
+    suspend fun updatePhotoUrl(photoUrl: String?) {
+        dataStore.edit { prefs ->
+            if (photoUrl != null) {
+                prefs[PHOTO_URL] = photoUrl
+            } else {
+                prefs.remove(PHOTO_URL)
+            }
+        }
+    }
+
     suspend fun preRegister(email: String, password: String): RegistrationResponseDto {
         return authApi.preRegister(UserCredentialsRegistrationDto(email, password))
     }

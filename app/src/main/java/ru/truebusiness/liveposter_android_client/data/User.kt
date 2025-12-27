@@ -9,7 +9,8 @@ data class User(
     val bio: String?,
     val registrationDate: String?,
     val confirmed: Boolean,
-    val coverUrl: String? = null
+    /** URL фото пользователя из Storage API (источник правды для отображения аватара) */
+    val photoUrl: String? = null
 ) {
     // Алиас для совместимости со старым кодом
     val userName: String get() = username
@@ -27,6 +28,5 @@ fun UserDto.toUser(): User = User(
     shortId = shortId,
     bio = bio,
     registrationDate = registrationDate,
-    confirmed = confirmed,
-    coverUrl = coverUrl
+    confirmed = confirmed
 )
