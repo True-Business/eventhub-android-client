@@ -2,6 +2,7 @@ package ru.truebusiness.liveposter_android_client.repository.api
 
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
@@ -28,4 +29,7 @@ interface AuthApi {
 
     @POST("$TARGET/api/v1/auth/add-info")
     suspend fun postRegister(@Body dto: UserInfoRegistrationDto): RegistrationResponseDto
+
+    @DELETE("$TARGET/api/v1/user")
+    suspend fun deleteAccount(): Response<Unit>
 }
