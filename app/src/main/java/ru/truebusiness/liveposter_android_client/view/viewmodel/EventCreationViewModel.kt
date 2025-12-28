@@ -77,6 +77,10 @@ class EventCreationViewModel(authRepository: AuthRepository) : ViewModel() {
         infoState = infoState.copy(address = v)
     }
 
+    fun updatePrice(v: Int?) {
+        infoState = infoState.copy(price = v)
+    }
+
     fun updateHowToGet(v: String) {
         infoState = infoState.copy(howToGet = v)
     }
@@ -151,7 +155,7 @@ class EventCreationViewModel(authRepository: AuthRepository) : ViewModel() {
             registerEndDateTime = LocalDateTime.of(infoState.startDate, infoState.startTime),
             withRegister = settingsState.requiresRegistration,
             open = !settingsState.isClosed, //the difference with is Closed?
-            price = null, //no such parameter in creation
+            price = infoState.price?.toDouble(),
             duration = Duration.between(
                 LocalDateTime.of(infoState.endDate, infoState.endTime),
                 LocalDateTime.of(infoState.startDate, infoState.startTime)
@@ -174,6 +178,7 @@ data class EventInfoState(
     val description: String = "",
     val city: String = "",
     val address: String = "",
+    val price: Int? = null,
 
     val howToGet: String = "",
     val startDate: LocalDate = LocalDate.now(),

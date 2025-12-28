@@ -109,7 +109,6 @@ class AuthRepository(
         return response
     }
 
-
     suspend fun login(email: String, password: String): User {
         val userDto = authApi.login(UserCredentialsRegistrationDto(email, password))
 
