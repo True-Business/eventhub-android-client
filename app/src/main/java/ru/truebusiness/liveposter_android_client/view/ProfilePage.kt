@@ -134,17 +134,18 @@ fun ProfilePage(
                         onAddPhotoClick = { imagePickerLauncher.launch("image/*") }
                     )
 
-                    AboutYourselfView(uiState.about)
+                    if (uiState.about.isNotBlank())
+                        AboutYourselfView(uiState.about)
 
-                    StatisticsView(uiState.eventsCreated, uiState.eventsVisited)
+                    //StatisticsView(uiState.eventsCreated, uiState.eventsVisited)
                 }
 
-                OrganizationsView(
-                    uiState.organizations,
-                    uiState.currentOrganizationIndex,
-                    profileViewModel::prevOrganization,
-                    profileViewModel::nextOrganization
-                )
+//                OrganizationsView(
+//                    uiState.organizations,
+//                    uiState.currentOrganizationIndex,
+//                    profileViewModel::prevOrganization,
+//                    profileViewModel::nextOrganization
+//                )
             }
         }
     }
