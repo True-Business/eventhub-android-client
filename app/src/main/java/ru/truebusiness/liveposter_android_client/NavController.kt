@@ -107,7 +107,7 @@ fun AppNavigation(
     val startDestination = if (effectiveIsLoggedIn) "main" else "welcome"
 
     // Временно для тестирования Storage API
-    // val startDestination = "storage-test"
+    //val startDestination = "storage-test"
 
     // Флаг для пропуска первого LaunchedEffect (начальное значение уже учтено в startDestination)
     var isInitialized by remember { mutableStateOf(false) }

@@ -14,9 +14,11 @@ import ru.truebusiness.liveposter_android_client.data.dto.UserCredentialsRegistr
 import ru.truebusiness.liveposter_android_client.data.dto.UserInfoRegistrationDto
 import ru.truebusiness.liveposter_android_client.data.toUser
 import ru.truebusiness.liveposter_android_client.repository.api.AuthApi
+import ru.truebusiness.liveposter_android_client.repository.api.UserApi
 
 class AuthRepository(
     private val authApi: AuthApi,
+    private val userApi: UserApi,
     private val dataStore: DataStore<Preferences>
 ) {
     companion object Keys {
@@ -158,7 +160,7 @@ class AuthRepository(
      */
     suspend fun deleteAccount(): Result<Unit> {
         return try {
-            val response = authApi.deleteAccount()
+            val response = userApi.deleteAccount()
             // Очищаем все данные пользователя из DataStore независимо от ответа сервера
             dataStore.edit { prefs ->
                 prefs.clear()
