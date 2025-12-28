@@ -28,11 +28,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import ru.truebusiness.liveposter_android_client.data.Event
 import ru.truebusiness.liveposter_android_client.ui.theme.accentColor
 import ru.truebusiness.liveposter_android_client.ui.theme.accentColorText
@@ -46,8 +48,7 @@ fun TinyEventCard(
     onLockClick: () -> Unit = {},
     onClick: () -> Unit = {}
 ) {
-
-
+    val context = LocalContext.current
     Column(modifier = Modifier.width(150.dp)) {
         Card(
             modifier = Modifier
@@ -58,7 +59,10 @@ fun TinyEventCard(
         ) {
             Box {
                 AsyncImage(
-                    model = event.posterUrl,
+                    model = ImageRequest.Builder(context)
+                        .data(event.posterUrl)
+                        .crossfade(true)
+                        .build(),
                     contentDescription = event.title,
                     modifier = Modifier
                         .fillMaxSize()

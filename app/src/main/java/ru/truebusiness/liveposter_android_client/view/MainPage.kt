@@ -17,8 +17,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -43,12 +41,12 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import coil.compose.AsyncImage
 import ru.truebusiness.liveposter_android_client.R
 import ru.truebusiness.liveposter_android_client.ui.theme.MainPageBodyColor
 import ru.truebusiness.liveposter_android_client.ui.theme.MainPageTopFooterColor
 import ru.truebusiness.liveposter_android_client.view.components.AppNavigationBar
 import ru.truebusiness.liveposter_android_client.view.components.EventCard
+import ru.truebusiness.liveposter_android_client.view.components.ProfileAvatar
 import ru.truebusiness.liveposter_android_client.view.viewmodel.AuthViewModel
 import ru.truebusiness.liveposter_android_client.view.viewmodel.EventsViewModel
 import java.util.Collections.emptyList
@@ -70,7 +68,8 @@ fun MainPage(
     val currentUser by authViewModel.currentUser.collectAsState()
 
     val userName = currentUser?.username ?: ""
-    val avatarUrl = currentUser?.coverUrl
+    // photoUrl - источник правды для фото из Storage API
+    val avatarUrl = currentUser?.photoUrl ?: ""
 
     Scaffold(
         topBar = {
@@ -89,33 +88,12 @@ fun MainPage(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Start
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .width(55.dp)
-                                .height(45.dp)
-                                .padding(start = 10.dp)
-                                .background(color = Color.White, shape = CircleShape)
-                                .clickable(onClick = { navController.navigate("profile-settings") }),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            if (!avatarUrl.isNullOrEmpty()) {
-                                AsyncImage(
-                                    model = avatarUrl,
-                                    contentDescription = "Avatar",
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .clip(CircleShape),
-                                    contentScale = ContentScale.Crop
-                                )
-                            } else {
-                                Icon(
-                                    imageVector = Icons.Default.AccountCircle,
-                                    contentDescription = "Avatar",
-                                    modifier = Modifier.fillMaxSize(),
-                                    tint = Color(0xFFFF6600)
-                                )
-                            }
-                        }
+                        ProfileAvatar(
+                            avatarUrl = avatarUrl,
+                            size = 45.dp,
+                            modifier = Modifier.padding(start = 10.dp),
+                            onClick = { navController.navigate("profile-settings") }
+                        )
 
                         Text(
                             text = userName,

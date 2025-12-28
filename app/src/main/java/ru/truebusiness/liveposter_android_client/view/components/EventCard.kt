@@ -12,20 +12,32 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.ImageLoader
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import ru.truebusiness.liveposter_android_client.data.Event
+import ru.truebusiness.liveposter_android_client.repository.api.RetrofitInstance
 
 @Composable
 fun EventCard(
     event: Event,
     onClick: () -> Unit
 ) {
+    val context = LocalContext.current
+    val insecureImageLoader = remember {
+        ImageLoader.Builder(context)
+            .okHttpClient(RetrofitInstance.insecureUploadClient)
+            .build()
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -38,7 +50,11 @@ fun EventCard(
             modifier = Modifier.fillMaxWidth()
         ) {
             AsyncImage(
-                model = event.posterUrl,
+                model = ImageRequest.Builder(context)
+                    .data(event.posterUrl)
+                    .crossfade(true)
+                    .build(),
+                imageLoader = insecureImageLoader,
                 contentDescription = event.title,
                 modifier = Modifier
                     .fillMaxWidth()

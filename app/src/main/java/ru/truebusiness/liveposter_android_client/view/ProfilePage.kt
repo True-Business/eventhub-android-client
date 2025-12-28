@@ -1,5 +1,8 @@
 package ru.truebusiness.liveposter_android_client.view
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -13,8 +16,13 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -23,14 +31,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import coil.ImageLoader
 import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
 import ru.truebusiness.liveposter_android_client.R
+import ru.truebusiness.liveposter_android_client.repository.api.RetrofitInstance
 import ru.truebusiness.liveposter_android_client.view.components.AppNavigationBar
 import ru.truebusiness.liveposter_android_client.view.components.InfoSurface
 import ru.truebusiness.liveposter_android_client.view.viewmodel.Organization
@@ -44,6 +56,25 @@ fun ProfilePage(
     profileViewModel: ProfileViewModel = viewModel()
 ) {
     val uiState by profileViewModel.uiState
+    val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Image picker launcher
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            profileViewModel.uploadUserPhoto(context, it)
+        }
+    }
+
+    // Показываем ошибку в Snackbar
+    LaunchedEffect(uiState.photoUploadError) {
+        uiState.photoUploadError?.let { error ->
+            snackbarHostState.showSnackbar(error)
+            profileViewModel.clearPhotoUploadError()
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -63,6 +94,15 @@ fun ProfilePage(
                     selectedRoute = "profile-settings",
                     uiState.username != "@anonymous"
                 )
+            },
+            snackbarHost = {
+                SnackbarHost(hostState = snackbarHostState) { data ->
+                    Snackbar(
+                        snackbarData = data,
+                        containerColor = Color.Red,
+                        contentColor = Color.White
+                    )
+                }
             },
             containerColor = Color.Transparent
         ) { padding ->
@@ -86,7 +126,13 @@ fun ProfilePage(
                             .clickable { navController.navigate("profile-settings") },
                         contentScale = ContentScale.Crop
                     )
-                    ProfileIconView(uiState.name, uiState.username, uiState.avatarUrl)
+                    ProfileIconView(
+                        name = uiState.name,
+                        username = uiState.username,
+                        avatarUrl = uiState.avatarUrl,
+                        isUploading = uiState.isUploadingPhoto,
+                        onAddPhotoClick = { imagePickerLauncher.launch("image/*") }
+                    )
 
                     AboutYourselfView(uiState.about)
 
@@ -230,8 +276,19 @@ fun AboutYourselfView(description: String) {
 fun ProfileIconView(
     name: String,
     username: String,
-    avatarUrl: String
+    avatarUrl: String,
+    isUploading: Boolean = false,
+    onAddPhotoClick: (() -> Unit)? = null
 ) {
+    val context = LocalContext.current
+
+    // ImageLoader с insecure OkHttpClient для self-signed сертификатов
+    val insecureImageLoader = remember {
+        ImageLoader.Builder(context)
+            .okHttpClient(RetrofitInstance.insecureUploadClient)
+            .build()
+    }
+
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -239,27 +296,97 @@ fun ProfileIconView(
     ) {
         Box(
             modifier = Modifier
-                .size(100.dp)
-                .clip(CircleShape)
-                .background(Color.White),
+                .size(100.dp),
             contentAlignment = Alignment.Center
         ) {
-            if (avatarUrl.isNotEmpty()) {
-                AsyncImage(
-                    model = avatarUrl,
-                    contentDescription = "Avatar",
+            // Аватар
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(CircleShape)
+                    .background(Color.White)
+                    .then(
+                        if (onAddPhotoClick != null && !isUploading) {
+                            Modifier.clickable { onAddPhotoClick() }
+                        } else {
+                            Modifier
+                        }
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                if (avatarUrl.isNotEmpty()) {
+                    SubcomposeAsyncImage(
+                        model = avatarUrl,
+                        imageLoader = insecureImageLoader,
+                        contentDescription = "Avatar",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop,
+                        loading = {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator(
+                                    color = orange,
+                                    modifier = Modifier.size(30.dp)
+                                )
+                            }
+                        },
+                        error = {
+                            Icon(
+                                imageVector = Icons.Default.AccountCircle,
+                                contentDescription = "Avatar",
+                                modifier = Modifier.fillMaxSize(),
+                                tint = orange
+                            )
+                        }
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.AccountCircle,
+                        contentDescription = "Avatar",
+                        modifier = Modifier.fillMaxSize(),
+                        tint = orange
+                    )
+                }
+            }
+
+            // Индикатор загрузки (при загрузке нового фото)
+            if (isUploading) {
+                Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .clip(CircleShape),
-                    contentScale = ContentScale.Crop
-                )
-            } else {
-                Icon(
-                    imageVector = Icons.Default.AccountCircle,
-                    contentDescription = "Avatar",
-                    modifier = Modifier.fillMaxSize(),
-                    tint = Color(0xFFFF6600)
-                )
+                        .clip(CircleShape)
+                        .background(Color.Black.copy(alpha = 0.5f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(
+                        color = Color.White,
+                        modifier = Modifier.size(40.dp)
+                    )
+                }
+            }
+
+            // Иконка камеры для добавления фото
+            if (onAddPhotoClick != null && !isUploading) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .background(orange)
+                        .clickable { onAddPhotoClick() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Добавить фото",
+                        tint = Color.White,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
             }
         }
 

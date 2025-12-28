@@ -21,6 +21,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.delay
 import androidx.navigation.navArgument
+import ru.truebusiness.liveposter_android_client.repository.EventRepository
 import ru.truebusiness.liveposter_android_client.view.event.EventDetailsPage
 import ru.truebusiness.liveposter_android_client.view.FriendsPage
 import ru.truebusiness.liveposter_android_client.view.MainPage
@@ -34,9 +35,11 @@ import ru.truebusiness.liveposter_android_client.view.registration.RegistrationP
 import ru.truebusiness.liveposter_android_client.view.WelcomePage
 import ru.truebusiness.liveposter_android_client.view.events.EventsMainScreen
 import ru.truebusiness.liveposter_android_client.view.events.EventCreationPage
+import ru.truebusiness.liveposter_android_client.view.events.EventCreationSettingsPage
 import ru.truebusiness.liveposter_android_client.view.organizations.AdminsScreen
 import ru.truebusiness.liveposter_android_client.view.organizations.OrganizationPage
 import ru.truebusiness.liveposter_android_client.view.organizationslist.OrganizationsListPage
+import ru.truebusiness.liveposter_android_client.view.test.StorageTestScreen
 import ru.truebusiness.liveposter_android_client.view.viewmodel.AuthViewModel
 import ru.truebusiness.liveposter_android_client.view.viewmodel.EventCreationViewModel
 import ru.truebusiness.liveposter_android_client.view.viewmodel.EventCreationViewModelFactory
@@ -48,6 +51,7 @@ import ru.truebusiness.liveposter_android_client.view.viewmodel.ProfileSettingsV
 import ru.truebusiness.liveposter_android_client.view.viewmodel.ProfileSettingsViewModelFactory
 import ru.truebusiness.liveposter_android_client.view.viewmodel.ProfileViewModel
 import ru.truebusiness.liveposter_android_client.view.viewmodel.ProfileViewModelFactory
+import ru.truebusiness.liveposter_android_client.repository.StorageRepository
 import java.util.UUID
 
 @Composable
@@ -91,14 +95,19 @@ fun AppNavigation(
 
     // Получаем AuthRepository для передачи в ViewModels профиля
     val authRepository = authViewModel.getAuthRepository()
-    val profileViewModelFactory = ProfileViewModelFactory(authRepository)
-    val profileSettingsViewModelFactory = ProfileSettingsViewModelFactory(authRepository)
+    val storageRepository = StorageRepository()
+    val profileViewModelFactory = ProfileViewModelFactory(authRepository, storageRepository)
+    val profileSettingsViewModelFactory = ProfileSettingsViewModelFactory(authRepository, storageRepository)
     val eventCreationViewModelFactory = EventCreationViewModelFactory(authRepository)
 
     val navController = rememberNavController()
 
+    // TODO: После тестирования Storage API раскомментировать строку ниже и удалить "storage-test"
     // Определяем начальный экран на основе загруженных данных (или таймаута)
     val startDestination = if (effectiveIsLoggedIn) "main" else "welcome"
+
+    // Временно для тестирования Storage API
+    // val startDestination = "storage-test"
 
     // Флаг для пропуска первого LaunchedEffect (начальное значение уже учтено в startDestination)
     var isInitialized by remember { mutableStateOf(false) }
@@ -124,6 +133,11 @@ fun AppNavigation(
     }
 
     NavHost(navController = navController, startDestination = startDestination) {
+        // Тестовый экран Storage API (временно)
+        composable("storage-test") {
+            StorageTestScreen()
+        }
+
         composable("welcome") {
             WelcomePage(navController, authViewModel)
         }

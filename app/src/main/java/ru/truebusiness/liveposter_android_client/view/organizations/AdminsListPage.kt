@@ -220,7 +220,7 @@ fun AdminListItem(
         ) {
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
-                    .data(user.coverUrl)
+                    .data(user.photoUrl)
                     .crossfade(true)
                     .build(),
                 contentDescription = "avatar",
