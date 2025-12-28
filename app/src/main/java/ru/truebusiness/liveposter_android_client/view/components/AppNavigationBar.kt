@@ -31,17 +31,25 @@ import ru.truebusiness.liveposter_android_client.R
 @Composable
 fun AppNavigationBar(
     navController: NavController,
-    selectedRoute: String
+    selectedRoute: String,
+    isAuthorized: Boolean,
 ) {
     val orange = Color(0xFFFF6600)
     val darkOrange = Color(0xFFE55A00)
 
-    val items = listOf(
-        NavItem("main", "Главная", R.drawable.icon_mainpage),
-        NavItem("events", "События", R.drawable.icon_events),
-        NavItem("friends", "Друзья", R.drawable.icon_friends),
-        NavItem("organizations", "Организации", R.drawable.icon_organizations)
-    )
+    val items = if (isAuthorized) {
+        listOf(
+            NavItem("main", "Главная", R.drawable.icon_mainpage),
+            NavItem("events", "События", R.drawable.icon_events),
+            NavItem("friends", "Друзья", R.drawable.icon_friends),
+            NavItem("organizations", "Организации", R.drawable.icon_organizations)
+        )
+    } else {
+        listOf(
+            NavItem("main", "Главная", R.drawable.icon_mainpage),
+            NavItem("organizations", "Организации", R.drawable.icon_organizations)
+        )
+    }
 
     val context = LocalContext.current
     val view = LocalView.current

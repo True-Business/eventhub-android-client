@@ -54,7 +54,7 @@ fun TopBarSection(
         SearchField(
             value = searchText,
             onValueChange = onSearchChange,
-            hint = "Hinted search text",
+            hint = "Поиск",
             modifier = Modifier.weight(1f)
         )
 
