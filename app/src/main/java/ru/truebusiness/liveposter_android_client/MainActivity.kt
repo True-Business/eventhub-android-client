@@ -26,7 +26,8 @@ class MainActivity: ComponentActivity() {
         RetrofitInstance.initialize(credentialsProvider)
 
         val api = RetrofitInstance.authApi
-        val authRepository = AuthRepository(api, dataStore)
+        val userApi = RetrofitInstance.userApi
+        val authRepository = AuthRepository(api, userApi, dataStore)
         val authViewModel = AuthViewModel(authRepository)
 
         setContent {
