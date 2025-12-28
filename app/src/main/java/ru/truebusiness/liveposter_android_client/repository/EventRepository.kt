@@ -274,9 +274,6 @@ class EventRepository {
         eventId: String,
         baseEvent: Event
     ): Event {
-        if (eventId == "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb") {
-            val stop = 1
-        }
         val coverResult = storageRepository.getCoverImageUrl(
             owner = ImageOwner.Event(eventId)
         )
@@ -287,8 +284,5 @@ class EventRepository {
         else {
             return baseEvent
         }
-//        return coverResult.getOrNull()?.let { coverUrl ->
-//            baseEvent.copy(posterUrl = coverUrl)
-//        } ?: baseEvent
     }
 }
