@@ -52,6 +52,8 @@ import ru.truebusiness.liveposter_android_client.view.viewmodel.ProfileSettingsV
 import ru.truebusiness.liveposter_android_client.view.viewmodel.ProfileViewModel
 import ru.truebusiness.liveposter_android_client.view.viewmodel.ProfileViewModelFactory
 import ru.truebusiness.liveposter_android_client.repository.StorageRepository
+import ru.truebusiness.liveposter_android_client.view.viewmodel.FriendsViewModel
+import ru.truebusiness.liveposter_android_client.view.viewmodel.FriendsViewModelFactory
 import java.util.UUID
 
 @Composable
@@ -97,8 +99,10 @@ fun AppNavigation(
     val authRepository = authViewModel.getAuthRepository()
     val storageRepository = StorageRepository()
     val profileViewModelFactory = ProfileViewModelFactory(authRepository, storageRepository)
-    val profileSettingsViewModelFactory = ProfileSettingsViewModelFactory(authRepository, storageRepository)
+    val profileSettingsViewModelFactory =
+        ProfileSettingsViewModelFactory(authRepository, storageRepository)
     val eventCreationViewModelFactory = EventCreationViewModelFactory(authRepository)
+    val friendsViewModelFactory = FriendsViewModelFactory(authRepository)
 
     val navController = rememberNavController()
 
@@ -224,7 +228,8 @@ fun AppNavigation(
         composable(
             route = "friends"
         ) {
-            FriendsPage(navController)
+            val friendsViewModel: FriendsViewModel = viewModel(factory = friendsViewModelFactory)
+            FriendsPage(navController, friendsViewModel)
         }
 
         /***************************************/
