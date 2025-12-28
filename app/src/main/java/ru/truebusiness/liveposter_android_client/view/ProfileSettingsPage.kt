@@ -1,7 +1,6 @@
 package ru.truebusiness.liveposter_android_client.view
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -62,7 +61,8 @@ fun ProfileSettingsPage(
             bottomBar = {
                 AppNavigationBar(
                     navController,
-                    selectedRoute = "profile-settings"
+                    selectedRoute = "profile-settings",
+                    state.username != "@anonymous"
                 )
             },
             containerColor = Color.Transparent
@@ -108,63 +108,81 @@ fun ProfileSettingsPage(
                 Spacer(modifier = Modifier.height(20.dp))
 
                 Text(text = state.name, fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                Text(text = state.username, fontSize = 20.sp)
+                if (state.username != "@anonymous") {
+                    Text(text = state.username, fontSize = 20.sp)
 
-                Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
 
-                // "Мой профиль"
-                InfoSurface(
-                    modifier = Modifier
-                        .clickable { navController.navigate("profile") },
-                ) {
-                    Row(
+                    // "Мой профиль"
+                    InfoSurface(
+                        modifier = Modifier
+                            .clickable { navController.navigate("profile") },
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = "Мой профиль",
+                                fontSize = 20.sp
+                            )
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                contentDescription = null,
+                                tint = Color(0xFFFF6600),
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    // Кнопки выхода и удаления
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(
-                            text = "Мой профиль",
-                            fontSize = 20.sp
-                        )
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                            contentDescription = null,
-                            tint = Color(0xFFFF6600),
-                        )
+                        InfoSurface(
+                            backgroundColor = orange,
+                            modifier = Modifier
+                                .clickable(onClick = { profileSettingsViewModel.logout() })
+                        ) {
+                            Text(
+                                text = "Выход из аккаунта",
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Normal,
+                                color = Color.White
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        InfoSurface(
+                            backgroundColor = orange,
+                            modifier = Modifier
+                                .clickable(onClick = { profileSettingsViewModel.logout() })
+                        ) {
+                            Text(
+                                text = "Удалить аккаунт",
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Normal,
+                                color = Color.White
+                            )
+                        }
                     }
-                }
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                // Кнопки выхода и удаления
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
+                } else {
+                    Spacer(modifier = Modifier.weight(1f))
                     InfoSurface(
                         backgroundColor = orange,
                         modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
                             .clickable(onClick = { profileSettingsViewModel.logout() })
                     ) {
                         Text(
-                            text = "Выход из аккаунта",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Normal,
-                            color = Color.White
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    InfoSurface(
-                        backgroundColor = orange,
-                        modifier = Modifier
-                            .clickable(onClick = { profileSettingsViewModel.logout() })
-                    ) {
-                        Text(
-                            text = "Удалить аккаунт",
+                            text = "Авторизоваться",
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Normal,
                             color = Color.White

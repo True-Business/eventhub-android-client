@@ -48,6 +48,7 @@ class AuthRepository(
             confirmed = prefs[CONFIRMED] ?: false
         )
     }
+
     suspend fun preRegister(email: String, password: String): RegistrationResponseDto {
         return authApi.preRegister(UserCredentialsRegistrationDto(email, password))
     }
@@ -90,7 +91,6 @@ class AuthRepository(
     }
 
 
-
     suspend fun login(email: String, password: String): User {
         val userDto = authApi.login(UserCredentialsRegistrationDto(email, password))
 
@@ -120,9 +120,9 @@ class AuthRepository(
     suspend fun loginAnonymously() {
         dataStore.edit { prefs ->
             prefs[USER_ID] = "anonymous-user-id"
-            prefs[USERNAME] = "Василий Попов"
-            prefs[SHORT_ID] = "vasily_P"
-            prefs[BIO] = "Я Вася Пупкин, студент 2 курса ФИТ НГУ и вот какой я классный. Приходите все на мероприятия НГУ!"
+            prefs[USERNAME] = "Гость"
+            prefs[SHORT_ID] = "anonymous"
+            prefs[BIO] = ""
             prefs[CONFIRMED] = true
             prefs[IS_LOGGED_IN] = true
         }

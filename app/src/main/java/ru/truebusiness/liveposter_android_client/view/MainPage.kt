@@ -153,7 +153,11 @@ fun MainPage(
             )
         },
         bottomBar = {
-            AppNavigationBar(navController, "main")
+            AppNavigationBar(
+                navController,
+                "main",
+                (currentUser != null && currentUser?.id != "anonymous-user-id")
+            )
         }
     ) { innerPadding ->
         Column(

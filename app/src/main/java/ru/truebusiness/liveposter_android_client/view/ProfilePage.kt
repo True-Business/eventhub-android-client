@@ -60,7 +60,8 @@ fun ProfilePage(
             bottomBar = {
                 AppNavigationBar(
                     navController,
-                    selectedRoute = "profile-settings"
+                    selectedRoute = "profile-settings",
+                    uiState.username != "@anonymous"
                 )
             },
             containerColor = Color.Transparent

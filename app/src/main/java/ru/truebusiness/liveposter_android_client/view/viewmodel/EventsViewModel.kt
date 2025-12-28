@@ -34,8 +34,8 @@ class EventsViewModel : ViewModel() {
     val events: LiveData<List<Event>> = _events
 
     private val _isLoading = MutableLiveData(false)
-    val isLoading: LiveData<Boolean> = _isLoading
 
+    val isLoading: LiveData<Boolean> = _isLoading
     private val _selectedCategory = MutableLiveData<EventCategory>(EventCategory.ALL)
     val selectedCategory: LiveData<EventCategory> = _selectedCategory
 
