@@ -2,6 +2,7 @@ package ru.truebusiness.liveposter_android_client.view.events
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -20,6 +21,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -41,7 +43,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import ru.truebusiness.liveposter_android_client.R
 import ru.truebusiness.liveposter_android_client.view.viewmodel.EventCreationViewModel
@@ -152,11 +153,11 @@ private fun SaveDraftButton(
                     onClick()
                     navController.popBackStack()
                 } else {
-                    android.widget.Toast
+                    Toast
                         .makeText(
                             context,
                             "Не все обязательные поля заполнены корректно, проверьте данные",
-                            android.widget.Toast.LENGTH_SHORT
+                            Toast.LENGTH_SHORT
                         )
                         .show()
                 }
@@ -234,6 +235,13 @@ private fun InputForm(viewModel: EventCreationViewModel) {
                 comment = "От 3 до 1024 символов",
                 isObligatory = true,
                 onChange = viewModel::updateDescription
+            )
+            InputIntField(
+                title = "Стоимость",
+                placeholder = "Введите стоимость одного билета",
+                value = state.price,
+                isObligatory = false,
+                onChange = viewModel::updatePrice
             )
             InputTextField(
                 title = "Город",
@@ -368,7 +376,7 @@ fun DateInputField(
                 }
             },
             trailingIcon = {
-                androidx.compose.material3.Icon(
+                Icon(
                     painter = painterResource(id = R.drawable.ic_calendar),
                     contentDescription = "Выбрать дату",
                     modifier = Modifier.clickable {
@@ -434,7 +442,7 @@ fun TimeInputField(
                 }
             },
             trailingIcon = {
-                androidx.compose.material3.Icon(
+                Icon(
                     painter = painterResource(id = R.drawable.ic_clock),
                     contentDescription = "Выбрать время",
                     modifier = Modifier.clickable {
@@ -465,16 +473,4 @@ fun TimeInputField(
             )
         )
     }
-}
-
-@Composable
-private fun showValidationErrorToast() {
-    val context = LocalContext.current
-    android.widget.Toast
-        .makeText(
-            context,
-            "Не все обязательные поля заполнены корректно, проверьте данные",
-            android.widget.Toast.LENGTH_SHORT
-        )
-        .show()
 }
