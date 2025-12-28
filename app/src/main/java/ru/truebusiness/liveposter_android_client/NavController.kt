@@ -250,9 +250,7 @@ fun AppNavigation(
             RegistrationPageUserInterest(navController)
         }
 
-        composable(
-            route = "events"
-        ) {
+        composable(route = "events") {
             EventsMainScreen(navController, eventsViewModel)
         }
 
