@@ -49,7 +49,8 @@ val mockEventList = listOf(
         participantsCount = 56,
         description = "Городской пикник с лекториями, творческими мастер-классами и концертной программой.",
         howToGet = "До остановки \"Университет\" на маршрутах 15 и 34, далее 5 минут пешком до главного входа.",
-        isFinished = false),
+        isFinished = false
+    ),
     Event(
         id = UUID.randomUUID(),
         category = listOf(EventCategory.ALL, EventCategory.MEETINGS),
@@ -327,25 +328,6 @@ val mockEventList = listOf(
 //        eventStatus = EventStatus.PLANNED,
 //        isPublic = false
 //    )
-)
-
-val mockUserFriendsList = listOf(
-    Friend(
-        id = UUID.randomUUID(),
-        username = "Харченко Владимир Александрович"
-    ),
-    Friend(
-        id = UUID.randomUUID(),
-        username = "Мацько Александр Михайлович"
-    ),
-    Friend(
-        id = UUID.randomUUID(),
-        username = "Путин Владимир Владимирович"
-    ),
-    Friend(
-        id = UUID.randomUUID(),
-        username = "Пушкин Александр Сергеевич"
-    )
 )
 
 val mockUsersList = listOf(
