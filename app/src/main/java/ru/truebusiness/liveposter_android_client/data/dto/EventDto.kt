@@ -30,7 +30,7 @@ data class EventDto(
 
     // Дополнительные поля для экрана деталей
     val participantsCount: Int? = null,
-    val isUserParticipant: Boolean? = null,
+    val userParticipant: Boolean? = null,
     val participants: List<EventParticipantDto>? = null
 )
 

@@ -45,7 +45,7 @@ fun EventDto.toDomainEvent(): Event {
         price = if (this.price == 0.0) null else this.price,
         duration = null, // TODO: Calculate from start/end dates if needed
         organizer = null, // TODO: Fetch from user API if needed
-        isUserParticipating = this.isUserParticipant ?: false,
+        isUserParticipating = this.userParticipant ?: false,
         eventStatus = parseEventStatus(this.status),
         isPublic = this.open,
 
